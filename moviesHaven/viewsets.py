@@ -6,3 +6,13 @@ from rest_framework import viewsets
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
+
+
+class MovieByGenreViewSet(viewsets.ModelViewSet):
+    queryset = Genres.objects.filter(movie__genre_name__isnull=False).distinct()
+    serializer_class = MovieByGenreSerializer
+
+
+class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
+    queryset = Genres.objects.all()
+    serializer_class = TVSeriesByGenreSerializer

@@ -62,6 +62,19 @@ class Movie(Entertainment):
     def get_short_overview(self):
         return self.overview[:15]
 
+    @property
+    def get_details(self):
+        detail_set = {
+            "id": self.id,
+            "title": self.title,
+            "overview": self.overview,
+            "release_date": self.release_date,
+            "thumbnail": self.thumbnail_lq,
+            "fanart": self.fanart_hq
+        }
+        return detail_set
+
+
 class TVSeries(Entertainment):
     person = models.ManyToManyField(Person, through="PersonRole")
     genre_name = models.ManyToManyField(Genres)

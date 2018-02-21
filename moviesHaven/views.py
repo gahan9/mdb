@@ -22,7 +22,7 @@ def index(request):
 
 def insert_raw_data(request):
     success_url = reverse_lazy('index')
-    contents = content_fetcher(directory_path=r"E:\dir")
+    contents = content_fetcher(directory_path="/home/quixom/Videos/dir")
     for video in contents:
         if RawData.objects.filter(**video):
             pass

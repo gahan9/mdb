@@ -1,5 +1,6 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Planet Vision</title>
@@ -23,8 +24,7 @@
                        href="{% url 'insert_raw_data' %}" target="index.html">Click
                     Here!</a></td>
                 <td><a class="btn btn-primary"
-                       href="{% url 'film_splitter' %}">Click
-                    Here!</a></td>
+                       href="{% url 'film_splitter' %}">{% trans "Click Here!" %}</a></td>
                 <td><a class="btn btn-primary"
                        href="{% url 'fetch_api_data' %}">Click
                     Here!</a></td>
