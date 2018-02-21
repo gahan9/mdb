@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Planet Vision</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <form>
+        <table class="table" border="1">
+            <thead>
+            <tr>
+                <th scope="col">Insert into Database!</th>
+                <th scope="col">Filter Files!</th>
+                <th scope="col">Fetch API Data!</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a class="btn btn-primary"
+                       href="{% url 'insert_raw_data' %}" target="index.html">Click
+                    Here!</a></td>
+                <td><a class="btn btn-primary"
+                       href="{% url 'film_splitter' %}">Click
+                    Here!</a></td>
+                <td><a class="btn btn-primary"
+                       href="{% url 'fetch_api_data' %}">Click
+                    Here!</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+</body>
+</html>
