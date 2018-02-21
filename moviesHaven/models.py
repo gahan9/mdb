@@ -16,7 +16,7 @@ class RawData(models.Model):
 
 class Person(models.Model):
     name = models.CharField(null=True, blank=True, max_length=100)
-    birth_date = models.DateField(null=True, blank=True)
+    birth_date = models.CharField(null=True, blank=True, max_length=100)
     profile_image = models.URLField(max_length=1000, null=True, blank=True)
     biography = models.TextField(null=True,blank=True)
     place_of_birth = models.CharField(null=True, blank=True, max_length=200)

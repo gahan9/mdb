@@ -147,3 +147,6 @@ TMDB_BASE_URL = "http://api.themoviedb.org/3/"
 TMDB_SEARCH_URL = TMDB_BASE_URL + "search/"
 TMDB_IMAGE_URL = "http://image.tmdb.org/t/p/"
 TMDB_API_KEY = "34142515d9d23817496eeb4ff1d223d0"
+
+option_quality = [185, 500, 1000]
+option_quality.sort(reverse=True)

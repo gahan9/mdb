@@ -9,8 +9,8 @@ from django.views import generic
 from django.db import IntegrityError
 
 from moviesHaven.utils import get_genre
-from moviesHaven.worker import name_fetcher, filter_film, getVideoDetails
-from mysite.settings import TMDB_SEARCH_URL, TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL
+from moviesHaven.worker import name_fetcher, filter_film
+from mysite.settings import TMDB_SEARCH_URL, TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, option_quality
 from .models import *
 from .worker import content_fetcher
 
@@ -21,14 +21,14 @@ def index(request):
 
 
 def insert_raw_data(request):
-        success_url = reverse_lazy('index')
-        contents = content_fetcher(directory_path=r"E:\dir")
-        for video in contents:
-            if RawData.objects.filter(**video):
-                pass
-            else:
-                RawData.objects.create(**video)
-        return HttpResponseRedirect(success_url)
+    success_url = reverse_lazy('index')
+    contents = content_fetcher(directory_path=r"E:\dir")
+    for video in contents:
+        if RawData.objects.filter(**video):
+            pass
+        else:
+            RawData.objects.create(**video)
+    return HttpResponseRedirect(success_url)
 
 
 def film_splitter(request):
@@ -97,10 +97,6 @@ def person_fetcher():
 
 
 def fetch_api_data(request):
-
-    option_quality = [185, 500, 1000]
-    option_quality.sort(reverse=True)
-
     for movies in Movie.objects.filter(status=False):
         params = {"api_key": TMDB_API_KEY,
                   "query": movies.title,
@@ -138,32 +134,27 @@ def fetch_api_data(request):
                 [movies.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
 
             # GET CAST/CREW DATA!
-
             movie_id = movies_data[0]['id']
             cast_movie_url = str(TMDB_BASE_URL) + 'movie/' + str(movie_id) + '/credits'
             cast_params = {"api_key": TMDB_API_KEY, "language": "fr"}
             cast_result = requests.get(cast_movie_url, params=cast_params)
             for character in cast_result.json()['cast']:
                 if 'name' in character:
-                    if character.get("name"):
-                        if not Person.objects.filter(**{'name': character.get("name")}):
-                            person = Person.objects.create()
-                            person.name = character.get("name")
-                            person.save()
+                    person_id = character.get("id")
+                    person_fetcher(person_id)
+
+            # for person in person_result.json()['cast']:
 
             # ---------------------------------------------------
             # for persons in Person.objects.all():
             # persons.birth_date = items.get("birthday")
             # persons.name =
 
-                # print(casts)
-                # for cast in casts:
-                #     person.name = cast.get("name")
-                #     person.profile_image = cast.get("profile_path")
-                #     person.save()
-        else:
-            pass
-
+            # print(casts)
+            # for cast in casts:
+            #     person.name = cast.get("name")
+            #     person.profile_image = cast.get("profile_path")
+            #     person.save()
 
     #
     # for tv in TVSeries.objects.filter(status=False):
@@ -194,20 +185,20 @@ def fetch_api_data(request):
     #             tv.vote_count = episode.get('vote_count')
     #             tv.vote_average = episode.get('vote_average')
     #
-                # for i in option_quality:
-                #     thumbnail_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, episode_result.json().get('poster_path'))
-                #     fanart_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, data['results'][0]['backdrop_path'])
-                #     if requests.get(thumbnail_image_url).status_code == 200:
-                #         if not tv.thumbnail_hq:
-                #             tv.thumbnail_hq = thumbnail_image_url
-                #             tv.fanart_hq = fanart_image_url
-                #         elif tv.thumbnail_hq and not tv.thumbnail_lq:
-                #             tv.thumbnail_lq = thumbnail_image_url
-                #             tv.fanart_lq = fanart_image_url
-                #             break
-                # if tv.thumbnail_hq and not tv.thumbnail_lq:
-                #     tv.thumbnail_lq = tv.thumbnail_hq
-                # tv.save()
+    # for i in option_quality:
+    #     thumbnail_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, episode_result.json().get('poster_path'))
+    #     fanart_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, data['results'][0]['backdrop_path'])
+    #     if requests.get(thumbnail_image_url).status_code == 200:
+    #         if not tv.thumbnail_hq:
+    #             tv.thumbnail_hq = thumbnail_image_url
+    #             tv.fanart_hq = fanart_image_url
+    #         elif tv.thumbnail_hq and not tv.thumbnail_lq:
+    #             tv.thumbnail_lq = thumbnail_image_url
+    #             tv.fanart_lq = fanart_image_url
+    #             break
+    # if tv.thumbnail_hq and not tv.thumbnail_lq:
+    #     tv.thumbnail_lq = tv.thumbnail_hq
+    # tv.save()
     #             #----- TVSeries.objects.filter(id=tv.id).update(**tv_dict)
     #             [tv.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
     #
@@ -222,3 +213,22 @@ def fetch_api_data(request):
     #     print()
 
     return HttpResponse("Okay!")
+
+
+def person_fetcher(p_id):
+    person_url = str(TMDB_BASE_URL) + 'person/' + str(p_id)
+    cast_params = {"api_key": TMDB_API_KEY, "language": "fr"}
+    person_result = requests.get(person_url, params=cast_params).json()
+    if person_result and not Person.objects.filter(**{"name": person_result["name"]}):
+        person = Person.objects.create()
+        if "name" in person_result:
+            person.name = person_result["name"]
+        if "birthday" in person_result:
+            person.birth_date = person_result["birthday"]
+        if "profile_path" in person_result:
+            person.profile_image = person_result["profile_path"]
+        if "biography" in person_result:
+            person.biography = person_result["biography"]
+        if "place_of_birth" in person_result:
+            person.place_of_birth = person_result["place_of_birth"]
+        person.save()
