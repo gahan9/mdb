@@ -16,13 +16,17 @@ class RawData(models.Model):
 
 class Person(models.Model):
     name = models.CharField(null=True, blank=True, max_length=100)
-    birth_date = models.CharField(null=True, blank=True, max_length=100)
-    profile_image = models.URLField(max_length=1000, null=True, blank=True)
+    birthday = models.CharField(null=True, blank=True, max_length=100)
+    profile_path = models.URLField(max_length=1000, null=True, blank=True)
     biography = models.TextField(null=True, blank=True)
     place_of_birth = models.CharField(null=True, blank=True, max_length=200)
 
     def __str__(self):
         return "{}".format(self.name)
+
+    @property
+    def get_short_biography(self):
+        return self.biography[:15]
 
 
 class Genres(models.Model):
@@ -38,7 +42,7 @@ class Entertainment(models.Model):
     title = models.CharField(max_length=350)
     overview = models.TextField()
     vote_average = models.FloatField(null=True, blank=True)
-    vote_count = models.IntegerField(default=0)
+    vote_count = models.IntegerField(null=True, blank=True)
     duration = models.IntegerField(null=True, blank=True)
     status = models.BooleanField(default=False, verbose_name="Meta Data fetched?")
 

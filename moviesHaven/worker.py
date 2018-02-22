@@ -7,19 +7,6 @@ from .models import Movie
 SUPPORTED_EXTENSIONS = ['mp4', 'mkv', '3gp', 'avi', 'mov', 'vob', 'm3u8']
 
 
-def name_fetcher(arg):
-    return ' '.join(arg.split('_')[1].split('.')[:-1])
-
-
-def filter_film(inputStr):
-    import re
-    # inputStr = name_fetcher(regexIn)
-    regex = r"[s]\d+[e]\d+"
-    regexOut = re.findall(regex, str(inputStr).lower())
-    regSea = re.findall(r"[s]\d+", (str(regexOut).split(',')[0]).lower())
-    regEpi = re.findall(r"[e]\d+", (str(regexOut).split(',')[0]).lower())
-    tup = regSea, regEpi
-    return tup
 
 
 def content_fetcher(directory_path):

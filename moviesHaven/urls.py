@@ -9,10 +9,10 @@ router.register(r'person/movie', viewsets.MovieByPersonViewSet)
 # router.register(r'genre/tv', viewsets.TVSeriesByGenreViewSet)
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.HomePageView.as_view(), name='index'),
     path('api/', include(router.urls)),
     path('create_dir/', views.insert_raw_data, name='insert_raw_data'),
     path('show_data/', views.film_splitter, name='film_splitter'),
-    path('api_out/', views.fetch_api_data, name='fetch_api_data'),
+    path('api_out/', views.update_meta_data, name='fetch_api_data'),
     # path('genre/movie/<int:pk>', views.MovieByGenre.as_view(), name=''),
 ]

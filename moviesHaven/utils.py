@@ -1,45 +1,62 @@
+import re
 import requests
 
-from moviesHaven.models import Genres, Person, PersonRole
-from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, LANGUAGE_CODE, API_LANGUAGE_CODE, \
-    TMDB_IMAGE_URL, OPTION_QUALITY
+from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, OPTION_QUALITY, DEFAULT_PARAMS
 
 
-# def get_movie_genre():
-#     url = TMDB_BASE_URL + "genre/movie/list?"
-#     params = {"api_key": TMDB_API_KEY}
-#     r = requests.get(url, params=params)
-#     genres = r.json()
-#     return genres['genres']
-#
-#
-# def get_tv_genre():
-#     url = TMDB_BASE_URL + "genre/tv/list?"
-#     params = {"api_key": TMDB_API_KEY}
-#     r = requests.get(url, params=params)
-#     genres = r.json()
-#     return genres['genres']
+name_fetcher = lambda x: ' '.join(x.split('_')[1].split('.')[:-1])
+
+
+def validate_value_existence(key, source_dict):
+    if key in source_dict:
+        if source_dict[key]:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def get_json_response(url, params):
+    try:
+        response = requests.get(url, params=params).json()
+        return response
+    except Exception as e:
+        return {"error": "Couldn't get any response", "detail": str(e)}
+
+
+def filter_film(arg):
+    #TODO: make regex in single expression
+    try:
+        arg = str(arg)
+    except Exception as e:
+        return ("Enter valid string {}".format(e),)
+
+    regexOut = re.findall(r"[s]\d+[e]\d+", arg.lower())
+    regSea = re.findall(r"[s]\d+", (str(regexOut).split(',')[0]).lower())
+    regEpi = re.findall(r"[e]\d+", (str(regexOut).split(',')[0]).lower())
+    tup = regSea, regEpi
+    return tup
 
 
 def get_genre(flag):
+    url = TMDB_BASE_URL
     if flag == "tv":
-        url = TMDB_BASE_URL + "genre/tv/list?"
+        url += "genre/tv/list?"
     elif flag == "movie":
-        url = TMDB_BASE_URL + "genre/movie/list?"
-    params = {"api_key": TMDB_API_KEY, 'language': API_LANGUAGE_CODE}
-    r = requests.get(url, params=params)
-    genres = r.json()
-    for genre in genres['genres']:
-        genre_dict = {"genre_id": genre.get('id'),
-                      "genre_name": genre.get('name'),
-                      }
-        if not Genres.objects.filter(**genre_dict):
-            try:
-                Genres.objects.create(**genre_dict)
-            except Exception as e:
-                print(e)
-                print(Genres.objects.filter(**genre_dict))
-                print(genre_dict)
+        url += "genre/movie/list?"
+    response = requests.get(url, params=DEFAULT_PARAMS)
+    return response.json()
+
+
+def create_file_structure(file_obj, flag):
+    end = re.search(r"[s]\d+[e]\d+", name_fetcher(file_obj.name)).start()
+    title = name_fetcher(file_obj.name)[:end]
+    season_number = filter_film(file_obj)[:1][0][0][1:]
+    episode_number = filter_film(file_obj)[1:][0][0][1:]
+    tv_dict = {"local_data"   : file_obj, "title": title,
+               'season_number': season_number, 'episode_number': episode_number}
+    return tv_dict
 
 
 def set_image(movie_instance, source_json):
@@ -47,19 +64,19 @@ def set_image(movie_instance, source_json):
     for i in OPTION_QUALITY:
         fanart_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, source_json.get('backdrop_path'))
         thumbnail_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, source_json.get('poster_path'))
-        # if requests.get(thumbnail_image_url).status_code == 200:
-        if True:
+        if requests.get(thumbnail_image_url).status_code == 200:
             if not movie_instance.thumbnail_hq:
                 movie_instance.thumbnail_hq = thumbnail_image_url
                 movie_instance.fanart_hq = fanart_image_url
+                continue
             elif movie_instance.thumbnail_hq and not movie_instance.thumbnail_lq:
                 movie_instance.thumbnail_lq = thumbnail_image_url
                 movie_instance.fanart_lq = fanart_image_url
                 break
             if movie_instance.thumbnail_hq and not movie_instance.thumbnail_lq:
                 movie_instance.thumbnail_lq = movie_instance.thumbnail_hq
-        movie_instance.save()
-        return movie_instance
+    movie_instance.save()
+    return movie_instance
 
 
 def person_fetcher(p_id):
@@ -69,26 +86,15 @@ def person_fetcher(p_id):
     return person_result
 
 
-def create_person(url, **kwargs):
-    print(">>> In create_person()")
-    cast_params = {"api_key": TMDB_API_KEY, "language": "fr"}
-    cast_result = requests.get(url, params=cast_params)
-    for character in cast_result.json()['cast']:
-        if 'name' in character:
-            person_id = character.get("id")
-            person_result = person_fetcher(person_id)
-            person_data = {}
-            if person_result:
-                if "name" in person_result:
-                    person_data["name"] = person_result["name"]
-                if "birthday" in person_result:
-                    person_data["birth_date"] = person_result["birthday"]
-                if "profile_path" in person_result:
-                    person_data["profile_image"] = person_result["profile_path"]
-                if "biography" in person_result:
-                    person_data["biography"] = person_result["biography"]
-                if "place_of_birth" in person_result:
-                    person_data["place_of_birth"] = person_result["place_of_birth"]
-                if not Person.objects.filter(**person_data):
-                    person_instance = Person.objects.create(**person_data)
-                    PersonRole.objects.create(role="Cast", person=person_instance, movie=kwargs['movie'])
+def fetch_cast_data(cast_json):
+    print(">>> In fetch_cast_data()")
+    if 'name' in cast_json:
+        person_id = cast_json.get("id")
+        person_result = person_fetcher(person_id)
+        person_data = {}
+        if person_result:
+            for key, value in person_result:
+                if key in ["name", "birthday", "profile_path", "biography", "place_of_birth"]:
+                    if value:
+                        person_data[key] = value
+        return person_data

@@ -1,11 +1,10 @@
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Planet Vision</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
@@ -20,14 +19,21 @@
             </thead>
             <tbody>
             <tr>
-                <td><a class="btn btn-primary"
-                       href="{% url 'insert_raw_data' %}" target="index.html">Click
-                    Here!</a></td>
-                <td><a class="btn btn-primary"
-                       href="{% url 'film_splitter' %}">{% trans "Click Here!" %}</a></td>
-                <td><a class="btn btn-primary"
-                       href="{% url 'fetch_api_data' %}">Click
-                    Here!</a></td>
+                <td>
+                    <a class="btn btn-primary" href="{% url 'insert_raw_data' %}" target="index.html">
+                        {% trans "Fetch local content" %}
+                    </a>
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="{% url 'film_splitter' %}">
+                        {% trans "Filter Local Content" %}
+                    </a>
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="{% url 'fetch_api_data' %}">
+                        {% trans "fetch meta data" %}
+                    </a>
+                </td>
             </tr>
             </tbody>
         </table>

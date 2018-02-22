@@ -14,13 +14,13 @@ class MovieAdmin(admin.ModelAdmin):
                     'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq']
     search_fields = ['title']
 
-
     def movie_genre(self, obj):
         return "\n".join([p.genre_name for p in obj.genre_name.all()])
 
 
 class TVSeriesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'season_number', 'episode_number', 'get_short_overview','thumbnail_hq', 'thumbnail_lq',
+    list_display = ['id', 'title', 'season_number', 'episode_number', 'get_short_overview', 'thumbnail_hq',
+                    'thumbnail_lq',
                     'fanart_hq', 'fanart_lq',
                     'tv_genre', 'duration', 'status',
                     'vote_average', 'vote_count', 'release_date']
@@ -36,8 +36,10 @@ class GenreAdmin(admin.ModelAdmin):
 class PersonRoleAdmin(admin.ModelAdmin):
     list_display = ['role', 'person', 'movie', 'tv']
 
+
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'birth_date', 'profile_image', 'biography', 'place_of_birth']
+    list_display = ['name', 'birthday', 'profile_path', 'get_short_biography', 'place_of_birth']
+
 
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(TVSeries, TVSeriesAdmin)
