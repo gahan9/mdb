@@ -1,22 +1,21 @@
-'''TODO
+"""TODO
 
-- API for Genre : Remove results array
-- API for cast : Same as genre
+- API for Genre : Remove results array : Done
+- API for cast : Same as genre : Done
 - API should work for movie and TV both
 - Thumbnail fix as per kodi
 - Exception handling in api (Generate DB) : Done
 
 - Streaming link integration in move and tv show
+"""
 
-
-'''
 
 from threading import Thread
+import copy
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
-import copy
 
 from moviesHaven.utils import get_genre, set_image, create_file_structure, get_json_response, \
     fetch_cast_data, filter_film, name_fetcher

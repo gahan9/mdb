@@ -12,6 +12,12 @@ class MovieByGenreViewSet(viewsets.ModelViewSet):
     queryset = Genres.objects.filter(movie__genre_name__isnull=False).distinct()
     serializer_class = MovieByGenreSerializer
 
+    def get_serializer_class(self):
+        if not self.kwargs:
+            return GenreSerializer
+        else:
+            return self.serializer_class
+
 
 class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
     queryset = Genres.objects.all()

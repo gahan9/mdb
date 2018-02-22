@@ -1,6 +1,4 @@
-import django_filters
 from rest_framework import serializers
-
 from .models import *
 
 
@@ -25,17 +23,10 @@ class MovieSerializer(serializers.ModelSerializer):
                   ]
 
 
-class GenreFilterField(serializers.RelatedField):
-    def to_representation(self, value):
-        if isinstance(value, Movie):
-            serializer = MovieSerializer(value, context=self.context)
-        else:
-            try:
-                return value.serializable_value
-            except Exception as e:
-                print(e)
-                raise Exception("Unexpected object: {}".format(value))
-        return serializer.data
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genres
+        fields = ['id', 'url', 'genre_id', 'genre_name']
 
 
 class MovieByGenreSerializer(serializers.ModelSerializer):
