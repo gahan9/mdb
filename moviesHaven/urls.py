@@ -5,6 +5,7 @@ from rest_framework import routers
 router = routers.DefaultRouter()
 router.register(r'movie', viewsets.MovieViewSet)
 router.register(r'genre/movie', viewsets.MovieByGenreViewSet)
+router.register(r'person/movie', viewsets.MovieByPersonViewSet)
 # router.register(r'genre/tv', viewsets.TVSeriesByGenreViewSet)
 
 urlpatterns = [

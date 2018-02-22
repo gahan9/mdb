@@ -39,9 +39,9 @@ class GenreFilterField(serializers.RelatedField):
 
 
 class MovieByGenreSerializer(serializers.ModelSerializer):
-    movie_set = serializers.SerializerMethodField(read_only=True)
+    results = serializers.SerializerMethodField(read_only=True)
 
-    def get_movie_set(self, obj):
+    def get_results(self, obj):
         filtered_movie_set = Movie.objects.filter(genre_name__id=obj.id)
         if filtered_movie_set:
             return [i.get_details for i in filtered_movie_set]
@@ -50,13 +50,13 @@ class MovieByGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genres
-        fields = ['id', 'url', 'genre_id', 'genre_name', 'movie_set']
+        fields = ['id', 'url', 'genre_id', 'genre_name', 'results']
 
 
 class TVSeriesByGenreSerializer(serializers.ModelSerializer):
-    tv_set = serializers.SerializerMethodField(read_only=True)
+    results = serializers.SerializerMethodField(read_only=True)
 
-    def get_tv_set(self, obj):
+    def get_results(self, obj):
         filtered_movie_set = TVSeries.objects.filter(genre_name__id=obj.id)
         if filtered_movie_set:
             return [i.get_details for i in filtered_movie_set]
@@ -66,3 +66,18 @@ class TVSeriesByGenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genres
         fields = "__all__"
+
+
+class MovieByPersonSerializer(serializers.ModelSerializer):
+    results = serializers.SerializerMethodField(read_only=True)
+
+    def get_results(self, obj):
+        filtered_movie_set = Movie.objects.filter(personrole__person=obj)
+        if filtered_movie_set:
+            return [i.get_details for i in filtered_movie_set]
+        else:
+            return []
+
+    class Meta:
+        model = Person
+        fields = ["id", "url", "results", "name", "biography", "profile_image"]

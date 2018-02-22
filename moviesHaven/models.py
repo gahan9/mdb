@@ -18,7 +18,7 @@ class Person(models.Model):
     name = models.CharField(null=True, blank=True, max_length=100)
     birth_date = models.CharField(null=True, blank=True, max_length=100)
     profile_image = models.URLField(max_length=1000, null=True, blank=True)
-    biography = models.TextField(null=True,blank=True)
+    biography = models.TextField(null=True, blank=True)
     place_of_birth = models.CharField(null=True, blank=True, max_length=200)
 
     def __str__(self):
@@ -65,12 +65,12 @@ class Movie(Entertainment):
     @property
     def get_details(self):
         detail_set = {
-            "id": self.id,
-            "title": self.title,
-            "overview": self.overview,
-            "release_date": self.release_date,
-            "thumbnail": self.thumbnail_lq,
-            "fanart": self.fanart_hq
+            "id"           : self.id,
+            "title"        : self.title,
+            "overview"     : self.overview,
+            "release_date" : self.release_date,
+            "poster_path"  : self.thumbnail_lq,
+            "backdrop_path": self.fanart_hq
         }
         return detail_set
 

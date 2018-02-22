@@ -108,7 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'fr'
+API_LANGUAGE_CODE = 'fr'
 
 TIME_ZONE = 'UTC'
 
@@ -139,9 +140,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES'    : (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
+    # 'DEFAULT_PERMISSION_CLASSES'    : (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
     'DEFAULT_PAGINATION_CLASS'      : 'rest_framework.pagination.PageNumberPagination',
     'PAGINATE_BY'                   : 20,
     'DEFAULT_FILTER_BACKENDS'       : ('django_filters.rest_framework.DjangoFilterBackend',)
@@ -152,5 +153,4 @@ TMDB_SEARCH_URL = TMDB_BASE_URL + "search/"
 TMDB_IMAGE_URL = "http://image.tmdb.org/t/p/"
 TMDB_API_KEY = "34142515d9d23817496eeb4ff1d223d0"
 
-option_quality = [185, 500, 1000]
-option_quality.sort(reverse=True)
+OPTION_QUALITY = [1000, 500, 185]

@@ -16,3 +16,8 @@ class MovieByGenreViewSet(viewsets.ModelViewSet):
 class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
     queryset = Genres.objects.all()
     serializer_class = TVSeriesByGenreSerializer
+
+
+class MovieByPersonViewSet(viewsets.ModelViewSet):
+    queryset = Person.objects.filter(movie__personrole__person__isnull=False).distinct()
+    serializer_class = MovieByPersonSerializer
