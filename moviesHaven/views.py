@@ -1,15 +1,3 @@
-"""TODO
-
-- API for Genre : Remove results array : Done
-- API for cast : Same as genre : Done
-- API should work for movie and TV both
-- Thumbnail fix as per kodi
-- Exception handling in api (Generate DB) : Done
-
-- Streaming link integration in move and tv show
-"""
-
-
 from threading import Thread
 import copy
 

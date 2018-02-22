@@ -70,7 +70,7 @@ class Movie(Entertainment):
     def get_details(self):
         detail_set = {
             "id"           : self.id,
-            "title"        : self.title,
+            "name"        : self.title,
             "overview"     : self.overview,
             "release_date" : self.release_date,
             "poster_path"  : self.thumbnail_lq,

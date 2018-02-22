@@ -26,11 +26,11 @@ def get_json_response(url, params):
 
 
 def filter_film(arg):
-    #TODO: make regex in single expression
+    #FIXME: make regex in single expression
     try:
         arg = str(arg)
     except Exception as e:
-        return ("Enter valid string {}".format(e),)
+        return "Enter valid string {}".format(e),
 
     regexOut = re.findall(r"[s]\d+[e]\d+", arg.lower())
     regSea = re.findall(r"[s]\d+", (str(regexOut).split(',')[0]).lower())
@@ -59,24 +59,21 @@ def create_file_structure(file_obj, flag):
     return tv_dict
 
 
-def set_image(movie_instance, source_json):
+def set_image(instance, source_json):
     print(">>> In set_image()")
-    for i in OPTION_QUALITY:
-        fanart_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, source_json.get('backdrop_path'))
-        thumbnail_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, i, source_json.get('poster_path'))
+    # for i in OPTION_QUALITY:
+    if validate_value_existence('backdrop_path', source_json):
+        fanart_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, 780, source_json.get('backdrop_path'))
+        if requests.get(fanart_image_url).status_code == 200:
+            instance.fanart_hq = fanart_image_url
+    if validate_value_existence('poster_path', source_json):
+        thumbnail_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, 300, source_json.get('poster_path'))
         if requests.get(thumbnail_image_url).status_code == 200:
-            if not movie_instance.thumbnail_hq:
-                movie_instance.thumbnail_hq = thumbnail_image_url
-                movie_instance.fanart_hq = fanart_image_url
-                continue
-            elif movie_instance.thumbnail_hq and not movie_instance.thumbnail_lq:
-                movie_instance.thumbnail_lq = thumbnail_image_url
-                movie_instance.fanart_lq = fanart_image_url
-                break
-            if movie_instance.thumbnail_hq and not movie_instance.thumbnail_lq:
-                movie_instance.thumbnail_lq = movie_instance.thumbnail_hq
-    movie_instance.save()
-    return movie_instance
+            instance.thumbnail_hq = thumbnail_image_url
+    if instance.thumbnail_hq and not instance.thumbnail_lq:
+        instance.thumbnail_lq = instance.thumbnail_hq
+    instance.save()
+    return instance
 
 
 def person_fetcher(p_id):
@@ -93,8 +90,14 @@ def fetch_cast_data(cast_json):
         person_result = person_fetcher(person_id)
         person_data = {}
         if person_result:
-            for key, value in person_result:
-                if key in ["name", "birthday", "profile_path", "biography", "place_of_birth"]:
-                    if value:
-                        person_data[key] = value
+            try:
+                for key, value in person_result.items():
+                    if key in ["name", "birthday", "profile_path", "biography", "place_of_birth"]:
+                        if value:
+                            person_data[key] = value
+            except Exception as e:
+                print("*" * 10)
+                print(person_result, sep="\n")
+                print("*" * 10)
+                raise Exception
         return person_data

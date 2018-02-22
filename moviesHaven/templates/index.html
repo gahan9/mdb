@@ -7,37 +7,41 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<div class="container">
-    <form>
-        <table class="table" border="1">
-            <thead>
-            <tr>
-                <th scope="col">Insert into Database!</th>
-                <th scope="col">Filter Files!</th>
-                <th scope="col">Fetch API Data!</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>
-                    <a class="btn btn-primary" href="{% url 'insert_raw_data' %}" target="index.html">
+<div class="container" style="margin-top: 10%">
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">Insert into Database!</th>
+            <th scope="col">Filter Files!</th>
+            <th scope="col">Fetch API Data!</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                <form action="{% url 'insert_raw_data' %}">
+                    <button class="btn btn-primary" type="submit">
                         {% trans "Fetch local content" %}
-                    </a>
-                </td>
-                <td>
-                    <a class="btn btn-primary" href="{% url 'film_splitter' %}">
+                    </button>
+                </form>
+            </td>
+            <td>
+                <form action="{% url 'film_splitter' %}">
+                    <button class="btn btn-primary" type="submit">
                         {% trans "Filter Local Content" %}
-                    </a>
-                </td>
-                <td>
-                    <a class="btn btn-primary" href="{% url 'fetch_api_data' %}">
-                        {% trans "fetch meta data" %}
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </form>
+                    </button>
+                </form>
+            </td>
+            <td>
+                <form action="{% url 'fetch_api_data' %}">
+                    <button class="btn btn-primary" type="submit">
+                        {% trans "Filter MetaData" %}
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 </body>
 </html>
