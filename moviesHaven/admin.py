@@ -9,17 +9,17 @@ class RawDataAdmin(admin.ModelAdmin):
 
 
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'get_short_overview', 'vote_average', 'vote_count',
+    list_display = ['id', 'name', 'get_short_overview', 'vote_average', 'vote_count',
                     'duration', 'movie_genre', 'release_date', 'status',
                     'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq']
-    search_fields = ['title']
+    search_fields = ['name']
 
     def movie_genre(self, obj):
         return "\n".join([p.genre_name for p in obj.genre_name.all()])
 
 
 class TVSeriesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'season_number', 'episode_number', 'get_short_overview', 'thumbnail_hq',
+    list_display = ['id', 'name', 'season_number', 'episode_number', 'get_short_overview', 'thumbnail_hq',
                     'thumbnail_lq',
                     'fanart_hq', 'fanart_lq',
                     'tv_genre', 'duration', 'status',

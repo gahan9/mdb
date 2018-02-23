@@ -4,7 +4,14 @@ import requests
 from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, OPTION_QUALITY, DEFAULT_PARAMS
 
 
-name_fetcher = lambda x: ' '.join(x.split('_')[1].split('.')[:-1])
+def name_fetcher(name):
+    try:
+        if len(name.split('_')) > 1:
+            return ' '.join(name.split('_')[1].split('.')[:-1])
+        else:
+            return ' '.join(name.split('.')[:-1])
+    except Exception as e:
+        return name
 
 
 def validate_value_existence(key, source_dict):

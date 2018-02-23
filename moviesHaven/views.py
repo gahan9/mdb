@@ -44,9 +44,9 @@ def filter_raw_data():
             except Exception as e:
                 print("Exception during creating TVSeries object: {}".format(e))
         else:
-            movie_dict = {"local_data": entry, "title": name_fetcher(entry.name)}
+            movie_dict = {"local_data": entry, "name": name_fetcher(entry.name)}
             try:
-                if not Movie.objects.filter(**{'title': name_fetcher(entry.name)}):
+                if not Movie.objects.filter(**movie_dict):
                     Movie.objects.create(**movie_dict)
             except Exception as e:
                 print("Exception during creating Movie object: {}".format(e))
@@ -73,7 +73,7 @@ def fetch_movie_metadata():
     print("fetching movie data...")
     for movie_instance in Movie.objects.filter(status=False):
         params = copy.deepcopy(DEFAULT_PARAMS)
-        params.update({"query": movie_instance.title})
+        params.update({"query": movie_instance.name})
         movie_result = get_json_response("{}movie/".format(TMDB_SEARCH_URL), params=params)
         print(movie_result)
         if 'results' in movie_result:
@@ -85,7 +85,7 @@ def fetch_movie_metadata():
                         genre_id = movies_data[0]['genre_ids']
 
                 for movie in movies_data:
-                    movie_instance.title = movie.get('title')
+                    movie_instance.name = movie.get('title')
                     movie_instance.overview = movie.get('overview')
                     movie_instance.release_date = movie.get('release_date')
                     movie_instance.vote_count = movie.get('vote_count')

@@ -1,3 +1,4 @@
+from django.core.serializers import serialize
 from rest_framework import serializers
 from .models import *
 
@@ -23,11 +24,6 @@ class PersonSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     genre_names = serializers.SerializerMethodField(required=False, read_only=True)
     description = serializers.SerializerMethodField(required=False, read_only=True)
-    name = serializers.SerializerMethodField(required=False, read_only=True)
-
-    @staticmethod
-    def get_name(obj):
-        return obj.title
 
     def get_genre_names(self, obj):
         print(obj.genre_name.all())
@@ -53,7 +49,9 @@ class MovieByGenreSerializer(serializers.ModelSerializer):
     def get_results(obj):
         filtered_movie_set = Movie.objects.filter(genre_name__id=obj.id)
         if filtered_movie_set:
-            return [i.get_details for i in filtered_movie_set]
+            # res = serialize('json', filtered_movie_set)
+            res = [i.get_details for i in filtered_movie_set]
+            return res
         else:
             return []
 

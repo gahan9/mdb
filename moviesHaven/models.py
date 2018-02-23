@@ -26,12 +26,21 @@ class Person(models.Model):
 
     @property
     def get_short_biography(self):
-        return self.biography[:15]
+        if self.biography:
+            return self.biography[:15]
+        else:
+            return self.biography
 
 
 class Genres(models.Model):
     genre_id = models.IntegerField(unique=True)
     genre_name = models.CharField(max_length=256)
+    poster_path = models.URLField(max_length=1000, verbose_name="Thumbnail",
+                                  help_text="Enter image URL of resolution width 300",
+                                  blank=True, null=True)
+    backdrop_path = models.URLField(max_length=1000, verbose_name="Fan Art",
+                                    help_text="Enter image URL of resolution width 780",
+                                    blank=True, null=True)
 
     def __str__(self):
         return "{}".format(self.genre_name)
@@ -39,7 +48,7 @@ class Genres(models.Model):
 
 class Entertainment(models.Model):
     local_data = models.ForeignKey(RawData, on_delete=models.CASCADE)
-    title = models.CharField(max_length=350)
+    name = models.CharField(max_length=350)
     overview = models.TextField()
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
@@ -49,7 +58,7 @@ class Entertainment(models.Model):
                                  help_text="Mark if all the require possible metadata is fetched")
 
     def __str__(self):
-        return "{}".format(self.title)
+        return "{}".format(self.name)
 
     class Meta:
         abstract = True
@@ -72,7 +81,7 @@ class Movie(Entertainment):
     def get_details(self):
         detail_set = {
             "id"           : self.id,
-            "name"        : self.title,
+            "name"        : self.name,
             "overview"     : self.overview,
             "release_date" : self.release_date,
             "poster_path"  : self.thumbnail_lq,
@@ -98,7 +107,7 @@ class TVSeries(Entertainment):
         return self.overview[:15]
 
     def __str__(self):
-        return "{} - {}".format(self.title, self.vote_average)
+        return "{} - {}".format(self.name, self.vote_average)
 
     class Meta:
         verbose_name = verbose_name_plural = "TV Series"
@@ -112,3 +121,14 @@ class PersonRole(models.Model):
 
     def __str__(self):
         return "{} as {}".format(self.person, self.role)
+
+
+class StreamAuthLog(models.Model):
+    stream_key = models.TextField(blank=True, null=True)
+    request_data = models.TextField(blank=True, null=True)
+    response_status = models.TextField(blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "{}".format(self.stream_key)

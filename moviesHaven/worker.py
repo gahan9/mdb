@@ -2,21 +2,23 @@ import os
 import tempfile
 import re
 
+from mysite.settings import TEMP_FOLDER_NAME
 from .models import Movie
 
 SUPPORTED_EXTENSIONS = ['mp4', 'mkv', '3gp', 'avi', 'mov', 'vob', 'm3u8']
-
-
 
 
 def content_fetcher(directory_path):
     data_set = []
     if os.path.exists(directory_path):
         for root, directory, files in os.walk(directory_path, topdown=True):
-            for name in files:
-                if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
-                    d = {"name": name, "path": root, "extension": name.split('.')[-1]}
-                    data_set.append(d)
+            if TEMP_FOLDER_NAME in root:
+                continue
+            else:
+                for name in files:
+                    if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
+                        d = {"name": name, "path": root, "extension": name.split('.')[-1]}
+                        data_set.append(d)
         return data_set
     else:
         return "Path Does not exist"
