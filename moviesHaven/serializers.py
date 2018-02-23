@@ -24,9 +24,11 @@ class PersonSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     genre_names = serializers.SerializerMethodField(required=False, read_only=True)
     description = serializers.SerializerMethodField(required=False, read_only=True)
+    backdrop_path = serializers.SerializerMethodField(required=False, read_only=True)
+    poster_path = serializers.SerializerMethodField(required=False, read_only=True)
 
     def get_genre_names(self, obj):
-        print(obj.genre_name.all())
+        # print(obj.genre_name.all())
         if obj.genre_name:
             return [i.genre_name for i in obj.genre_name.all()]
         else:
@@ -35,10 +37,50 @@ class MovieSerializer(serializers.ModelSerializer):
     def get_description(self, obj):
         return obj.overview
 
+    @staticmethod
+    def get_poster_path(obj):
+        return obj.thumbnail_hq
+
+    @staticmethod
+    def get_backdrop_path(obj):
+        return obj.fanart_hq
+
     class Meta:
         model = Movie
         fields = ['id', 'url', 'name', 'genre_names', 'release_date', 'description',
-                  'thumbnail_lq', 'status'
+                  'thumbnail_lq', 'status',
+                  'backdrop_path', 'poster_path'
+                  ]
+
+
+class TVSeriesSerializer(serializers.ModelSerializer):
+    genre_names = serializers.SerializerMethodField(required=False, read_only=True)
+    description = serializers.SerializerMethodField(required=False, read_only=True)
+    backdrop_path = serializers.SerializerMethodField(required=False, read_only=True)
+    poster_path = serializers.SerializerMethodField(required=False, read_only=True)
+
+    def get_genre_names(self, obj):
+        if obj.genre_name:
+            return [i.genre_name for i in obj.genre_name.all()]
+        else:
+            return []
+
+    def get_description(self, obj):
+        return obj.overview
+
+    @staticmethod
+    def get_poster_path(obj):
+        return obj.thumbnail_hq
+
+    @staticmethod
+    def get_backdrop_path(obj):
+        return obj.fanart_hq
+
+    class Meta:
+        model = TVSeries
+        fields = ['id', 'url', 'name', 'genre_names', 'release_date', 'description',
+                  'season_number', 'episode_number',
+                  'backdrop_path', 'poster_path'
                   ]
 
 

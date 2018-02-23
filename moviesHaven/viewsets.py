@@ -10,6 +10,8 @@ import os
 import uuid
 
 import requests
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,28 +24,57 @@ from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
 
 
 class MovieViewSet(viewsets.ModelViewSet):
-    queryset = Movie.objects.all()
+    queryset = Movie.objects.filter(status=True).order_by("name")
     serializer_class = MovieSerializer
 
 
-class TVViewSet(viewsets.ModelViewSet):
-    queryset = TVSeries.objects.all()
-    serializer_class = MovieSerializer
+class TVSeriesViewSet(viewsets.ModelViewSet):
+    queryset = TVSeries.objects.filter(status=True).order_by("name")
+    serializer_class = TVSeriesSerializer
 
 
 class MovieSearchView(ListAPIView):
-    queryset = Movie.objects.all()
+    queryset = Movie.objects.filter(status=True)
     serializer_class = MovieSerializer
+    filter_backends = (OrderingFilter,)
+    ordering_fields = ('name', 'release_date')
     model = Movie
 
     def get_queryset(self):
-        """
-        filtering against a `name` query parameter in the URL. for movie title
-        """
-        queryset = self.model.objects.all()
+        queryset = self.model.objects.filter(status=True)
         movie_name = self.request.query_params.get('name', None)
-        if movie_name is not None:
+        movie_year = self.request.query_params.get('release_date', None)
+        print(movie_name, movie_year)
+        if movie_name:
             queryset = queryset.filter(name__icontains=movie_name)
+        if movie_year:
+            try:
+                queryset = queryset.filter(release_date__year=movie_year)
+            except ValueError:
+                return Response({"detail": "Invalid Year"})
+        return queryset
+
+
+class TVSeriesSearchView(ListAPIView):
+    serializer_class = TVSeriesSerializer
+    model = TVSeries
+    filter_backends = (OrderingFilter,)
+    ordering_fields = ('name', 'release_date')
+
+    def get_queryset(self):
+        """
+        filtering against a `name` query parameter in the URL. for tv name
+        """
+        queryset = self.model.objects.filter(status=True)
+        tv_name = self.request.query_params.get('name', None)
+        tv_year = self.request.query_params.get('release_date', None)
+        if tv_name:
+            queryset = queryset.filter(name__icontains=tv_name).order_by("-release_date")
+        if tv_year:
+            try:
+                queryset = queryset.filter(release_date__year=tv_year).order_by("name")
+            except ValueError:
+                return Response({"detail": "Invalid Year"})
         return queryset
 
 
