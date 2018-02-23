@@ -23,6 +23,7 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('moviesHaven/', include('moviesHaven.urls',)),
+    path('', include('moviesHaven.urls',)),
 ]
 
 if settings.DEBUG:

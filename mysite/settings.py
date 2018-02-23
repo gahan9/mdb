@@ -11,9 +11,9 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from .local_settings import DATABASES
+# from .local_settings import DATABASES
+from .server_settings import DATABASES
 
-# from .server_settings import DATABASES
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -156,3 +156,5 @@ TMDB_IMAGE_URL = "http://image.tmdb.org/t/p/"
 OPTION_QUALITY = [1000, 780, 500, 300, 185]
 SCRAPE_DIR = "/home/quixom/Videos/dir"
 DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": API_LANGUAGE_CODE}
+STREAM_VALIDATOR_API = "https://planetvision.net/api/streaming/check"
+TEMP_FOLDER_NAME = ".cache"
