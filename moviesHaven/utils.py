@@ -34,11 +34,6 @@ def get_json_response(url, params):
 
 def filter_film(arg):
     #FIXME: make regex in single expression
-    try:
-        arg = str(arg)
-    except Exception as e:
-        return "Enter valid string {}".format(e),
-
     regexOut = re.findall(r"[s]\d+[e]\d+", arg.lower())
     regSea = re.findall(r"[s]\d+", (str(regexOut).split(',')[0]).lower())
     regEpi = re.findall(r"[e]\d+", (str(regexOut).split(',')[0]).lower())
@@ -56,12 +51,12 @@ def get_genre(flag):
     return response.json()
 
 
-def create_file_structure(file_obj, flag):
+def create_file_structure(file_obj):
     end = re.search(r"[s]\d+[e]\d+", name_fetcher(file_obj.name)).start()
     title = name_fetcher(file_obj.name)[:end]
-    season_number = filter_film(file_obj)[:1][0][0][1:]
-    episode_number = filter_film(file_obj)[1:][0][0][1:]
-    tv_dict = {"local_data"   : file_obj, "title": title,
+    season_number = filter_film(file_obj.name)[:1][0][0][1:]
+    episode_number = filter_film(file_obj.name)[1:][0][0][1:]
+    tv_dict = {"local_data"   : file_obj, "name": title,
                'season_number': season_number, 'episode_number': episode_number}
     return tv_dict
 
