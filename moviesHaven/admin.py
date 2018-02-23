@@ -49,3 +49,5 @@ admin.site.register(Genres, GenreAdmin)
 admin.site.register(Person, PersonAdmin)
 
 admin.site.site_header = 'Planet Vision'
+admin.site.site_title = 'Planet Vision'
+admin.site.index_title = 'Planet Vision'
