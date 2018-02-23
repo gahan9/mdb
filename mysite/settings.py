@@ -109,8 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'fr'
-API_LANGUAGE_CODE = 'fr'
+LANGUAGE_CODE = 'pl'
 
 TIME_ZONE = 'UTC'
 
@@ -156,6 +155,6 @@ TMDB_IMAGE_URL = "http://image.tmdb.org/t/p/"
 
 OPTION_QUALITY = [1000, 780, 500, 300, 185]
 SCRAPE_DIR = "/home/quixom/Videos/dir"
-DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": API_LANGUAGE_CODE}
+DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": 'fr'}
 STREAM_VALIDATOR_API = "https://planetvision.net/api/streaming/check"
 TEMP_FOLDER_NAME = ".cache"

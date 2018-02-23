@@ -1,16 +1,10 @@
 """
-TODO:
-- search by name
-- search by year
-- sort by year
-- sort by letter
+TODO: disable directory listing
 """
-
 import os
 import uuid
 
 import requests
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -26,11 +20,15 @@ from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.filter(status=True).order_by("name")
     serializer_class = MovieSerializer
+    filter_backends = (OrderingFilter,)
+    ordering_fields = ('name', 'release_date')
 
 
 class TVSeriesViewSet(viewsets.ModelViewSet):
     queryset = TVSeries.objects.filter(status=True).order_by("name")
     serializer_class = TVSeriesSerializer
+    filter_backends = (OrderingFilter,)
+    ordering_fields = ('name', 'release_date')
 
 
 class MovieSearchView(ListAPIView):
@@ -44,7 +42,7 @@ class MovieSearchView(ListAPIView):
         queryset = self.model.objects.filter(status=True)
         movie_name = self.request.query_params.get('name', None)
         movie_year = self.request.query_params.get('release_date', None)
-        print(movie_name, movie_year)
+        # print(movie_name, movie_year)
         if movie_name:
             queryset = queryset.filter(name__icontains=movie_name)
         if movie_year:
@@ -81,12 +79,29 @@ class TVSeriesSearchView(ListAPIView):
 class MovieByGenreViewSet(viewsets.ModelViewSet):
     queryset = Genres.objects.filter(movie__genre_name__isnull=False).distinct()
     serializer_class = MovieByGenreSerializer
+    model = Genres
 
     def get_serializer_class(self):
         if not self.kwargs:
             return GenreSerializer
         else:
             return self.serializer_class
+
+    def get_queryset(self):
+        """
+        filtering against a `name` query parameter in the URL. for tv name
+        """
+        queryset = self.model.objects.filter(movie__genre_name__isnull=False)
+        tv_name = self.request.query_params.get('name', None)
+        tv_year = self.request.query_params.get('release_date', None)
+        if tv_name:
+            queryset = queryset.filter(name__icontains=tv_name).order_by("-release_date")
+        if tv_year:
+            try:
+                queryset = queryset.filter(release_date__year=tv_year).order_by("name")
+            except ValueError:
+                return Response({"detail": "Invalid Year"})
+        return queryset
 
 
 class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
@@ -148,7 +163,7 @@ class StreamGenerator(APIView):
                             os.mkdir(symlink_path)
                         unique = "fu{}{}k".format(uuid.uuid1(), 'c')
                         s_path = os.path.join(symlink_path, unique)
-                        print(s_path.split(TEMP_FOLDER_NAME)[-1])
+                        # print(s_path.split(TEMP_FOLDER_NAME)[-1])
                         if not os.path.exists(s_path):
                             os.symlink(file_path, s_path)
                         host = '/'.join(request.build_absolute_uri().split('/')[:3])

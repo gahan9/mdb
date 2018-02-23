@@ -2,8 +2,8 @@ from django.db import models
 
 
 class RawData(models.Model):
-    name = models.TextField(blank=True, null=True)
-    path = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=1500, blank=True, null=True)
+    path = models.CharField(max_length=1500, blank=True, null=True)
     extension = models.CharField(blank=True, null=True, max_length=10)
 
     def __str__(self):
@@ -12,6 +12,7 @@ class RawData(models.Model):
     class Meta:
         verbose_name = "Raw Video Data in local"
         verbose_name_plural = "Raw Video Data in local"
+        unique_together = ('name', 'path')
 
 
 class Person(models.Model):
