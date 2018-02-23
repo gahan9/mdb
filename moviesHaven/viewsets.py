@@ -1,7 +1,15 @@
+"""
+TODO:
+- search by name
+- search by year
+- sort by year
+- sort by letter
+"""
+
 import os
 import uuid
 
-from pip._vendor import requests
+import requests
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,7 +24,11 @@ from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
-    model = Movie
+
+
+class TVViewSet(viewsets.ModelViewSet):
+    queryset = TVSeries.objects.all()
+    serializer_class = MovieSerializer
 
 
 class MovieSearchView(ListAPIView):
@@ -60,6 +72,17 @@ class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
 class MovieByPersonViewSet(viewsets.ModelViewSet):
     queryset = Person.objects.filter(movie__personrole__person__isnull=False).distinct().order_by('name')
     serializer_class = MovieByPersonSerializer
+
+    def get_serializer_class(self):
+        if not self.kwargs:
+            return PersonSerializer
+        else:
+            return self.serializer_class
+
+
+class TVSeriesByPersonViewSet(viewsets.ModelViewSet):
+    queryset = Person.objects.filter(tvseries__personrole__person__isnull=False).distinct().order_by('name')
+    serializer_class = TVSeriesByPersonSerializer
 
     def get_serializer_class(self):
         if not self.kwargs:

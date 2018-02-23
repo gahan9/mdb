@@ -72,7 +72,7 @@ class TVSeriesByGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genres
-        fields = "__all__"
+        fields = ['id', 'url', 'genre_id', 'genre_name', 'results']
 
 
 class MovieByPersonSerializer(serializers.ModelSerializer):
@@ -85,6 +85,26 @@ class MovieByPersonSerializer(serializers.ModelSerializer):
 
     def get_results(self, obj):
         filtered_movie_set = Movie.objects.filter(personrole__person=obj)
+        if filtered_movie_set:
+            return [i.get_details for i in filtered_movie_set]
+        else:
+            return []
+
+    class Meta:
+        model = Person
+        fields = ['id', 'url', 'name', 'birthday', 'profile_path', 'biography', 'place_of_birth', 'results', 'poster_path']
+
+
+class TVSeriesByPersonSerializer(serializers.ModelSerializer):
+    results = serializers.SerializerMethodField(read_only=True)
+    poster_path = serializers.SerializerMethodField(required=False, read_only=True)
+
+    @staticmethod
+    def get_poster_path(obj):
+        return obj.profile_path
+
+    def get_results(self, obj):
+        filtered_movie_set = TVSeries.objects.filter(personrole__person=obj)
         if filtered_movie_set:
             return [i.get_details for i in filtered_movie_set]
         else:

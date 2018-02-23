@@ -81,7 +81,7 @@ class Movie(Entertainment):
     def get_details(self):
         detail_set = {
             "id"           : self.id,
-            "name"        : self.name,
+            "name"         : self.name,
             "overview"     : self.overview,
             "release_date" : self.release_date,
             "poster_path"  : self.thumbnail_lq,
@@ -105,6 +105,20 @@ class TVSeries(Entertainment):
     @property
     def get_short_overview(self):
         return self.overview[:15]
+
+    @property
+    def get_details(self):
+        detail_set = {
+            "id"            : self.id,
+            "name"          : self.name,
+            "overview"      : self.overview,
+            "release_date"  : self.release_date,
+            "poster_path"   : self.thumbnail_lq,
+            "backdrop_path" : self.fanart_hq,
+            "season_number" : self.season_number,
+            "episode_number": self.episode_number
+        }
+        return detail_set
 
     def __str__(self):
         return "{} - {}".format(self.name, self.vote_average)
