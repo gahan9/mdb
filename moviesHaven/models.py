@@ -43,8 +43,10 @@ class Entertainment(models.Model):
     overview = models.TextField()
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
-    duration = models.IntegerField(null=True, blank=True)
-    status = models.BooleanField(default=False, verbose_name="Meta Data fetched?")
+    duration = models.IntegerField(null=True, blank=True, verbose_name="run time",
+                                   help_text="Run time duration(in minutes)")
+    status = models.BooleanField(default=False, verbose_name="Meta Data fetched?",
+                                 help_text="Mark if all the require possible metadata is fetched")
 
     def __str__(self):
         return "{}".format(self.title)
