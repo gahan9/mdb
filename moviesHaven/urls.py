@@ -21,6 +21,7 @@ urlpatterns = [
     path('show_data/', views.film_splitter, name='film_splitter'),
     path('api_out/', views.update_meta_data, name='fetch_api_data'),
     path('api/generate_stream/', viewsets.StreamGenerator.as_view(), name='generate_stream'),
+    path('api/filter_set/', viewsets.DetailView.as_view(), name='filter_set'),
     # path('genre/movie/<int:pk>', views.MovieByGenre.as_view(), name=''),
 ]
 try:

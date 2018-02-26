@@ -15,6 +15,41 @@ from rest_framework import viewsets
 from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
 
 
+class DetailView(APIView):
+    """
+    :get
+    type: tv/movie
+    category: letter/year
+    :list
+    all the alphabets/year contained by tv/movie
+    """
+    ordering_fields = ('name', 'release_date')
+    model = Movie
+
+    def get(self, request):
+        content_type = self.request.query_params.get('type', None)
+        category = self.request.query_params.get('category', None)
+        response = {}
+        # print(movie_name, movie_year)
+        if content_type == "movie":
+            self.model = Movie
+        elif content_type == "tv":
+            self.model = TVSeries
+        queryset = self.model.objects.filter(status=True)
+        if category == "year":
+            try:
+                year_list = [i.year for i in queryset.dates('release_date', 'year', order='DESC')]
+                response["results"] = year_list
+            except ValueError:
+                return Response({"detail": "Invalid search parameter"})
+        elif category == "letter":
+            try:
+                pass
+            except ValueError:
+                return Response({"detail": "Invalid search parameter: {}"})
+        return Response(response)
+
+
 class MovieViewSet(viewsets.ModelViewSet):
     """
     list:
@@ -23,21 +58,32 @@ class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.filter(status=True).order_by("name")
     serializer_class = MovieSerializer
     filter_backends = (OrderingFilter,)
-    ordering_fields = ('name', 'release_date')
+    ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
     model = Movie
 
     def get_queryset(self):
         queryset = self.model.objects.filter(status=True).order_by("name")
-        movie_name = self.request.query_params.get('name', None)
-        movie_year = self.request.query_params.get('release_date', None)
+        name = self.request.query_params.get('name', None)
+        name_starts_with = self.request.query_params.get('name_starts_with', None)
+        year = self.request.query_params.get('year', None)
         classics = self.request.query_params.get('classics', None)
         genre = self.request.query_params.get('genre', None)
+        latest = self.request.query_params.get('latest', None)
         # print(movie_name, movie_year, genre)
-        if movie_name:
-            queryset = queryset.filter(name__icontains=movie_name)
-        if movie_year:
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        if name_starts_with:
+            queryset = queryset.filter(name__istartswith=name_starts_with)
+        if latest:
             try:
-                queryset = queryset.filter(release_date__year=movie_year)
+                latest = int(latest)
+            except Exception as e:
+                latest = 3
+            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
+            queryset = queryset.filter(date_updated__gte=latest_condition)
+        if year:
+            try:
+                queryset = queryset.filter(release_date__year=year)
             except ValueError:
                 return Response({"detail": "Invalid Year"})
         if classics:
@@ -65,13 +111,27 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         filtering against a `name` query parameter in the URL. for tv name
         """
         queryset = self.model.objects.filter(status=True).order_by("name")
-        tv_name = self.request.query_params.get('name', None)
-        tv_year = self.request.query_params.get('release_date', None)
-        if tv_name:
-            queryset = queryset.filter(name__icontains=tv_name).order_by("-release_date")
-        if tv_year:
+        name = self.request.query_params.get('name', None)
+        name_starts_with = self.request.query_params.get('name_starts_with', None)
+        year = self.request.query_params.get('year', None)
+        latest = self.request.query_params.get('latest', None)
+        # print(movie_name, movie_year, genre)
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        if name_starts_with:
+            queryset = queryset.filter(name__istartswith=name_starts_with)
+        if latest:
             try:
-                queryset = queryset.filter(release_date__year=tv_year).order_by("name")
+                latest = int(latest)
+            except Exception as e:
+                latest = 3
+            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
+            queryset = queryset.filter(date_updated__gte=latest_condition)
+        if name:
+            queryset = queryset.filter(name__icontains=name).order_by("-release_date")
+        if year:
+            try:
+                queryset = queryset.filter(release_date__year=year).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Year"})
         return queryset
@@ -170,12 +230,18 @@ class StreamGenerator(APIView):
                         file_path = os.path.join(instance.local_data.path, instance.local_data.name)
                         symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
                         if not os.path.exists(symlink_path):
-                            os.mkdir(symlink_path)
+                            try:
+                                os.mkdir(symlink_path)
+                            except PermissionError:
+                                return Response({"detail": "Unable to generate streaming link"})
                         unique = "{}{}".format(uuid.uuid1(), 'c')
                         s_path = os.path.join(symlink_path, unique)
                         # print(s_path.split(TEMP_FOLDER_NAME)[-1])
                         if not os.path.exists(s_path):
-                            os.symlink(file_path, s_path)
+                            try:
+                                os.symlink(file_path, s_path)
+                            except PermissionError:
+                                return Response({"detail": "Unable to generate streaming link"})
                         host = '/'.join(request.build_absolute_uri().split('/')[:3])
                         # NOTE: stream URL configured to work only with apache hosted server
                         stream_url = "{0}/media/{1}/{2}".format(host, TEMP_FOLDER_NAME, unique)
