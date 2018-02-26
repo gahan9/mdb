@@ -50,13 +50,8 @@ class Genres(models.Model):
 class Entertainment(models.Model):
     local_data = models.ForeignKey(RawData, on_delete=models.CASCADE)
     name = models.CharField(max_length=350)
-    overview = models.TextField()
-    vote_average = models.FloatField(null=True, blank=True)
-    vote_count = models.IntegerField(null=True, blank=True)
-    duration = models.IntegerField(null=True, blank=True, verbose_name="run time",
-                                   help_text="Run time duration(in minutes)")
-    status = models.BooleanField(default=False, verbose_name="Meta Data fetched?",
-                                 help_text="Mark if all the require possible metadata is fetched")
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return "{}".format(self.name)
@@ -67,12 +62,20 @@ class Entertainment(models.Model):
 
 class Movie(Entertainment):
     person = models.ManyToManyField(Person, through="PersonRole")
+    overview = models.TextField(null=True, blank=True)
     genre_name = models.ManyToManyField(Genres)
     release_date = models.DateField(null=True, blank=True)
     thumbnail_hq = models.URLField(max_length=1000, null=True, blank=True)
     thumbnail_lq = models.URLField(max_length=1000, null=True, blank=True)
     fanart_hq = models.URLField(max_length=1000, null=True, blank=True)
     fanart_lq = models.URLField(max_length=1000, null=True, blank=True)
+    vote_average = models.FloatField(null=True, blank=True)
+    vote_count = models.IntegerField(null=True, blank=True)
+    duration = models.IntegerField(null=True, blank=True, verbose_name="run time",
+                                   help_text="Run time duration(in minutes)")
+    status = models.BooleanField(default=False, verbose_name="Meta Data fetched?",
+                                 help_text="Mark if all the require possible metadata is fetched")
+
 
     @property
     def get_short_overview(self):
@@ -85,15 +88,21 @@ class Movie(Entertainment):
             "name"         : self.name,
             "overview"     : self.overview,
             "release_date" : self.release_date,
-            "poster_path"  : self.thumbnail_lq,
+            "poster_path"  : self.thumbnail_hq,
             "backdrop_path": self.fanart_hq
         }
         return detail_set
 
 
+class SeasonDetail(Entertainment):
+    season_number = models.IntegerField(null=True, blank=True)
+
+
 class TVSeries(Entertainment):
+    # related_season = models.ForeignKey(SeasonDetail)
     person = models.ManyToManyField(Person, through="PersonRole")
     genre_name = models.ManyToManyField(Genres)
+    overview = models.TextField(null=True, blank=True)
     episode_title = models.CharField(max_length=350, null=True, blank=True)
     season_number = models.IntegerField(null=True, blank=True)
     episode_number = models.IntegerField(null=True, blank=True)
@@ -102,16 +111,26 @@ class TVSeries(Entertainment):
     thumbnail_lq = models.URLField(max_length=1000, null=True, blank=True)
     fanart_hq = models.URLField(max_length=1000, null=True, blank=True)
     fanart_lq = models.URLField(max_length=1000, null=True, blank=True)
+    vote_average = models.FloatField(null=True, blank=True)
+    vote_count = models.IntegerField(null=True, blank=True)
+    duration = models.IntegerField(null=True, blank=True, verbose_name="run time",
+                                   help_text="Run time duration(in minutes)")
+    status = models.BooleanField(default=False, verbose_name="Meta Data fetched?",
+                                 help_text="Mark if all the require possible metadata is fetched")
 
     @property
     def get_short_overview(self):
         return self.overview[:15]
 
     @property
+    def get_episode_name(self):
+        return "{} Season {} episode {}".format(self.name, self.season_number, self.episode_number)
+
+    @property
     def get_details(self):
         detail_set = {
             "id"            : self.id,
-            "name"          : self.name,
+            "name"          : self.get_episode_name,
             "overview"      : self.overview,
             "release_date"  : self.release_date,
             "poster_path"   : self.thumbnail_lq,
@@ -144,6 +163,7 @@ class StreamAuthLog(models.Model):
     response_status = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
+    sym_link_path = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return "{}".format(self.stream_key)
