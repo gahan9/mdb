@@ -58,12 +58,16 @@ class TVSeriesSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField(required=False, read_only=True)
     backdrop_path = serializers.SerializerMethodField(required=False, read_only=True)
     poster_path = serializers.SerializerMethodField(required=False, read_only=True)
+    name = serializers.SerializerMethodField(required=False, read_only=True)
 
     def get_genre_names(self, obj):
         if obj.genre_name:
             return [i.genre_name for i in obj.genre_name.all()]
         else:
             return []
+
+    def get_name(self, obj):
+        return "{} Season {} episode {}".format(obj.name, obj.season_number, obj.episode_number)
 
     def get_description(self, obj):
         return obj.overview

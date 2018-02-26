@@ -160,7 +160,9 @@ class StreamGenerator(APIView):
             if post_data.get('id', None) and post_data.get('stream_key', None):
                 stream_key = post_data.get('stream_key')
                 response = requests.get(STREAM_VALIDATOR_API, params={'key': stream_key}, verify=False)
-                log_entry = StreamAuthLog.objects.create(stream_key=stream_key, request_data=str(post_data))
+                log_entry = StreamAuthLog.objects.create(
+                    stream_key=stream_key,
+                    request_data=str(post_data))
                 if response.status_code == 200:
                     log_entry.response_status = "ok"
                     try:
@@ -178,14 +180,21 @@ class StreamGenerator(APIView):
                         # NOTE: stream URL configured to work only with apache hosted server
                         stream_url = "{0}/media/{1}/{2}".format(host, TEMP_FOLDER_NAME, unique)
                         log_entry.response_status = stream_url
+                        log_entry.sym_link_path = s_path
+                        log_entry.save()
                         return Response({'stream_link': stream_url})
                     except self.model.DoesNotExist:
-                        return Response({"detail": "provided id does not exist"})
+                        err_msg = "provided id does not exist"
+                        log_entry.response_status = err_msg
+                        log_entry.save()
+                        return Response({"detail": err_msg})
                 else:
                     try:
                         log_entry.response_status = {"status": response.status_code, "content": response.json()}
+                        log_entry.save()
                     except Exception as e:
                         log_entry.response_status = {"status": response.status_code}
+                        log_entry.save()
                     return Response({'detail': "Invalid Stream Key"})
             else:
                 return Response({'detail': 'Missing id or key'})
