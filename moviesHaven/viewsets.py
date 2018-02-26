@@ -87,22 +87,6 @@ class MovieByGenreViewSet(viewsets.ModelViewSet):
         else:
             return self.serializer_class
 
-    def get_queryset(self):
-        """
-        filtering against a `name` query parameter in the URL. for tv name
-        """
-        queryset = self.model.objects.filter(movie__genre_name__isnull=False)
-        tv_name = self.request.query_params.get('name', None)
-        tv_year = self.request.query_params.get('release_date', None)
-        if tv_name:
-            queryset = queryset.filter(name__icontains=tv_name).order_by("-release_date")
-        if tv_year:
-            try:
-                queryset = queryset.filter(release_date__year=tv_year).order_by("name")
-            except ValueError:
-                return Response({"detail": "Invalid Year"})
-        return queryset
-
 
 class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
     queryset = Genres.objects.filter(tvseries__genre_name__isnull=False).distinct()
