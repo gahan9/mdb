@@ -25,4 +25,8 @@ urlpatterns = [
     path('api/generate_stream/', viewsets.StreamGenerator.as_view(), name='generate_stream'),
     # path('genre/movie/<int:pk>', views.MovieByGenre.as_view(), name=''),
 ]
-urlpatterns += [path('api/', include('drf_openapi.urls'))]
+try:
+    urlpatterns += [path('api/', include('drf_openapi.urls'))]
+except Exception as e:
+    print("URL IMPORT EXCEPTION: ", e)
+    pass
