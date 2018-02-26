@@ -10,8 +10,8 @@ router.register(r'movie', viewsets.MovieViewSet)
 router.register(r'genre_movie', viewsets.MovieByGenreViewSet)
 router.register(r'person_movie', viewsets.MovieByPersonViewSet)
 router.register(r'tv', viewsets.TVSeriesViewSet)
-# router.register(r'genre_tv', viewsets.TVSeriesByGenreViewSet)
-# router.register(r'person_tv', viewsets.TVSeriesByPersonViewSet)
+router.register(r'genre_tv', viewsets.TVSeriesByGenreViewSet)
+router.register(r'person_tv', viewsets.TVSeriesByPersonViewSet)
 
 urlpatterns = [
     path('', views.HomePageView.as_view(), name='index'),
@@ -25,3 +25,4 @@ urlpatterns = [
     path('api/generate_stream/', viewsets.StreamGenerator.as_view(), name='generate_stream'),
     # path('genre/movie/<int:pk>', views.MovieByGenre.as_view(), name=''),
 ]
+urlpatterns += [path('api/', include('drf_openapi.urls'))]
