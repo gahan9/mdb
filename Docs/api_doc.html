@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome file</title>
+  <title>api_doc</title>
   <link rel="stylesheet" href="https://stackedit.io/style.css" />
 </head>
 
@@ -18,6 +18,8 @@
 <li></li>
 <li><a href="#movie">Movie</a></li>
 <li><a href="#generate-stream">Generate Stream</a></li>
+<li><a href="#documentaire">Documentaire</a></li>
+<li><a href="#animation-kids">Animation (Kids)</a></li>
 </ul>
 </li>
 </ul>
@@ -68,7 +70,33 @@ post-data</p>
 }
 </code></pre>
 <h3 id="sample-url-1">Sample URL</h3>
-<pre><code>http://192.168.5.47:8000/moviesHaven/api/generate_stream/```
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/generate_stream/
+</code></pre>
+<h2 id="documentaire">Documentaire</h2>
+<blockquote>
+<p><strong>Base_URL</strong> :  differed by genre only<br>
+<em>domain</em>/moviesHaven/api/movie/?genre=Documentaire<br>
+<strong>URL</strong> : <em>domain</em>/moviesHaven/api/movie/?genre=Documentaire<br>
+<strong>method</strong>: GET<br>
+<strong>parameters</strong> : all parameters same as for movie<br>
+: <strong>name_starts_with</strong> = a  # returns list of movies starts with this string (Case insensitive)</p>
+</blockquote>
+<h3 id="sample-url-2">Sample URL</h3>
+<dl>
+<dt>for latest:</dt>
+<dd><code>http://192.168.5.47:8000/moviesHaven/api/movie/?genre=Documentaire&amp;latest=3</code></dd>
+</dl>
+<h2 id="animation-kids">Animation (Kids)</h2>
+<blockquote>
+<p><strong>Base_URL</strong> :  differed by genre only<br>
+<em>domain</em>/moviesHaven/api/movie/?genre=animation<br>
+<strong>URL</strong> : <em>domain</em>/moviesHaven/api/movie/?genre=animation<br>
+<strong>method</strong>: GET<br>
+<strong>parameters</strong> : all parameters same as for movie<br>
+: <strong>name_starts_with</strong> = a  # returns list of movies starts with this string (Case insensitive)</p>
+</blockquote>
+<h3 id="sample-url-3">Sample URL</h3>
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/movie/?genre=animation&amp;name_starts_with=a
 </code></pre>
 
     </div>
