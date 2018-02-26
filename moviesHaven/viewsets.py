@@ -1,15 +1,3 @@
-"""
-TASK TODO:
-> Documentaries and genre....
-    Genre
-        search by genre
-            - documentaries
-            - animation
-        year filter (search by year)
-        order by name, year
-> Classics
-
-"""
 import datetime
 import os
 import uuid
@@ -77,59 +65,6 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         filtering against a `name` query parameter in the URL. for tv name
         """
         queryset = self.model.objects.filter(status=True).order_by("name")
-        tv_name = self.request.query_params.get('name', None)
-        tv_year = self.request.query_params.get('release_date', None)
-        if tv_name:
-            queryset = queryset.filter(name__icontains=tv_name).order_by("-release_date")
-        if tv_year:
-            try:
-                queryset = queryset.filter(release_date__year=tv_year).order_by("name")
-            except ValueError:
-                return Response({"detail": "Invalid Year"})
-        return queryset
-
-
-class MovieSearchView(ListAPIView):
-    #TODO: Delete Me
-    queryset = Movie.objects.filter(status=True)
-    serializer_class = MovieSerializer
-    filter_backends = (OrderingFilter,)
-    ordering_fields = ('name', 'release_date')
-    model = Movie
-
-    def get_queryset(self):
-        queryset = self.model.objects.filter(status=True)
-        movie_name = self.request.query_params.get('name', None)
-        movie_year = self.request.query_params.get('release_date', None)
-        classics = self.request.query_params.get('classics', None)
-        # print(movie_name, movie_year)
-        if movie_name:
-            queryset = queryset.filter(name__icontains=movie_name)
-        if movie_year:
-            try:
-                queryset = queryset.filter(release_date__year=movie_year)
-            except ValueError:
-                return Response({"detail": "Invalid Year"})
-        if classics:
-            try:
-                queryset = queryset.filter(release_date__range=(datetime.date(1900, 1, 1), datetime.date(1970, 1, 1)))
-            except ValueError:
-                return Response({"detail": "Invalid search parameter: {}".format(classics)})
-        return queryset
-
-
-class TVSeriesSearchView(ListAPIView):
-    # TODO: Delete Me
-    serializer_class = TVSeriesSerializer
-    model = TVSeries
-    filter_backends = (OrderingFilter,)
-    ordering_fields = ('name', 'release_date')
-
-    def get_queryset(self):
-        """
-        filtering against a `name` query parameter in the URL. for tv name
-        """
-        queryset = self.model.objects.filter(status=True)
         tv_name = self.request.query_params.get('name', None)
         tv_year = self.request.query_params.get('release_date', None)
         if tv_name:
@@ -234,7 +169,7 @@ class StreamGenerator(APIView):
                         symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
                         if not os.path.exists(symlink_path):
                             os.mkdir(symlink_path)
-                        unique = "fu{}{}k".format(uuid.uuid1(), 'c')
+                        unique = "{}{}".format(uuid.uuid1(), 'c')
                         s_path = os.path.join(symlink_path, unique)
                         # print(s_path.split(TEMP_FOLDER_NAME)[-1])
                         if not os.path.exists(s_path):
