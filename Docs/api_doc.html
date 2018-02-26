@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome file</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li><a href="#apis">APIs</a>
+<ul>
+<li></li>
+<li><a href="#movie">Movie</a></li>
+<li><a href="#generate-stream">Generate Stream</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <h1 id="apis">APIs</h1>
+<h3 id="domain-http192.168.5.478000">DOMAIN: <a href="http://192.168.5.47:8000">http://192.168.5.47:8000</a></h3>
+<hr>
+<hr>
+<h2 id="movie">Movie</h2>
+<blockquote>
+<p><strong>url</strong>: <em>domain</em>/moviesHaven/api/movie/<br>
+<strong>method</strong>: GET<br>
+<strong>params</strong> (all optional)<br>
+<strong>no parameters</strong> will list out all available movies<br>
+<strong>parameters</strong><br>
+:  <strong>name</strong> = the  # returns list of movies containing this string (Case insensitive)<br>
+: <strong>name_starts_with</strong> = A  # returns list of movies starts with this string (Case insensitive)<br>
+: <strong>year</strong> = 2018   # returns list of movies with release year<br>
+: <strong>genre</strong> = animation  # returns list of movies containing this string as genre (Case insensitive)<br>
+: <strong>latest</strong> = 3  #  returns list of movies added/updated in last 3 days<br>
+: <strong>classics</strong> = true  # returns result of movies since year Jan 1, 1900 to Jan 1, 1970<br>
+: <strong>ordering</strong> = name # available ordering name, release_date, vote_average, vote_count (name orders list of movies in ascending order whereas -name orders in descending order)</p>
+</blockquote>
+<hr>
+<h3 id="sample-url">Sample URL</h3>
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/movie/?name\_starts\_with=i&amp;name=r&amp;year=1901&amp;genre=drame&amp;latest=1&amp;ordering=name
+</code></pre>
+<h2 id="generate-stream">Generate Stream</h2>
+<blockquote>
+<p>URL :<br>
+method : POST<br>
+post-data format: json<br>
+post-data</p>
+</blockquote>
+<pre><code>{
+   "id": 65,  # id of content
+   "type": "movie",   # type of content movie or tv
+   "stream_key": "eb17783d-bbbc-4499-ad74-eecd59c74baa"  # your streaming key
+}
+</code></pre>
+<p>Response</p>
+<pre><code>{
+   "stream_link": "http://192.168.5.47:8000/media/.cache/ab32c178-1af7-11e8-8ae2-e03f49b35bd1c"  # stream link of user
+}
+</code></pre>
+<h3 id="sample-url-1">Sample URL</h3>
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/generate_stream/```
+</code></pre>
+
+    </div>
+  </div>
+</body>
+
+</html>
