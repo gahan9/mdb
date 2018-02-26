@@ -110,7 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'pl'
+LANGUAGE_CODE = 'fr'
+API_LANGUAGE_CODE = 'fr'
 
 TIME_ZONE = 'UTC'
 
@@ -148,3 +149,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE'                     : 40,
     'DEFAULT_FILTER_BACKENDS'       : ('django_filters.rest_framework.DjangoFilterBackend',)
 }
+
+TMDB_API_KEY = "34142515d9d23817496eeb4ff1d223d0"
+TMDB_BASE_URL = "http://api.themoviedb.org/3/"
+TMDB_SEARCH_URL = TMDB_BASE_URL + "search/"
+TMDB_IMAGE_URL = "http://image.tmdb.org/t/p/"
+
+OPTION_QUALITY = [1000, 780, 500, 300, 185]
+SCRAPE_DIR = "/media/data"
+DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": API_LANGUAGE_CODE}
+STREAM_VALIDATOR_API = "https://planetvision.net/api/streaming/check"
+TEMP_FOLDER_NAME = ".cache"
