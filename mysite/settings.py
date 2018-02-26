@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 # from .local_settings import DATABASES
 from .server_settings import DATABASES
+from .tmdb_settings import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -147,14 +148,3 @@ REST_FRAMEWORK = {
     'PAGE_SIZE'                     : 40,
     'DEFAULT_FILTER_BACKENDS'       : ('django_filters.rest_framework.DjangoFilterBackend',)
 }
-
-TMDB_API_KEY = "34142515d9d23817496eeb4ff1d223d0"
-TMDB_BASE_URL = "http://api.themoviedb.org/3/"
-TMDB_SEARCH_URL = TMDB_BASE_URL + "search/"
-TMDB_IMAGE_URL = "http://image.tmdb.org/t/p/"
-
-OPTION_QUALITY = [1000, 780, 500, 300, 185]
-SCRAPE_DIR = "/home/quixom/Videos/dir"
-DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": 'fr'}
-STREAM_VALIDATOR_API = "https://planetvision.net/api/streaming/check"
-TEMP_FOLDER_NAME = ".cache"
