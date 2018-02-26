@@ -52,13 +52,16 @@ def get_genre(flag):
 
 
 def create_file_structure(file_obj):
-    end = re.search(r"[s]\d+[e]\d+", name_fetcher(file_obj.name)).start()
-    title = name_fetcher(file_obj.name)[:end]
-    season_number = filter_film(file_obj.name)[:1][0][0][1:]
-    episode_number = filter_film(file_obj.name)[1:][0][0][1:]
-    tv_dict = {"local_data"   : file_obj, "name": title,
+    try:
+        end = re.search(r"[s]\d+[e]\d+", name_fetcher(file_obj.name)).start()
+        title = name_fetcher(file_obj.name)[:end]
+        season_number = filter_film(file_obj.name)[:1][0][0][1:]
+        episode_number = filter_film(file_obj.name)[1:][0][0][1:]
+        tv_dict = {"local_data"   : file_obj, "name": title,
                'season_number': season_number, 'episode_number': episode_number}
-    return tv_dict
+        return tv_dict
+    except:
+        return None
 
 
 def set_image(instance, source_json):
