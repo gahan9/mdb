@@ -103,7 +103,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
     queryset = TVSeries.objects.filter(status=True).order_by("name")
     serializer_class = TVSeriesSerializer
     filter_backends = (OrderingFilter,)
-    ordering_fields = ('name', 'release_date')
+    ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
     model = TVSeries
 
     def get_queryset(self):
@@ -115,6 +115,8 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         year = self.request.query_params.get('year', None)
         latest = self.request.query_params.get('latest', None)
+        classics = self.request.query_params.get('classics', None)
+        genre = self.request.query_params.get('genre', None)
         # print(movie_name, movie_year, genre)
         if name:
             queryset = queryset.filter(name__icontains=name)
@@ -127,13 +129,21 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                 latest = 3
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
             queryset = queryset.filter(date_updated__gte=latest_condition)
-        if name:
-            queryset = queryset.filter(name__icontains=name).order_by("-release_date")
         if year:
             try:
                 queryset = queryset.filter(release_date__year=year).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Year"})
+        if classics:
+            try:
+                queryset = queryset.filter(release_date__range=(datetime.date(1900, 1, 1), datetime.date(1970, 1, 1)))
+            except ValueError:
+                return Response({"detail": "Invalid search parameter: {}".format(classics)})
+        if genre:
+            try:
+                queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("genre_name")
+            except ValueError:
+                return Response({"detail": "Invalid Genre"})
         return queryset
 
 
