@@ -6,11 +6,10 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
-from moviesHaven.utils import get_genre, set_image, create_file_structure, get_json_response, \
-    fetch_cast_data, filter_film, name_catcher
+from moviesHaven.utils import set_image, create_file_structure, get_json_response, \
+    fetch_cast_data, filter_film, name_catcher, get_genre
 from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, DEFAULT_PARAMS
 from mysite.tmdb_settings import SCRAPE_DIR
-
 from .models import *
 from .worker import content_fetcher
 
@@ -25,9 +24,29 @@ class HomePageView(TemplateView):
         context['movies'] = Movie.objects.all()
         return context
 
+#
+# class FilterPageView(TemplateView):
+#     """ Filter page view """
+#     template_name = "index.html"
+#     success_url = reverse_lazy('index')
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(FilterPageView, self).get_context_data(**kwargs)
+#         context['entry'] = RawData.objects.all()
+#         return context
+#
+#     def get(self,request):
+#         filter_thread = Thread(target=filter_raw_data)
+#         filter_thread.start()
+#
+#         genres = get_genre("tv")
+#         genres.update(get_genre("movie"))
+#         genre_thread = Thread(target=genre_maker, args=(genres))
+#         genre_thread.start()
+#         return HttpResponseRedirect(reverse_lazy('index'))
 
 def structure_maker():
-    contents = content_fetcher(directory_path='E:\\dir')
+    contents = content_fetcher(directory_path=SCRAPE_DIR)
     for video in contents:
         try:
             if RawData.objects.filter(**video):
@@ -60,7 +79,11 @@ def filter_raw_data():
             except Exception as e:
                 print("Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
         else:
-            movie_dict = {"local_data": entry, "name": name_catcher(entry.name)}
+            if len(name_catcher(entry.name).split('_')) > 1:
+                title = name_catcher(entry.name).split('_')[1]
+            else:
+                title = name_catcher(entry.name)
+            movie_dict = {"local_data": entry, "name": title}
             try:
                 if not Movie.objects.filter(**movie_dict):
                     Movie.objects.create(**movie_dict)
@@ -79,10 +102,11 @@ def genre_maker(genres):
             except Exception as e:
                 print(e)
 
+
 def film_splitter(request):
     filter_thread = Thread(target=filter_raw_data)
     filter_thread.start()
-
+    #
     # genres = get_genre("tv")
     # genres.update(get_genre("movie"))
     # genre_thread = Thread(target=genre_maker, args=(genres))
