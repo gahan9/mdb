@@ -77,10 +77,8 @@ def filter_raw_data():
                     entry.meta_episode = tv_instance[0]
                     entry.save()
                     # FIXME: remove local_data foreign key from tv; and fix streaming
-                    tv_instance.local_data = entry.file
-                    tv_instance.save()
-                    if not TVSeries.objects.filter(**structure):
-                        TVSeries.objects.create(**structure)
+                    tv_instance[0].local_data = entry.file
+                    tv_instance[0].save()
             except Exception as e:
                 print("Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
         else:
@@ -96,8 +94,8 @@ def filter_raw_data():
                     entry.meta_movie = movie_instance[0]
                     entry.save()
                     # FIXME: remove local_data foreign key from movie; and fix streaming
-                    movie_instance.local_data = entry.file
-                    movie_instance.save()
+                    movie_instance[0].local_data = entry.file
+                    movie_instance[0].save()
             except Exception as e:
                 print("Exception during creating Movie object: {}".format(e))
 
