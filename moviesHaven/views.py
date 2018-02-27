@@ -2,13 +2,15 @@ from threading import Thread
 import copy
 
 import requests
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from moviesHaven.utils import get_genre, set_image, create_file_structure, get_json_response, \
-    fetch_cast_data, filter_film, name_fetcher, validate_value_existence
-from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, SCRAPE_DIR, DEFAULT_PARAMS, TMDB_IMAGE_URL
+    fetch_cast_data, filter_film
+from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, DEFAULT_PARAMS
+from mysite.tmdb_settings import SCRAPE_DIR
+
 from .models import *
 from .worker import content_fetcher
 
@@ -22,6 +24,7 @@ class HomePageView(TemplateView):
         context = super(HomePageView, self).get_context_data(**kwargs)
         context['movies'] = Movie.objects.all()
         return context
+
 
 def structure_maker():
     contents = content_fetcher(directory_path=SCRAPE_DIR)
@@ -37,6 +40,7 @@ def structure_maker():
         except:
             pass
 
+
 def insert_raw_data(request):
     success_url = reverse_lazy('index')
     fetcher_thread = Thread(target=structure_maker)
@@ -47,27 +51,28 @@ def insert_raw_data(request):
 def filter_raw_data():
     for entry in RawData.objects.all():
         if all(filter_film(entry.name)):
-            # structure = create_file_structure(file_obj=entry)
             try:
                 structure = create_file_structure(file_obj=entry)
+
                 if structure:
                     if not TVSeries.objects.filter(**structure):
                         TVSeries.objects.create(**structure)
             except Exception as e:
                 print("Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
         else:
-            movie_dict = {"local_data": entry, "name": name_fetcher(entry.name)}
+            movie_dict = {"local_data": entry, "name": entry.name}
             try:
                 if not Movie.objects.filter(**movie_dict):
                     Movie.objects.create(**movie_dict)
             except Exception as e:
                 print("Exception during creating Movie object: {}".format(e))
 
+
 def genre_maker(genres):
     for genre in genres['genres']:
         genre_dict = {"genre_id"  : genre.get('id'),
-                      "genre_name": genre.get('name'),
-                      }
+            "genre_name": genre.get('name'),
+                }
         if not Genres.objects.filter(**genre_dict):
             try:
                 Genres.objects.create(**genre_dict)
@@ -78,10 +83,10 @@ def film_splitter(request):
     filter_thread = Thread(target=filter_raw_data)
     filter_thread.start()
 
-    genres = get_genre("tv")
-    genres.update(get_genre("movie"))
-    genre_thread = Thread(target=genre_maker, args=(genres))
-    genre_thread.start()
+    # genres = get_genre("tv")
+    # genres.update(get_genre("movie"))
+    # genre_thread = Thread(target=genre_maker, args=(genres))
+    # genre_thread.start()
     return HttpResponseRedirect(reverse_lazy('index'))
 
 
@@ -139,11 +144,14 @@ def fetch_tv_metadata():
         params = copy.deepcopy(DEFAULT_PARAMS)
         params.update({"query": tv_instance.name})
         tv_result = get_json_response("{}tv/".format(TMDB_SEARCH_URL), params=params)
-
-        if 'genre_ids' in tv_result['results'][0]:
-            if tv_result['results'][0]['genre_ids']:
-                genre_id = tv_result['results'][0]['genre_ids']
         tv_id = tv_result['results'][0]['id']
+        if tv_result['results']:
+            if 'genre_ids' in tv_result['results'][0]:
+                if tv_result['results'][0]['genre_ids']:
+                    genre_id = tv_result['results'][0]['genre_ids']
+        else:
+            HttpResponse("Result not found!")
+            print("Results not found")
         url = str(TMDB_BASE_URL) + 'tv/' + str(tv_id) + '/season/' + str(tv_instance.season_number)
         episode_result = get_json_response(url, params=params)
         episodes = episode_result['episodes']
@@ -187,8 +195,10 @@ def fetch_tv_metadata():
 
 
 def update_meta_data(request):
-    movie_thread = Thread(target=fetch_movie_metadata)
-    movie_thread.start()
-    tv_thread = Thread(target=fetch_tv_metadata)
-    tv_thread.start()
+    fetch_tv_metadata()
+    fetch_movie_metadata()
+    # movie_thread = Thread(target=fetch_movie_metadata)
+    # movie_thread.start()
+    # tv_thread = Thread(target=fetch_tv_metadata)
+    # tv_thread.start()
     return HttpResponseRedirect(reverse_lazy('index'))

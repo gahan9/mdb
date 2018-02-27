@@ -1,18 +1,22 @@
 import re
 import requests
 
-from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, OPTION_QUALITY, DEFAULT_PARAMS
+from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS
 
 
 def name_fetcher(name):
     try:
-        if len(name.split('_')) > 1:
-            return ' '.join(name.split('_')[1].split('.')[:-1])
+        regex = "([s]\d{2})+([e]\d{2})|([s]\dx\d{2})|(\d{2}x\d{2})"
+        x = re.search(regex,name.lower()).group(0)
+        if not x.startswith('s'):
+            return 's' + x.replace("x","e")
         else:
-            return ' '.join(name.split('.')[:-1])
+            return x.replace("x","e")
     except Exception as e:
         return name
 
+        # exclude = '(1080p|720p|19[0-9]{2}|20[0-1]{1}[0-9]{1}|PAL|NTSC|LiMiTED|Theatrical|BluRay|x264|french|Unrated|films|DiVX|DVD|DiVX|HD|VCD|xvid\\w+|xvid-\\w+|dvdrip|xvid-hto|final|avi|flv|mp4|mp3|[s]\\d{2}[e]\\d{2}|[s]\\dx\\d{2}|\\d{2}x\\d{2})'
+        #' '.join([x for x in tv.split('.') if x not in re.findall(exclude,tv)])
 
 def validate_value_existence(key, source_dict):
     if key in source_dict:
@@ -33,12 +37,10 @@ def get_json_response(url, params):
 
 
 def filter_film(arg):
-    #FIXME: make regex in single expression
-    regexOut = re.findall(r"[s]\d+[e]\d+", arg.lower())
-    regSea = re.findall(r"[s]\d+", (str(regexOut).split(',')[0]).lower())
-    regEpi = re.findall(r"[e]\d+", (str(regexOut).split(',')[0]).lower())
-    tup = regSea, regEpi
-    return tup
+    regex_output = name_fetcher(arg)
+    regex_season = re.findall(r"[s]\d+", regex_output.lower())
+    regex_episode = re.findall(r"[e]\d+", regex_output.lower())
+    return regex_season, regex_episode
 
 
 def get_genre(flag):
@@ -53,12 +55,11 @@ def get_genre(flag):
 
 def create_file_structure(file_obj):
     try:
-        end = re.search(r"[s]\d+[e]\d+", name_fetcher(file_obj.name)).start()
-        title = name_fetcher(file_obj.name)[:end]
-        season_number = filter_film(file_obj.name)[:1][0][0][1:]
-        episode_number = filter_film(file_obj.name)[1:][0][0][1:]
-        tv_dict = {"local_data"   : file_obj, "name": title,
-               'season_number': season_number, 'episode_number': episode_number}
+        title = file_obj.name  # [:end]
+        season_number = name_fetcher(file_obj.name)[1:3] # [:1][0][0][1:]
+        episode_number = name_fetcher(file_obj.name)[4:6] # [1:][0][0][1:]
+        tv_dict = {"local_data": file_obj, "name": title,
+                       'season_number': season_number, 'episode_number': episode_number}
         return tv_dict
     except:
         return None
@@ -66,7 +67,6 @@ def create_file_structure(file_obj):
 
 def set_image(instance, source_json):
     print(">>> In set_image()")
-    # for i in OPTION_QUALITY:
     if validate_value_existence('backdrop_path', source_json):
         fanart_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, 780, source_json.get('backdrop_path'))
         if requests.get(fanart_image_url).status_code == 200:
