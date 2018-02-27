@@ -1,8 +1,7 @@
 import re
 import requests
 
-from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS
-from mysite.tmdb_settings import EXCLUDE
+from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS, EXCLUDE
 
 
 def name_fetcher(name):
