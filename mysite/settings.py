@@ -150,3 +150,6 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS'       : ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_VERSIONING_CLASS'      : 'rest_framework.versioning.URLPathVersioning'
 }
+
+SUPPORTED_EXTENSIONS = ['mp4', 'mkv', '3gp', 'avi', 'mov', 'vob', 'm3u8']
+EXCLUDE = r'(^[^_]+_|repack|webrip-\w+|ld|webrip|dvdrip-\w+|dvdrip|truefrench|subfrench|hdtv-\w+|hdtv|bdrip-\w+|bdrip|pdtv|extended|1080p|720p|19[0-9]{2}|20[0-1]{1}[0-9]{1}|PAL|NTSC|LiMiTED|Theatrical|BluRay|x264-\w+|stv|x264|french|Unrated|films|DiVX|DVD|DiVX|HD|VCD|xvid-\w+|xvid\w+|xvid-\w+-\w+|dvdrip(?:[\\`|\\~|\\!|\\@|\\#|\\$|\\%|\\^|\\&|\\*|\\(|\\)|\\+||\\-|\\[|\\{|\\]|\\}|\\||\\_|\'|\\<|\\,|\\>|\\?|""|\\;|\\:|]\\w+)|dvdrip|final|mkv_\w+|mkv|avi_\w+|avi|flv_\w+|flv|mp4_\w+|mp4|mp3|[s]\\d{2}[e]\\d{2}(?:[\\`|\\~|\\!|\\@|\\#|\\$|\\%|\\^|\\&|\\*|\\(|\\)|\\+||\\-|\\[|\\{|\\]|\\}|\\||\\_|\'|\\<|\\,|\\>|\\?|""|\\;|\\:|])\\w+|[s]\\d{2}[e]\\d{2}|[s]\d+[e]\d+-\w+|[s]\d+[e]\d+)'
