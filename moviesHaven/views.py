@@ -1,17 +1,13 @@
 from threading import Thread
 import copy
-
-import requests
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
-from moviesHaven.utils import set_image, create_file_structure, get_json_response, \
-    fetch_cast_data, filter_film, name_catcher, get_genre
-from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, DEFAULT_PARAMS
-from mysite.tmdb_settings import SCRAPE_DIR
+from moviesHaven.media_info import FetchMediaInfo
+from .utils import *
+from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, DEFAULT_PARAMS, SCRAPE_DIR
 from .models import *
-from .worker import content_fetcher
 
 
 class HomePageView(TemplateView):
@@ -23,6 +19,7 @@ class HomePageView(TemplateView):
         context = super(HomePageView, self).get_context_data(**kwargs)
         context['movies'] = Movie.objects.all()
         return context
+
 
 #
 # class FilterPageView(TemplateView):
@@ -49,15 +46,17 @@ def structure_maker():
     contents = content_fetcher(directory_path=SCRAPE_DIR)
     for video in contents:
         try:
-            if RawData.objects.filter(**video):
-                pass
-            else:
+            if not RawData.objects.filter(**video):
                 try:
-                    RawData.objects.create(**video)
+                    raw_object = RawData.objects.create(**video)
+                    media_info_obj = FetchMediaInfo()
+                    media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
+                    if media_data:
+                        MediaInfo.objects.create(file=raw_object, **media_data)
                 except Exception as e:
-                    pass
-        except:
-            pass
+                    print("Structure Maker exception : {}".format(e))
+        except Exception as e:
+            print("Structure Maker exception : {}".format(e))
 
 
 def insert_raw_data(request):
@@ -68,25 +67,37 @@ def insert_raw_data(request):
 
 
 def filter_raw_data():
-    for entry in RawData.objects.all():
-        if all(filter_film(entry.name)):
+    for entry in MediaInfo.objects.all():
+        if all(filter_film(entry.file.name)):
             try:
-                structure = create_file_structure(file_obj=entry)
-
-                if structure:
+                # TODO: Season vise data create
+                structure = create_file_structure(file_obj=entry.file)
+                if structure and structure.get('title', None):
+                    tv_instance = TVSeries.objects.get_or_create(**structure)
+                    entry.meta_episode = tv_instance[0]
+                    entry.save()
+                    # FIXME: remove local_data foreign key from tv; and fix streaming
+                    tv_instance.local_data = entry.file
+                    tv_instance.save()
                     if not TVSeries.objects.filter(**structure):
                         TVSeries.objects.create(**structure)
             except Exception as e:
                 print("Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
         else:
-            if len(name_catcher(entry.name).split('_')) > 1:
-                title = name_catcher(entry.name).split('_')[1]
+            the_name = name_catcher(entry.file.name)
+            # FIXME: handle name match with multiple occurrence of special character
+            if len(the_name.split('_')) > 1:
+                title = the_name.split('_')[1]
             else:
-                title = name_catcher(entry.name)
-            movie_dict = {"local_data": entry, "name": title}
+                title = the_name
             try:
-                if not Movie.objects.filter(**movie_dict):
-                    Movie.objects.create(**movie_dict)
+                if title:
+                    movie_instance = Movie.objects.get_or_create(title=title)
+                    entry.meta_movie = movie_instance[0]
+                    entry.save()
+                    # FIXME: remove local_data foreign key from movie; and fix streaming
+                    movie_instance.local_data = entry.file
+                    movie_instance.save()
             except Exception as e:
                 print("Exception during creating Movie object: {}".format(e))
 
@@ -94,8 +105,8 @@ def filter_raw_data():
 def genre_maker(genres):
     for genre in genres['genres']:
         genre_dict = {"genre_id"  : genre.get('id'),
-            "genre_name": genre.get('name'),
-                }
+                      "genre_name": genre.get('name'),
+                      }
         if not Genres.objects.filter(**genre_dict):
             try:
                 Genres.objects.create(**genre_dict)
@@ -103,7 +114,7 @@ def genre_maker(genres):
                 print(e)
 
 
-def film_splitter(request):
+def file_filter(request):
     filter_thread = Thread(target=filter_raw_data)
     filter_thread.start()
     #
@@ -119,7 +130,7 @@ def fetch_movie_metadata():
     for movie_instance in Movie.objects.filter(status=False):
         try:
             params = copy.deepcopy(DEFAULT_PARAMS)
-            params.update({"query": movie_instance.name})
+            params.update({"query": movie_instance.title})
             movie_result = get_json_response("{}movie/".format(TMDB_SEARCH_URL), params=params)
             print(movie_result)
             if 'results' in movie_result:
@@ -132,6 +143,7 @@ def fetch_movie_metadata():
 
                     for movie in movies_data:
                         movie_instance.name = movie.get('title')
+                        movie_instance.tmdb_id = movie.get('id')
                         movie_instance.overview = movie.get('overview')
                         movie_instance.release_date = movie.get('release_date')
                         movie_instance.vote_count = movie.get('vote_count')
@@ -151,9 +163,11 @@ def fetch_movie_metadata():
                                 try:
                                     person_instance = Person.objects.create(**person_data)
                                     try:
-                                        PersonRole.objects.create(role="Cast", person=person_instance, movie=movie_instance)
+                                        PersonRole.objects.create(role="Cast", person=person_instance,
+                                                                  movie=movie_instance)
                                     except Exception as e:
-                                        print("Exception occurred during creating person role-- {}\n for {}".format(e, person_instance))
+                                        print("Exception occurred during creating person role-- {}\n for {}".format(e,
+                                                                                                                    person_instance))
                                 except Exception as e:
                                     print("Exception occurred during creating person-- {}".format(e))
                     movie_instance.status = True
@@ -163,66 +177,67 @@ def fetch_movie_metadata():
 
 
 def fetch_tv_metadata():
+    # LARGE CHANGE to Do
     print("fetching tv data...")
     for tv_instance in TVSeries.objects.filter(status=False):
         params = copy.deepcopy(DEFAULT_PARAMS)
-        params.update({"query": tv_instance.name})
+        params.update({"query": tv_instance.title})
         tv_result = get_json_response("{}tv/".format(TMDB_SEARCH_URL), params=params)
-        tv_id = tv_result['results'][0]['id']
-        if tv_result['results']:
-            if 'genre_ids' in tv_result['results'][0]:
-                if tv_result['results'][0]['genre_ids']:
-                    genre_id = tv_result['results'][0]['genre_ids']
-        else:
-            HttpResponse("Result not found!")
-            print("Results not found")
+        results = tv_result.get('results', None)
+        results0 = results[0] if results else None
+        tv_id = results[0].get('id', None) if results else None
+        genre_ids = results0.get('genre_ids', None) if results0 else None
         url = str(TMDB_BASE_URL) + 'tv/' + str(tv_id) + '/season/' + str(tv_instance.season_number)
-        episode_result = get_json_response(url, params=params)
-        episodes = episode_result['episodes']
-
-        for episode in episodes:
-            if episode['episode_number'] == tv_instance.episode_number:
-                tv_instance.episode_number = episode.get('episode_number')
-                tv_instance.season_number = episode.get('season_number')
-                tv_instance.episode_title = episode.get('name')
-                tv_instance.release_date = episode.get('air_date')
-                tv_instance.overview = episode.get('overview')
-                tv_instance.vote_count = episode.get('vote_count')
-                tv_instance.vote_average = episode.get('vote_average')
-                try:
-                    [tv_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
-                except Exception as e:
-                    pass
-                    # print(e , "second error")
-                    tv_instance.save()
-
-                image_set_thread = Thread(target=set_image, args=(tv_instance, tv_result['results'][0]))
-                image_set_thread.start()
-        cast_tv_url = "{}tv/{}/credits".format(TMDB_BASE_URL, tv_id)
-        cast_list = get_json_response(cast_tv_url, DEFAULT_PARAMS)['cast']
-
-        for cast in cast_list:
-            person_data = fetch_cast_data(cast)
-            if person_data:
-                if not Person.objects.filter(**person_data):
+        episode_result = get_json_response(url, params=DEFAULT_PARAMS)
+        episodes = episode_result.get('episodes', None)
+        if episodes:
+            for episode in episodes:
+                if episode['episode_number'] == tv_instance.episode_number:
+                    tv_instance.tmdb_id = episode.get('id')
+                    tv_instance.episode_number = episode.get('episode_number')
+                    tv_instance.season_number = episode.get('season_number')
+                    tv_instance.episode_title = episode.get('name')
+                    tv_instance.release_date = episode.get('air_date')
+                    tv_instance.overview = episode.get('overview')
+                    tv_instance.vote_count = episode.get('vote_count')
+                    tv_instance.vote_average = episode.get('vote_average')
                     try:
-                        person_instance = Person.objects.create(**person_data)
-                        try:
-                            PersonRole.objects.create(role="Cast", person=person_instance, tv=tv_instance)
-                        except Exception as e:
-                            print("Exception occurred during creating person role-- {}\n for {}".format(
-                                e, person_instance))
+                        if genre_ids:
+                            [tv_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_ids]
                     except Exception as e:
-                        print("Exception occurred during creating person-- {}".format(e))
-        tv_instance.status = True
-        tv_instance.save()
+                        print("Genre adding exception : {}".format(e))
+                        # print(e , "second error")
+                        tv_instance.save()
+                    image_set_thread = Thread(target=set_image, args=(tv_instance, tv_result['results'][0]))
+                    image_set_thread.start()
+
+        cast_tv_url = "{}tv/{}/credits".format(TMDB_BASE_URL, tv_id)
+        cast_list = get_json_response(cast_tv_url, DEFAULT_PARAMS)
+        cast_list = cast_list.get('cast', None)
+        if cast_list:
+            for cast in cast_list:
+                person_data = fetch_cast_data(cast)
+                if person_data:
+                    if not Person.objects.filter(**person_data):
+                        try:
+                            person_instance = Person.objects.create(**person_data)
+                            try:
+                                PersonRole.objects.create(role="Cast", person=person_instance, tv=tv_instance)
+                            except Exception as e:
+                                print("Exception occurred during creating person role-- {}\n for {}".format(
+                                    e, person_instance))
+                        except Exception as e:
+                            print("Exception occurred during creating person-- {}".format(e))
+        if cast_list and episodes:
+            tv_instance.status = True
+            tv_instance.save()
 
 
 def update_meta_data(request):
-    fetch_tv_metadata()
-    fetch_movie_metadata()
-    # movie_thread = Thread(target=fetch_movie_metadata)
-    # movie_thread.start()
-    # tv_thread = Thread(target=fetch_tv_metadata)
-    # tv_thread.start()
+    # fetch_tv_metadata()
+    # fetch_movie_metadata()
+    movie_thread = Thread(target=fetch_movie_metadata)
+    movie_thread.start()
+    tv_thread = Thread(target=fetch_tv_metadata)
+    tv_thread.start()
     return HttpResponseRedirect(reverse_lazy('index'))

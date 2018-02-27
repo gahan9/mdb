@@ -52,9 +52,9 @@ class Genres(models.Model):
 
 
 class Entertainment(models.Model):
-    local_data = models.ForeignKey(RawData, on_delete=models.CASCADE)
-    title = models.CharField(max_length=350, null=True, help_text=_("title parsed from raw data"))
-    name = models.CharField(max_length=350, help_text=_("name from tmdb API"))
+    local_data = models.ForeignKey(RawData, on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=350, help_text=_("title parsed from raw data"))
+    name = models.CharField(max_length=350, null=True, blank=True, help_text=_("name from tmdb API"))
     tmdb_id = models.CharField(max_length=200, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -64,6 +64,7 @@ class Entertainment(models.Model):
 
     class Meta:
         abstract = True
+        unique_together = ('title', )
 
 
 class Movie(Entertainment):
@@ -77,15 +78,16 @@ class Movie(Entertainment):
     fanart_lq = models.URLField(max_length=1000, null=True, blank=True)
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
-    duration = models.IntegerField(null=True, blank=True, verbose_name="run time",
-                                   help_text=_("Run time duration(in minutes)"))
     status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
                                  help_text=_("Mark if all the require possible metadata is fetched"))
 
 
     @property
     def get_short_overview(self):
-        return self.overview[:15]
+        if self.overview:
+            return self.overview[:15]
+        else:
+            return self.overview
 
     @property
     def get_details(self):
@@ -98,6 +100,9 @@ class Movie(Entertainment):
             "backdrop_path": self.fanart_hq
         }
         return detail_set
+
+    def __str__(self):
+        return "{}. {} - {}".format(self.id, self.title[:10], self.vote_average)
 
     class Meta:
         verbose_name = _("Movie")
@@ -125,14 +130,15 @@ class TVSeries(Entertainment):
     fanart_lq = models.URLField(max_length=1000, null=True, blank=True)
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
-    duration = models.IntegerField(null=True, blank=True, verbose_name=_("run time"),
-                                   help_text=_("Run time duration(in minutes)"))
     status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
                                  help_text=_("Mark if all the require possible metadata is fetched"))
 
     @property
     def get_short_overview(self):
-        return self.overview[:15]
+        if self.overview:
+            return self.overview[:15]
+        else:
+            return self.overview
 
     @property
     def get_episode_name(self):
@@ -153,7 +159,7 @@ class TVSeries(Entertainment):
         return detail_set
 
     def __str__(self):
-        return "{} - {}".format(self.name, self.vote_average)
+        return "{}. {} - {}".format(self.id, self.title[:10], self.vote_average)
 
     class Meta:
         verbose_name = verbose_name_plural = _("Episodes")
@@ -177,8 +183,12 @@ class MediaInfo(models.Model):
     frame_height = models.CharField(max_length=20, null=True, blank=True)
     video_codec = models.CharField(max_length=20, null=True, blank=True)
     audio_codec = models.CharField(max_length=20, null=True, blank=True)
+    bit_rate = models.CharField(max_length=20, null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True,
                                   verbose_name=_("Run time in seconds"))
+
+    def __str__(self):
+        return "{} - {}x{} @ {}".format(self.file, self.frame_width, self.frame_height, self.bit_rate)
 
     class Meta:
         verbose_name = verbose_name_plural = _("Media Information")

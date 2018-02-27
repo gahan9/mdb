@@ -9,8 +9,8 @@ class RawDataAdmin(admin.ModelAdmin):
 
 
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'get_short_overview', 'vote_average', 'vote_count',
-                    'duration', 'movie_genre', 'release_date', 'status',
+    list_display = ['id', 'title', 'name', 'get_short_overview', 'vote_average', 'vote_count',
+                    'movie_genre', 'release_date', 'status',
                     'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq']
     search_fields = ['name']
 
@@ -19,10 +19,10 @@ class MovieAdmin(admin.ModelAdmin):
 
 
 class TVSeriesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'season_number', 'episode_number', 'get_short_overview', 'thumbnail_hq',
+    list_display = ['id', 'title', 'name', 'season_number', 'episode_number', 'get_short_overview', 'thumbnail_hq',
                     'thumbnail_lq',
                     'fanart_hq', 'fanart_lq',
-                    'tv_genre', 'duration', 'status',
+                    'tv_genre', 'status',
                     'vote_average', 'vote_count', 'release_date']
 
     def tv_genre(self, obj):
@@ -54,13 +54,19 @@ class SubMenuContentAdmin(admin.ModelAdmin):
                     'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']
 
 
+class MediaInfoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'file', 'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
+                    'video_codec', 'audio_codec', 'runtime']
+
+
 admin.site.register(RawData, RawDataAdmin)
-# admin.site.register(Movie, MovieAdmin)
-# admin.site.register(TVSeries, TVSeriesAdmin)
+admin.site.register(Movie, MovieAdmin)
+admin.site.register(TVSeries, TVSeriesAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(PersonRole, PersonRoleAdmin)
 admin.site.register(Genres, GenreAdmin)
 admin.site.register(StreamAuthLog, StreamAuthLogAdmin)
+admin.site.register(MediaInfo, MediaInfoAdmin)
 # admin.site.register(MainMenuContent, MainMenuContentAdmin)
 # admin.site.register(SubMenuContent, SubMenuContentAdmin)
 

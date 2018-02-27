@@ -1,5 +1,8 @@
 import re
 import requests
+import os
+
+from mysite.settings import TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 
 from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS, EXCLUDE
 
@@ -7,11 +10,11 @@ from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT
 def name_fetcher(name):
     try:
         regex = "([s]\d{2})+([e]\d{2})|([s]\dx\d{2})|(\d{2}x\d{2})"
-        x = re.search(regex,name.lower()).group(0)
+        x = re.search(regex, name.lower()).group(0)
         if not x.startswith('s'):
-            return 's' + x.replace("x","e")
+            return 's' + x.replace("x", "e")
         else:
-            return x.replace("x","e")
+            return x.replace("x", "e")
     except Exception as e:
         return name
 
@@ -31,6 +34,7 @@ def get_json_response(url, params):
         response = requests.get(url, params=params).json()
         return response
     except Exception as e:
+        # print(url, params)
         return {"error": "Couldn't get any response", "detail": str(e)}
 
 
@@ -40,9 +44,11 @@ def filter_film(arg):
     regex_episode = re.findall(r"[e]\d+", regex_output.lower())
     return regex_season, regex_episode
 
+
 def name_catcher(filename):
     value = ' '.join(list(filter(lambda x: x not in re.findall(EXCLUDE, filename), filename.split('.'))))
     return value
+
 
 def get_genre(flag):
     url = TMDB_BASE_URL
@@ -57,14 +63,14 @@ def get_genre(flag):
 def create_file_structure(file_obj):
     try:
         title = file_obj.name  # [:end]
-        season_number = name_fetcher(file_obj.name)[1:3] # [:1][0][0][1:]
-        episode_number = name_fetcher(file_obj.name)[4:6] # [1:][0][0][1:]
+        season_number = name_fetcher(file_obj.name)[1:3]  # [:1][0][0][1:]
+        episode_number = name_fetcher(file_obj.name)[4:6]  # [1:][0][0][1:]
         if len(name_catcher(title).split('_')) > 1:
             title = name_catcher(title).split('_')[1]
         else:
             title = name_catcher(title)
-        tv_dict = {"local_data": file_obj, "name": title,
-                       'season_number': season_number, 'episode_number': episode_number}
+        tv_dict = {"title": title,
+                   'season_number': season_number, 'episode_number': episode_number}
         return tv_dict
     except:
         return None
@@ -111,3 +117,19 @@ def fetch_cast_data(cast_json):
                 print("*" * 10)
                 raise Exception
         return person_data
+
+
+def content_fetcher(directory_path):
+    data_set = []
+    if os.path.exists(directory_path):
+        for root, directory, files in os.walk(directory_path, topdown=True):
+            if TEMP_FOLDER_NAME in root:
+                continue
+            else:
+                for name in files:
+                    if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
+                        d = {"name": name, "path": root, "extension": name.split('.')[-1]}
+                        data_set.append(d)
+        return data_set
+    else:
+        return "Path Does not exist"

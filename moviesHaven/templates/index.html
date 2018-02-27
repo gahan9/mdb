@@ -26,16 +26,16 @@
                 </form>
             </td>
             <td>
-                <form action="{% url 'film_splitter' %}">
+                <form action="{% url 'file_filter' %}">
                     <button class="btn btn-primary" type="submit">
                         {% trans "Filter Local Content" %}
                     </button>
                 </form>
             </td>
             <td>
-                <form action="{% url 'fetch_api_data' %}">
+                <form action="{% url 'update_meta_data' %}">
                     <button class="btn btn-primary" type="submit">
-                        {% trans "Filter MetaData" %}
+                        {% trans "Fetch MetaData" %}
                     </button>
                 </form>
             </td>
