@@ -46,6 +46,9 @@ class Genres(models.Model):
     def __str__(self):
         return "{}".format(self.genre_name)
 
+    class Meta:
+        verbose_name = "Genre"
+
 
 class Entertainment(models.Model):
     local_data = models.ForeignKey(RawData, on_delete=models.CASCADE)
@@ -93,9 +96,15 @@ class Movie(Entertainment):
         }
         return detail_set
 
+    class Meta:
+        verbose_name = "Movie"
+
 
 class SeasonDetail(Entertainment):
     season_number = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "TV Seasons"
 
 
 class TVSeries(Entertainment):
@@ -144,7 +153,7 @@ class TVSeries(Entertainment):
         return "{} - {}".format(self.name, self.vote_average)
 
     class Meta:
-        verbose_name = verbose_name_plural = "TV Series"
+        verbose_name = verbose_name_plural = "Episodes"
 
 
 class PersonRole(models.Model):
@@ -155,6 +164,19 @@ class PersonRole(models.Model):
 
     def __str__(self):
         return "{} as {}".format(self.person, self.role)
+
+
+class MediaInfo(models.Model):
+    file = models.ForeignKey(RawData, on_delete=models.CASCADE)
+    meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.SET_NULL)
+    # meta_episode = models.ForeignKey(TVSeries, null=True, blank=True, on_delete=models.SET_NULL)
+    frame_width = models.CharField(max_length=20, null=True, blank=True)
+    frame_height = models.CharField(max_length=20, null=True, blank=True)
+    runtime = models.IntegerField(null=True, blank=True,
+                                  verbose_name="Run time in minutes")
+
+    class Meta:
+        verbose_name = verbose_name_plural = "Media Information"
 
 
 class StreamAuthLog(models.Model):

@@ -45,12 +45,12 @@ class StreamAuthLogAdmin(admin.ModelAdmin):
     list_display = ['stream_key', 'sym_link_path', 'response_status', 'date_created', 'date_updated']
 
 
+admin.site.register(RawData, RawDataAdmin)
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(TVSeries, TVSeriesAdmin)
-admin.site.register(RawData, RawDataAdmin)
+admin.site.register(Person, PersonAdmin)
 admin.site.register(PersonRole, PersonRoleAdmin)
 admin.site.register(Genres, GenreAdmin)
-admin.site.register(Person, PersonAdmin)
 admin.site.register(StreamAuthLog, StreamAuthLogAdmin)
 
 admin.site.site_header = 'Planet Vision'
