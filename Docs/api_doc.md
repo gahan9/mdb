@@ -1,12 +1,11 @@
-﻿
-APIs
+﻿APIs
 ====
 ### DOMAIN: http://192.168.5.47:8000
 ----------
 ----------
 
 Movie
---------
+=====
 > **url**: *domain*/moviesHaven/api/movie/
 > **method**: GET
 > **params** (all optional)
@@ -24,17 +23,36 @@ Movie
 ```
 http://192.168.5.47:8000/moviesHaven/api/movie/?name\_starts\_with=i&name=r&year=1901&genre=drame&latest=1&ordering=name
 ```
+Movie By Genre
+--------------------
+***Step 1***
+: URL: *domain*/moviesHaven/api/genre_movie/
+ Response Type: json
+ Response:  list of genres
+ 
+### Sample URL
+```
+http://192.168.5.47:8000/moviesHaven/api/genre_movie/
+```
+select genre_name
+
+ -------------
+ **Step 2**
+ : **url**: *domain*/moviesHaven/api/movie/
+  **params**: genre= genre_name  # genre_name from step 1
+
+
 Generate Stream
 ---------------------
-> URL : 
+> URL : *domain*/moviesHaven/api/generate_stream
 > method : POST
 > post-data format: json
 > post-data
  ```
  {
-    "id": 65,  # id of content
-    "type": "movie",   # type of content movie or tv
-    "stream_key": "eb17783d-bbbc-4499-ad74-eecd59c74baa"  # your streaming key
+	"id": 65,  # id of content
+	"type": "movie",   # type of content movie or tv
+	"stream_key": "eb17783d-bbbc-4499-ad74-eecd59c74baa"  # your streaming key
 }
  ```
  Response
@@ -44,34 +62,20 @@ Generate Stream
 }
 ```
 ### Sample URL
-```
-http://192.168.5.47:8000/moviesHaven/api/generate_stream/
-```
-Documentaire
-------------------
-> **Base_URL** :  differed by genre only
->*domain*/moviesHaven/api/movie/?genre=Documentaire
-> **URL** : *domain*/moviesHaven/api/movie/?genre=Documentaire
-> **method**: GET
-> **parameters** : all parameters same as for movie
-> : **name_starts_with** = a  # returns list of movies starts with this string (Case insensitive) 
-### Sample URL
+```http://192.168.5.47:8000/moviesHaven/api/generate_stream/```
 
-for latest:
+Person
+---------
 
-: `http://192.168.5.47:8000/moviesHaven/api/movie/?genre=Documentaire&latest=3`
-
-Animation (Kids)
---------------------
-> **Base_URL** :  differed by genre only
->*domain*/moviesHaven/api/movie/?genre=animation
-> **URL** : *domain*/moviesHaven/api/movie/?genre=animation
-> **method**: GET
-> **parameters** : all parameters same as for movie
-> : **name_starts_with** = a  # returns list of movies starts with this string (Case insensitive) 
+> URL : *domain*/moviesHaven/api/person
+> method : GET
+> post-data format: json
+> post-data
+> **params**:
+> **type**: movie/tv
+> **name_starts_with** : a   # returns list of actors of given type starts with
 
 ### Sample URL
 ```
-http://192.168.5.47:8000/moviesHaven/api/movie/?genre=animation&name_starts_with=a
+http://192.168.5.47:8000/moviesHaven/api/person/?name_starts_with=a&type=movie
 ```
-

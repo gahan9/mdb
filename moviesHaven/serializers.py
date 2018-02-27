@@ -6,7 +6,7 @@ from .models import *
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genres
-        fields = ['id', 'url', 'genre_id', 'genre_name']
+        fields = ['id', 'genre_id', 'genre_name']
 
 
 class PersonSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class PersonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Person
-        fields = ['id', 'url', 'name', 'birthday', 'profile_path', 'biography', 'place_of_birth', 'poster_path']
+        fields = ['id', 'url', 'name', 'birthday', 'biography', 'place_of_birth', 'poster_path']
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -103,7 +103,7 @@ class MovieByGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genres
-        fields = ['id', 'url', 'genre_id', 'genre_name', 'results']
+        fields = ['id', 'genre_id', 'genre_name', 'results']
 
 
 class TVSeriesByGenreSerializer(serializers.ModelSerializer):
@@ -118,7 +118,7 @@ class TVSeriesByGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genres
-        fields = ['id', 'url', 'genre_id', 'genre_name', 'results']
+        fields = ['id', 'genre_id', 'genre_name', 'results']
 
 
 class MovieByPersonSerializer(serializers.ModelSerializer):
@@ -138,7 +138,7 @@ class MovieByPersonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Person
-        fields = ['id', 'url', 'name', 'birthday', 'profile_path', 'biography', 'place_of_birth', 'results', 'poster_path']
+        fields = ['id', 'name', 'birthday', 'profile_path', 'biography', 'place_of_birth', 'results', 'poster_path']
 
 
 class TVSeriesByPersonSerializer(serializers.ModelSerializer):
@@ -158,4 +158,11 @@ class TVSeriesByPersonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Person
-        fields = ['id', 'url', 'name', 'birthday', 'profile_path', 'biography', 'place_of_birth', 'results', 'poster_path']
+        fields = ['id', 'name', 'birthday', 'profile_path', 'biography', 'place_of_birth', 'results', 'poster_path']
+
+
+class SubMenuContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubMenuContent
+        fields = ['id', 'name', 'name_en', 'overview', 'overview_en',
+                  'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']

@@ -5,6 +5,7 @@ import uuid
 import requests
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -65,6 +66,10 @@ class MovieViewSet(viewsets.ModelViewSet):
         queryset = self.model.objects.filter(status=True).order_by("name")
         name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
+        person_name = self.request.query_params.get('person_name', None)
+        person_role = self.request.query_params.get('person_role', None)
+        person_role = person_role if person_role else "cast"
+        person_name_starts_with = self.request.query_params.get('person_name_starts_with', None)
         year = self.request.query_params.get('year', None)
         classics = self.request.query_params.get('classics', None)
         genre = self.request.query_params.get('genre', None)
@@ -74,6 +79,10 @@ class MovieViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=name)
         if name_starts_with:
             queryset = queryset.filter(name__istartswith=name_starts_with)
+        if person_name:
+            queryset = queryset.filter(personrole__role__iexact=person_role, person__name__icontains=person_name)
+        if person_name_starts_with:
+            queryset = queryset.filter(personrole__role__iexact=person_role, person__name__istartswith=person_name_starts_with)
         if latest:
             try:
                 latest = int(latest)
@@ -117,11 +126,19 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         latest = self.request.query_params.get('latest', None)
         classics = self.request.query_params.get('classics', None)
         genre = self.request.query_params.get('genre', None)
+        person_name = self.request.query_params.get('person_name', None)
+        person_role = self.request.query_params.get('person_role', None)
+        person_role = person_role if person_role else "cast"
+        person_name_starts_with = self.request.query_params.get('person_name_starts_with', None)
         # print(movie_name, movie_year, genre)
         if name:
             queryset = queryset.filter(name__icontains=name)
         if name_starts_with:
             queryset = queryset.filter(name__istartswith=name_starts_with)
+        if person_name:
+            queryset = queryset.filter(personrole__role__iexact=person_role, person__name__icontains=person_name)
+        if person_name_starts_with:
+            queryset = queryset.filter(personrole__role__iexact=person_role, person__name__istartswith=person_name_starts_with)
         if latest:
             try:
                 latest = int(latest)
@@ -191,6 +208,29 @@ class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
             return GenreSerializer
         else:
             return self.serializer_class
+
+
+class PersonViewSet(viewsets.ModelViewSet):
+    queryset = Person.objects.filter(personrole__role__iexact="cast")
+    serializer_class = PersonSerializer
+    model = Person
+
+    def get_queryset(self):
+        content_type = self.request.query_params.get('type', None)
+        queryset = self.model.objects.filter(personrole__role__iexact="cast")
+        if content_type == "movie":
+            queryset = queryset.filter(personrole__movie__isnull=False)
+        elif content_type == "tv":
+            queryset = queryset.filter(personrole__tv__isnull=False)
+        else:
+            return queryset
+        name_starts_with = self.request.query_params.get('name_starts_with', None)
+        # print(self.request.query_params)
+        try:
+            queryset = queryset.filter(name__istartswith=name_starts_with)
+        except ValueError:
+            return queryset
+        return queryset
 
 
 class MovieByPersonViewSet(viewsets.ModelViewSet):
@@ -276,3 +316,11 @@ class StreamGenerator(APIView):
                 return Response({'detail': 'Missing id or key'})
         else:
             return Response({'detail': 'NO or Invalid post data'})
+
+
+class SubMenuStructureViewSet(viewsets.ModelViewSet):
+    serializer_class = SubMenuContentSerializer
+    queryset = SubMenuContent.objects.all().order_by("priority")
+    filter_backends = (OrderingFilter,)
+    ordering_fields = ('name', 'priority')
+    model = TVSeries

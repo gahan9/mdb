@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 
 class RawData(models.Model):
@@ -10,8 +11,8 @@ class RawData(models.Model):
         return "{}".format(self.name)
 
     class Meta:
-        verbose_name = "Raw Video Data in local"
-        verbose_name_plural = "Raw Video Data in local"
+        verbose_name = _("Raw Video Data in local")
+        verbose_name_plural = _("Raw Video Data in local")
         unique_together = ('name', 'path')
 
 
@@ -36,23 +37,25 @@ class Person(models.Model):
 class Genres(models.Model):
     genre_id = models.IntegerField(unique=True)
     genre_name = models.CharField(max_length=256)
-    poster_path = models.URLField(max_length=1000, verbose_name="Thumbnail",
-                                  help_text="Enter image URL of resolution width 300",
+    poster_path = models.URLField(max_length=1000, verbose_name=_("Thumbnail"),
+                                  help_text=_("Enter image URL of resolution width 300"),
                                   blank=True, null=True)
-    backdrop_path = models.URLField(max_length=1000, verbose_name="Fan Art",
-                                    help_text="Enter image URL of resolution width 780",
+    backdrop_path = models.URLField(max_length=1000, verbose_name=_("Fan Art"),
+                                    help_text=_("Enter image URL of resolution width 780"),
                                     blank=True, null=True)
 
     def __str__(self):
         return "{}".format(self.genre_name)
 
     class Meta:
-        verbose_name = "Genre"
+        verbose_name = _("Genre")
 
 
 class Entertainment(models.Model):
     local_data = models.ForeignKey(RawData, on_delete=models.CASCADE)
-    name = models.CharField(max_length=350)
+    title = models.CharField(max_length=350, null=True, help_text=_("title parsed from raw data"))
+    name = models.CharField(max_length=350, help_text=_("name from tmdb API"))
+    tmdb_id = models.CharField(max_length=200, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -75,9 +78,9 @@ class Movie(Entertainment):
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
     duration = models.IntegerField(null=True, blank=True, verbose_name="run time",
-                                   help_text="Run time duration(in minutes)")
-    status = models.BooleanField(default=False, verbose_name="Meta Data fetched?",
-                                 help_text="Mark if all the require possible metadata is fetched")
+                                   help_text=_("Run time duration(in minutes)"))
+    status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
+                                 help_text=_("Mark if all the require possible metadata is fetched"))
 
 
     @property
@@ -97,14 +100,14 @@ class Movie(Entertainment):
         return detail_set
 
     class Meta:
-        verbose_name = "Movie"
+        verbose_name = _("Movie")
 
 
 class SeasonDetail(Entertainment):
     season_number = models.IntegerField(null=True, blank=True)
 
     class Meta:
-        verbose_name = "TV Seasons"
+        verbose_name = _("TV Seasons")
 
 
 class TVSeries(Entertainment):
@@ -122,10 +125,10 @@ class TVSeries(Entertainment):
     fanart_lq = models.URLField(max_length=1000, null=True, blank=True)
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
-    duration = models.IntegerField(null=True, blank=True, verbose_name="run time",
-                                   help_text="Run time duration(in minutes)")
-    status = models.BooleanField(default=False, verbose_name="Meta Data fetched?",
-                                 help_text="Mark if all the require possible metadata is fetched")
+    duration = models.IntegerField(null=True, blank=True, verbose_name=_("run time"),
+                                   help_text=_("Run time duration(in minutes)"))
+    status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
+                                 help_text=_("Mark if all the require possible metadata is fetched"))
 
     @property
     def get_short_overview(self):
@@ -153,7 +156,7 @@ class TVSeries(Entertainment):
         return "{} - {}".format(self.name, self.vote_average)
 
     class Meta:
-        verbose_name = verbose_name_plural = "Episodes"
+        verbose_name = verbose_name_plural = _("Episodes")
 
 
 class PersonRole(models.Model):
@@ -169,14 +172,16 @@ class PersonRole(models.Model):
 class MediaInfo(models.Model):
     file = models.ForeignKey(RawData, on_delete=models.CASCADE)
     meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.SET_NULL)
-    # meta_episode = models.ForeignKey(TVSeries, null=True, blank=True, on_delete=models.SET_NULL)
+    meta_episode = models.ForeignKey(TVSeries, null=True, blank=True, on_delete=models.SET_NULL)
     frame_width = models.CharField(max_length=20, null=True, blank=True)
     frame_height = models.CharField(max_length=20, null=True, blank=True)
+    video_codec = models.CharField(max_length=20, null=True, blank=True)
+    audio_codec = models.CharField(max_length=20, null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True,
-                                  verbose_name="Run time in minutes")
+                                  verbose_name=_("Run time in seconds"))
 
     class Meta:
-        verbose_name = verbose_name_plural = "Media Information"
+        verbose_name = verbose_name_plural = _("Media Information")
 
 
 class StreamAuthLog(models.Model):
@@ -189,3 +194,32 @@ class StreamAuthLog(models.Model):
 
     def __str__(self):
         return "{}".format(self.stream_key)
+
+
+class MainMenuConstructor(models.Model):
+    name = models.CharField(max_length=50, verbose_name=_("Name in Regional Language(French)"))
+    name_en = models.CharField(max_length=50, verbose_name=_("Name in English (en_US)"))
+    poster_path = models.URLField(max_length=1000, verbose_name="Thumbnail",
+                                  help_text=_("Enter image URL of resolution width 300"),
+                                  blank=True, null=True)
+    backdrop_path = models.URLField(max_length=1000, verbose_name="Fan Art",
+                                    help_text=_("Enter image URL of resolution width 780"),
+                                    blank=True, null=True)
+    addon_id = models.CharField(max_length=100, blank=True, null=True)
+    addon_cmd = models.TextField(blank=True, null=True,
+                                 verbose_name=_("addon command to be execute"))
+    priority = models.IntegerField(default=10, verbose_name=_("Order/Priority of item"),
+                                help_text=_("Determines in which order item should be displayed"))
+
+
+class MainMenuContent(MainMenuConstructor):
+    class Meta:
+        verbose_name = _("Content of Main Menu")
+
+
+class SubMenuContent(MainMenuConstructor):
+    overview = models.TextField(blank=True, null=True, verbose_name=_("Description in regional language"))
+    overview_en = models.TextField(blank=True, null=True, verbose_name=_("Description in English US"))
+
+    class Meta:
+        verbose_name = _("Sub Menu Content")

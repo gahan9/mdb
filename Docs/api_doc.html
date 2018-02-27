@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>api_doc</title>
+  <title>planetVIsion API doc</title>
   <link rel="stylesheet" href="https://stackedit.io/style.css" />
 </head>
 
@@ -16,10 +16,14 @@
 <li><a href="#apis">APIs</a>
 <ul>
 <li></li>
-<li><a href="#movie">Movie</a></li>
+</ul>
+</li>
+<li><a href="#movie">Movie</a>
+<ul>
+<li></li>
+<li><a href="#movie-by-genre">Movie By Genre</a></li>
 <li><a href="#generate-stream">Generate Stream</a></li>
-<li><a href="#documentaire">Documentaire</a></li>
-<li><a href="#animation-kids">Animation (Kids)</a></li>
+<li><a href="#person">Person</a></li>
 </ul>
 </li>
 </ul>
@@ -32,7 +36,7 @@
 <h3 id="domain-http192.168.5.478000">DOMAIN: <a href="http://192.168.5.47:8000">http://192.168.5.47:8000</a></h3>
 <hr>
 <hr>
-<h2 id="movie">Movie</h2>
+<h1 id="movie">Movie</h1>
 <blockquote>
 <p><strong>url</strong>: <em>domain</em>/moviesHaven/api/movie/<br>
 <strong>method</strong>: GET<br>
@@ -51,9 +55,26 @@
 <h3 id="sample-url">Sample URL</h3>
 <pre><code>http://192.168.5.47:8000/moviesHaven/api/movie/?name\_starts\_with=i&amp;name=r&amp;year=1901&amp;genre=drame&amp;latest=1&amp;ordering=name
 </code></pre>
+<h2 id="movie-by-genre">Movie By Genre</h2>
+<dl>
+<dt><em><strong>Step 1</strong></em></dt>
+<dd>URL: <em>domain</em>/moviesHaven/api/genre_movie/<br>
+Response Type: json<br>
+Response:  list of genres</dd>
+</dl>
+<h3 id="sample-url-1">Sample URL</h3>
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/genre_movie/
+</code></pre>
+<p>select genre_name</p>
+<hr>
+<dl>
+<dt><strong>Step 2</strong></dt>
+<dd><strong>url</strong>: <em>domain</em>/moviesHaven/api/movie/<br>
+<strong>params</strong>: genre= genre_name  # genre_name from step 1</dd>
+</dl>
 <h2 id="generate-stream">Generate Stream</h2>
 <blockquote>
-<p>URL :<br>
+<p>URL : <em>domain</em>/moviesHaven/api/generate_stream<br>
 method : POST<br>
 post-data format: json<br>
 post-data</p>
@@ -69,34 +90,20 @@ post-data</p>
    "stream_link": "http://192.168.5.47:8000/media/.cache/ab32c178-1af7-11e8-8ae2-e03f49b35bd1c"  # stream link of user
 }
 </code></pre>
-<h3 id="sample-url-1">Sample URL</h3>
-<pre><code>http://192.168.5.47:8000/moviesHaven/api/generate_stream/
-</code></pre>
-<h2 id="documentaire">Documentaire</h2>
-<blockquote>
-<p><strong>Base_URL</strong> :  differed by genre only<br>
-<em>domain</em>/moviesHaven/api/movie/?genre=Documentaire<br>
-<strong>URL</strong> : <em>domain</em>/moviesHaven/api/movie/?genre=Documentaire<br>
-<strong>method</strong>: GET<br>
-<strong>parameters</strong> : all parameters same as for movie<br>
-: <strong>name_starts_with</strong> = a  # returns list of movies starts with this string (Case insensitive)</p>
-</blockquote>
 <h3 id="sample-url-2">Sample URL</h3>
-<dl>
-<dt>for latest:</dt>
-<dd><code>http://192.168.5.47:8000/moviesHaven/api/movie/?genre=Documentaire&amp;latest=3</code></dd>
-</dl>
-<h2 id="animation-kids">Animation (Kids)</h2>
+<p><code>http://192.168.5.47:8000/moviesHaven/api/generate_stream/</code></p>
+<h2 id="person">Person</h2>
 <blockquote>
-<p><strong>Base_URL</strong> :  differed by genre only<br>
-<em>domain</em>/moviesHaven/api/movie/?genre=animation<br>
-<strong>URL</strong> : <em>domain</em>/moviesHaven/api/movie/?genre=animation<br>
-<strong>method</strong>: GET<br>
-<strong>parameters</strong> : all parameters same as for movie<br>
-: <strong>name_starts_with</strong> = a  # returns list of movies starts with this string (Case insensitive)</p>
+<p>URL : <em>domain</em>/moviesHaven/api/person<br>
+method : GET<br>
+post-data format: json<br>
+post-data<br>
+<strong>params</strong>:<br>
+<strong>type</strong>: movie/tv<br>
+<strong>name_starts_with</strong> : a   # returns list of actors of given type starts with</p>
 </blockquote>
 <h3 id="sample-url-3">Sample URL</h3>
-<pre><code>http://192.168.5.47:8000/moviesHaven/api/movie/?genre=animation&amp;name_starts_with=a
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/person/?name_starts_with=a&amp;type=movie
 </code></pre>
 
     </div>

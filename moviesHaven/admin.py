@@ -4,7 +4,7 @@ from .models import *
 
 class RawDataAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'path', 'extension']
-    list_filter = ['extension']
+    list_filter = ['extension', 'movie__status']
     search_fields = ['name', 'path']
 
 
@@ -34,24 +34,35 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 class PersonRoleAdmin(admin.ModelAdmin):
-    list_display = ['role', 'person', 'movie', 'tv']
+    list_display = ['id', 'role', 'person', 'movie', 'tv']
 
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'birthday', 'profile_path', 'get_short_biography', 'place_of_birth']
+    list_display = ['id', 'name', 'birthday', 'profile_path', 'get_short_biography', 'place_of_birth']
 
 
 class StreamAuthLogAdmin(admin.ModelAdmin):
-    list_display = ['stream_key', 'sym_link_path', 'response_status', 'date_created', 'date_updated']
+    list_display = ['id', 'stream_key', 'sym_link_path', 'response_status', 'date_created', 'date_updated']
+
+
+class MainMenuContentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'name_en', 'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']
+
+
+class SubMenuContentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'name_en', 'overview', 'overview_en',
+                    'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']
 
 
 admin.site.register(RawData, RawDataAdmin)
-admin.site.register(Movie, MovieAdmin)
-admin.site.register(TVSeries, TVSeriesAdmin)
+# admin.site.register(Movie, MovieAdmin)
+# admin.site.register(TVSeries, TVSeriesAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(PersonRole, PersonRoleAdmin)
 admin.site.register(Genres, GenreAdmin)
 admin.site.register(StreamAuthLog, StreamAuthLogAdmin)
+# admin.site.register(MainMenuContent, MainMenuContentAdmin)
+# admin.site.register(SubMenuContent, SubMenuContentAdmin)
 
 admin.site.site_header = 'Planet Vision'
 admin.site.site_title = 'Planet Vision'
