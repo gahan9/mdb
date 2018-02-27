@@ -2,6 +2,7 @@ import re
 import requests
 
 from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS
+from mysite.tmdb_settings import EXCLUDE
 
 
 def name_fetcher(name):
@@ -15,8 +16,6 @@ def name_fetcher(name):
     except Exception as e:
         return name
 
-        # exclude = '(1080p|720p|19[0-9]{2}|20[0-1]{1}[0-9]{1}|PAL|NTSC|LiMiTED|Theatrical|BluRay|x264|french|Unrated|films|DiVX|DVD|DiVX|HD|VCD|xvid\\w+|xvid-\\w+|dvdrip|xvid-hto|final|avi|flv|mp4|mp3|[s]\\d{2}[e]\\d{2}|[s]\\dx\\d{2}|\\d{2}x\\d{2})'
-        #' '.join([x for x in tv.split('.') if x not in re.findall(exclude,tv)])
 
 def validate_value_existence(key, source_dict):
     if key in source_dict:
@@ -42,6 +41,9 @@ def filter_film(arg):
     regex_episode = re.findall(r"[e]\d+", regex_output.lower())
     return regex_season, regex_episode
 
+def name_catcher(filename):
+    value = ' '.join(list(filter(lambda x: x not in re.findall(EXCLUDE, filename), filename.split('.'))))
+    return value
 
 def get_genre(flag):
     url = TMDB_BASE_URL
@@ -58,6 +60,10 @@ def create_file_structure(file_obj):
         title = file_obj.name  # [:end]
         season_number = name_fetcher(file_obj.name)[1:3] # [:1][0][0][1:]
         episode_number = name_fetcher(file_obj.name)[4:6] # [1:][0][0][1:]
+        if len(name_catcher(title).split('_')) > 1:
+            title = name_catcher(title).split('_')[1]
+        else:
+            title = name_catcher(title)
         tv_dict = {"local_data": file_obj, "name": title,
                        'season_number': season_number, 'episode_number': episode_number}
         return tv_dict

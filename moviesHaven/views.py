@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from moviesHaven.utils import get_genre, set_image, create_file_structure, get_json_response, \
-    fetch_cast_data, filter_film
+    fetch_cast_data, filter_film, name_catcher
 from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, DEFAULT_PARAMS
 from mysite.tmdb_settings import SCRAPE_DIR
 
@@ -27,7 +27,7 @@ class HomePageView(TemplateView):
 
 
 def structure_maker():
-    contents = content_fetcher(directory_path=SCRAPE_DIR)
+    contents = content_fetcher(directory_path='E:\\dir')
     for video in contents:
         try:
             if RawData.objects.filter(**video):
@@ -60,7 +60,7 @@ def filter_raw_data():
             except Exception as e:
                 print("Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
         else:
-            movie_dict = {"local_data": entry, "name": entry.name}
+            movie_dict = {"local_data": entry, "name": name_catcher(entry.name)}
             try:
                 if not Movie.objects.filter(**movie_dict):
                     Movie.objects.create(**movie_dict)
