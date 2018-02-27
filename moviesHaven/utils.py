@@ -109,13 +109,17 @@ def fetch_cast_data(cast_json):
             try:
                 for key, value in person_result.items():
                     if key in ["name", "birthday", "profile_path", "biography", "place_of_birth"]:
-                        if value:
-                            person_data[key] = value
+                        if key == "profile_path":
+                            if value:
+                                person_data[key] = "{}w300{}".format(TMDB_IMAGE_URL, value)
+                        else:
+                            if value:
+                                person_data[key] = value
             except Exception as e:
-                print("*" * 10)
+                # print("*" * 10)
                 print(person_result, sep="\n")
-                print("*" * 10)
-                raise Exception
+                # print("*" * 10)
+                # raise Exception
         return person_data
 
 

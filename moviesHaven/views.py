@@ -117,11 +117,10 @@ def genre_maker(genres):
 def file_filter(request):
     filter_thread = Thread(target=filter_raw_data)
     filter_thread.start()
-    #
-    # genres = get_genre("tv")
-    # genres.update(get_genre("movie"))
-    # genre_thread = Thread(target=genre_maker, args=(genres))
-    # genre_thread.start()
+    genres = get_genre("tv")
+    genres.update(get_genre("movie"))
+    genre_thread = Thread(target=genre_maker, args=(genres,))
+    genre_thread.start()
     return HttpResponseRedirect(reverse_lazy('index'))
 
 

@@ -224,12 +224,16 @@ class PersonViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(personrole__tv__isnull=False)
         else:
             return queryset
+        name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         # print(self.request.query_params)
-        try:
-            queryset = queryset.filter(name__istartswith=name_starts_with)
-        except ValueError:
-            return queryset
+        if name_starts_with:
+            try:
+                queryset = queryset.filter(name__istartswith=name_starts_with)
+            except ValueError:
+                return queryset
+        if name:
+            queryset = queryset.filter(name__icontains=name)
         return queryset
 
 
