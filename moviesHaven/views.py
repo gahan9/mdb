@@ -140,16 +140,16 @@ def fetch_movie_metadata():
             if 'results' in movie_result:
                 movies_data = movie_result['results']
                 if movies_data:
-                    try:
-                        movie = movies_data[0]
-                    except Exception as e:
-                        continue
-                    if movie:
-                        print(">>> Found movie data...")
-                        if 'genre_ids' in movies_data[0]:
-                            if movies_data[0]['genre_ids']:
-                                genre_id = movies_data[0]['genre_ids']
-                        # for movie in movies_data:
+                    # try:
+                    #     movie = movies_data[0]
+                    # except Exception as e:
+                    #     continue
+                    # if movie:
+                    print(">>> Found movie data...")
+                    if 'genre_ids' in movies_data[0]:
+                        if movies_data[0]['genre_ids']:
+                            genre_id = movies_data[0]['genre_ids']
+                    for movie in movies_data:
                         movie_instance.name = movie.get('title', None)
                         movie_instance.tmdb_id = movie.get('id', None)
                         movie_instance.overview = movie.get('overview', None)
