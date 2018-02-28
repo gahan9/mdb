@@ -154,7 +154,7 @@ def fetch_movie_metadata():
                         movie_instance.vote_average = movie.get('vote_average', None)
                         # TODO: INCLUDE ME IN CLASS!!! GET TRAILER
                         if movie_instance.tmdb_id:
-                            trailer_url = TMDB_TRAILER_URL.format(movie_instance.tmdb_id)
+                            trailer_url = TMDB_TRAILER_URL.format(id=movie_instance.tmdb_id)
                             trailer_response = get_json_response(trailer_url, DEFAULT_PARAMS)
                             trailer_response = trailer_response.get("results", None)
                             if trailer_response:
