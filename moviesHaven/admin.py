@@ -67,6 +67,7 @@ admin.site.register(PersonRole, PersonRoleAdmin)
 admin.site.register(Genres, GenreAdmin)
 admin.site.register(StreamAuthLog, StreamAuthLogAdmin)
 admin.site.register(MediaInfo, MediaInfoAdmin)
+admin.site.register(Others)
 # admin.site.register(MainMenuContent, MainMenuContentAdmin)
 # admin.site.register(SubMenuContent, SubMenuContentAdmin)
 
