@@ -67,7 +67,7 @@ class TVSeriesSerializer(serializers.ModelSerializer):
             return []
 
     def get_name(self, obj):
-        return "{} Season {} episode {}".format(obj.name, obj.season_number, obj.episode_number)
+        return "{} Season {} episode {}".format(obj.episode_title, obj.season_number, obj.episode_number)
 
     def get_description(self, obj):
         return obj.overview
@@ -82,7 +82,7 @@ class TVSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TVSeries
-        fields = ['id', 'url', 'name', 'genre_names', 'release_date', 'description',
+        fields = ['id', 'url', 'episode_title', 'genre_names', 'release_date', 'description',
                   'season_number', 'episode_number',
                   'backdrop_path', 'poster_path'
                   ]

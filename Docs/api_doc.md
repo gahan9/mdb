@@ -18,6 +18,7 @@ Movie
 > : **latest** = 3  #  returns list of movies added/updated in last 3 days
 > : **classics** = true  # returns result of movies since year Jan 1, 1900 to Jan 1, 1970
 >  : **ordering** = name # available ordering name, release_date, vote_average, vote_count (name orders list of movies in ascending order whereas -name orders in descending order)
+>  : **person_name**=Dwayne%20Johnson  # get list of movies by this cast/actor
 ----------
 ### Sample URL
 ```
@@ -29,7 +30,7 @@ Movie By Genre
 : URL: *domain*/moviesHaven/api/genre_movie/
  Response Type: json
  Response:  list of genres
- 
+
 ### Sample URL
 ```
 http://192.168.5.47:8000/moviesHaven/api/genre_movie/
@@ -77,5 +78,9 @@ Person
 
 ### Sample URL
 ```
-http://192.168.5.47:8000/moviesHaven/api/person/?name_starts_with=a&type=movie
+http://192.168.5.47:8000/moviesHaven/api/person/?name_starts_with=d&type=movie
+```
+Now hi below url with selecting name from response of above api as below:
+```
+http://192.168.5.47:8000/moviesHaven/api/movie/?person_name=Dwayne%20Johnson
 ```

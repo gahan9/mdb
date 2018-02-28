@@ -1,4 +1,6 @@
 import re
+import time
+
 import requests
 import os
 
@@ -32,7 +34,12 @@ def validate_value_existence(key, source_dict):
 def get_json_response(url, params):
     try:
         response = requests.get(url, params=params).json()
-        return response
+        status_code = response.get('status_code', None)
+        if status_code:
+            while status_code == 25:
+                time.sleep(10)
+                return get_json_response(url, params)
+            return response
     except Exception as e:
         # print(url, params)
         return {"error": "Couldn't get any response", "detail": str(e)}
