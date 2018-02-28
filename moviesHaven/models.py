@@ -60,11 +60,16 @@ class Entertainment(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "{}".format(self.name)
+        return "{}".format(self.title)
 
     class Meta:
         abstract = True
         unique_together = ('title', )
+
+
+class Others(Entertainment):
+    class Meta:
+        verbose_name = "Other Videos"
 
 
 class Movie(Entertainment):
