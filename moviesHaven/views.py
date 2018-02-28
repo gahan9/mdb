@@ -70,26 +70,28 @@ def insert_raw_data(request):
 def filter_raw_data():
     fetcher = MetaFetcher()
     for entry in MediaInfo.objects.all():
-        if all(filter_film(entry.file.name)):
-            try:
-                structure = fetcher.organize_tv_data(model_instance=entry.file)
-                if structure:
-                    title = structure.get('title', None)
-                    if title:
-                        # XXX: need to check test case if two TV season with same name exist???
-                        tv_instance = TVSeries.objects.get_or_create(name=title)[0]
-                        season_number = structure.get('season_number', None)
-                        if season_number:
-                            season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
-                            print("---------", season_number)
-                            episode_number = structure.get('episode_number', None)
-                            if episode_number:
-                                episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance, episode_number=episode_number)[0]
-                                entry.meta_episode = episode_instance
-                                entry.save()
-            except Exception as e:
-                print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
-                raise Exception(e)
+        filter1 = filter_film(entry.file.name)
+        if filter1:
+            if all(filter1):
+                try:
+                    structure = fetcher.organize_tv_data(model_instance=entry.file)
+                    if structure:
+                        title = structure.get('title', None)
+                        if title:
+                            # XXX: need to check test case if two TV season with same name exist???
+                            tv_instance = TVSeries.objects.get_or_create(name=title)[0]
+                            season_number = structure.get('season_number', None)
+                            if season_number:
+                                season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
+                                print("---------", season_number)
+                                episode_number = structure.get('episode_number', None)
+                                if episode_number:
+                                    episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance, episode_number=episode_number)[0]
+                                    entry.meta_episode = episode_instance
+                                    entry.save()
+                except Exception as e:
+                    print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
+                    raise Exception(e)
         else:
             title = fetcher.get_name(entry.file.name)
             # FIXME: handle name match with multiple occurrence of special character
