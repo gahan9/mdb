@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-# from .local_settings import DATABASES
-from .server_settings import DATABASES
+from .local_settings import DATABASES
+# from .server_settings import DATABASES
 from .tmdb_settings import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -152,4 +152,4 @@ REST_FRAMEWORK = {
 }
 
 SUPPORTED_EXTENSIONS = ['mp4', 'mkv', '3gp', 'avi', 'mov', 'vob', 'm3u8']
-EXCLUDE = r'(^[^_]+_|repack|webrip-\w+|ld|webrip|dvdrip-\w+|dvdrip|truefrench|subfrench|hdtv-\w+|hdtv|bdrip-\w+|bdrip|pdtv|extended|1080p|720p|19[0-9]{2}|20[0-1]{1}[0-9]{1}|PAL|NTSC|LiMiTED|Theatrical|BluRay|x264-\w+|stv|x264|french|Unrated|films|DiVX|DVD|DiVX|HD|VCD|xvid-\w+|xvid\w+|xvid-\w+-\w+|dvdrip(?:[\\`|\\~|\\!|\\@|\\#|\\$|\\%|\\^|\\&|\\*|\\(|\\)|\\+||\\-|\\[|\\{|\\]|\\}|\\||\\_|\'|\\<|\\,|\\>|\\?|""|\\;|\\:|]\\w+)|dvdrip|final|mkv_\w+|mkv|avi_\w+|avi|flv_\w+|flv|mp4_\w+|mp4|mp3|[s]\\d{2}[e]\\d{2}(?:[\\`|\\~|\\!|\\@|\\#|\\$|\\%|\\^|\\&|\\*|\\(|\\)|\\+||\\-|\\[|\\{|\\]|\\}|\\||\\_|\'|\\<|\\,|\\>|\\?|""|\\;|\\:|])\\w+|[s]\\d{2}[e]\\d{2}|[s]\d+[e]\d+-\w+|[s]\d+[e]\d+)'
+EXCLUDE = r'(h264-\w+|h264|RUSSIAN|\d.\d+\w+|part.\d+|repack|mkv_\w+|mkv|avi_\w+|avi|flv_\w+|flv|mp4_\w+|mp4|mp3.*|\w+_|rerip|bluray|doc|webrip|subfrench|truefrench|3d|french|web|hdtv|bdrip|extended|1080p|720p|19[0-9]{2}|20[0-1]{1}[0-9]{1}|PAL|NTSC|LiMiTED|Theatrical|dvdrip|final|BluRay|x264-\w+-\w+|x264-\w+|x264|Unrated|films|DiVX|DVD|DiVX|HD-\w+|dts-\w+|dts|stv|HD|VCD|xvid-\\w+|xvid\\w+|xvid-\\w+-\\w+|dvdrip(?:[\\`|\\~|\\!|\\@|\\#|\\$|\\%|\\^|\\&|\\*|\\(|\\)|\\+||\\-|\\[|\\{|\\]|\\}|\\||\\_|\'|\\<|\\,|\\>|\\?|""|\\;|\\:|]\\w+)|[s]\\d{2}[e]\\d{2}(?:[\\`|\\~|\\!|\\@|\\#|\\$|\\%|\\^|\\&|\\*|\\(|\\)|\\+||\\-|\\[|\\{|\\]|\\}|\\||\\_|\'|\\<|\\,|\\>|\\?|""|\\;|\\:|])\\w+|proper|[s]\\d{2}[e]\\d{2}|s\d+e\d+)'

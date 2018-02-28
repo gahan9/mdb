@@ -46,7 +46,7 @@ def filter_film(arg):
 
 
 def name_catcher(filename):
-    value = ' '.join(list(filter(lambda x: x not in re.findall(EXCLUDE, filename), filename.split('.'))))
+    value = ' '.join(list(filter(lambda x: x not in re.findall(EXCLUDE, filename, re.IGNORECASE), filename.split('.'))))
     return value
 
 
