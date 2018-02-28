@@ -2,7 +2,8 @@ from django.conf.urls import url
 from django.urls import path, include
 from django.views.generic import RedirectView
 
-from . import views, viewsets
+from . import views
+from . import viewsets
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -12,7 +13,7 @@ router.register(r'person', viewsets.PersonViewSet)
 router.register(r'genre_movie', viewsets.MovieByGenreViewSet)
 router.register(r'person_movie', viewsets.MovieByPersonViewSet)
 router.register(r'genre_tv', viewsets.TVSeriesByGenreViewSet)
-router.register(r'person_tv', viewsets.TVSeriesByPersonViewSet)
+# router.register(r'person_tv', viewsets.TVSeriesByPersonViewSet)
 router.register(r'menu', viewsets.SubMenuStructureViewSet)
 
 urlpatterns = [

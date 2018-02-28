@@ -248,15 +248,15 @@ class MovieByPersonViewSet(viewsets.ModelViewSet):
             return self.serializer_class
 
 
-class TVSeriesByPersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.filter(tvseries__personrole__person__isnull=False).distinct().order_by('name')
-    serializer_class = TVSeriesByPersonSerializer
-
-    def get_serializer_class(self):
-        if not self.kwargs:
-            return PersonSerializer
-        else:
-            return self.serializer_class
+# class TVSeriesByPersonViewSet(viewsets.ModelViewSet):
+#     queryset = Person.objects.filter(episodedetail__personrole__person__isnull=False).distinct().order_by('name')
+#     serializer_class = TVSeriesByPersonSerializer
+#
+#     def get_serializer_class(self):
+#         if not self.kwargs:
+#             return PersonSerializer
+#         else:
+#             return self.serializer_class
 
 
 class StreamGenerator(APIView):

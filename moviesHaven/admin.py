@@ -4,8 +4,13 @@ from .models import *
 
 class RawDataAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'path', 'extension']
-    list_filter = ['extension', 'movie__status']
+    list_filter = ['extension']
     search_fields = ['name', 'path']
+
+
+class MediaInfoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'file', 'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
+                    'video_codec', 'audio_codec', 'runtime']
 
 
 class MovieAdmin(admin.ModelAdmin):
@@ -19,14 +24,24 @@ class MovieAdmin(admin.ModelAdmin):
 
 
 class TVSeriesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'name', 'season_number', 'episode_number', 'get_short_overview', 'thumbnail_hq',
-                    'thumbnail_lq',
-                    'fanart_hq', 'fanart_lq',
-                    'tv_genre', 'status',
-                    'vote_average', 'vote_count', 'release_date']
+    list_display = ['id', 'title', 'name', 'tmdb_id',
+                    'original_name', 'first_air_date', 'vote_average',
+                    'origin_country', 'original_language', 'status', 'season_status',
+                    'get_short_overview', 'backdrop_path', 'poster_path']
+    search_fields = ['title', 'name', 'overview']
 
-    def tv_genre(self, obj):
-        return "\n".join([p.genre_name for p in obj.genre_name.all()])
+
+class SeasonDetailAdmin(admin.ModelAdmin):
+    list_display = ['id', 'series', 'tmdb_id', 'air_date', 'season_number']
+    search_fields = ['season_number', 'series__name']
+
+
+class EpisodeDetailAdmin(admin.ModelAdmin):
+    list_display = ['id', 'season',
+                    'episode_title', 'episode_number', 'air_date', 'vote_average'
+                    'get_short_overview', 'still_path'
+                    ]
+    search_fields = ['episode_title', 'season__series__name']
 
 
 class GenreAdmin(admin.ModelAdmin):
@@ -52,11 +67,6 @@ class MainMenuContentAdmin(admin.ModelAdmin):
 class SubMenuContentAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'name_en', 'overview', 'overview_en',
                     'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']
-
-
-class MediaInfoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'file', 'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
-                    'video_codec', 'audio_codec', 'runtime']
 
 
 admin.site.register(RawData, RawDataAdmin)
