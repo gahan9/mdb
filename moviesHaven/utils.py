@@ -4,9 +4,9 @@ import time
 import requests
 import os
 
-from mysite.settings import TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
-
-from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS, EXCLUDE
+from mysite.regex import MOVIE_TV_FILTER
+from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS,\
+    TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 
 
 def name_fetcher(name):
@@ -54,7 +54,7 @@ def filter_film(arg):
 
 
 def name_catcher(filename):
-    value = ' '.join(list(filter(lambda x: x not in re.findall(EXCLUDE, filename, re.IGNORECASE), filename.split('.'))))
+    value = ' '.join(list(filter(lambda x: x not in re.findall(MOVIE_TV_FILTER, filename, re.IGNORECASE), filename.split('.'))))
     return value
 
 

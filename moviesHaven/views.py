@@ -67,6 +67,21 @@ def insert_raw_data(request):
 
 
 def filter_raw_data():
+
+    LIST_OF_DATA = ['2bgs03e24ffdxs_2.broke.girls.s03e24.final.french.dvdrip.x264-sodapop.mkv_799c3.flv.mp4',
+                    '3amledfxk_3.amis.menent.l.enquete.avi_70468.flv.mp4',
+                    'acbwap2014fdxj_avengers.confidential.black.widowm.avi_81680.flv.mp4',
+                    'ads09e04fpxh_american.dad.s09e04.french.pdtv.x264-hybris.mp4_7dc6d.flv.mp4',
+                    '30.rock.s03e21.avi.flv.mp4',
+                    'brb.beltm.avi.flv.mp4',
+                    'am_erican_graf_fiti.avi.flv.mp4',
+                    ]
+    for items in LIST_OF_DATA:
+        if all(filter_film(items)):
+            print(items , "----- tv\n")
+        else:
+            print(items , "----- movie\n")
+
     for entry in MediaInfo.objects.all():
         if all(filter_film(entry.file.name)):
             try:
@@ -84,7 +99,7 @@ def filter_raw_data():
         else:
             the_name = name_catcher(entry.file.name)
             # FIXME: handle name match with multiple occurrence of special character
-            if len(the_name.split('_')) > 1:
+            if '_' in the_name.split('_'):
                 title = the_name.split('_')[1]
             else:
                 title = the_name
@@ -208,6 +223,7 @@ def fetch_tv_metadata():
                     image_set_thread = Thread(target=set_image, args=(tv_instance, tv_result['results'][0]))
                     image_set_thread.start()
 
+        # FIXME: Use this url for crew+cast : cast_tv_url = "{}tv/{}/season/{}/episode/{}/".format(TMDB_BASE_URL, tv_id)
         cast_tv_url = "{}tv/{}/credits".format(TMDB_BASE_URL, tv_id)
         cast_list = get_json_response(cast_tv_url, DEFAULT_PARAMS)
         cast_list = cast_list.get('cast', None)
