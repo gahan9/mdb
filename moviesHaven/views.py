@@ -152,17 +152,24 @@ def fetch_movie_metadata():
                         movie_instance.release_date = movie.get('release_date', None)
                         movie_instance.vote_count = movie.get('vote_count', None)
                         movie_instance.vote_average = movie.get('vote_average', None)
+                        try:
+                            movie_instance.save()
+                        except Exception as e:
+                            print("Movie... saving meta data exception : {}".format(e))
                         # TODO: INCLUDE ME IN CLASS!!! GET TRAILER
                         if movie_instance.tmdb_id:
                             trailer_url = TMDB_TRAILER_URL.format(id=movie_instance.tmdb_id)
                             trailer_response = get_json_response(trailer_url, DEFAULT_PARAMS)
                             if trailer_response:
-                                trailer_response = trailer_response.get("results", None)
-                                if trailer_response:
-                                    try:
-                                        movie_instance.trailer_id = trailer_response[0].get("key", None)
-                                    except:
-                                        pass
+                                try:
+                                    trailer_response = trailer_response.get("results", None)
+                                    if trailer_response:
+                                        try:
+                                            movie_instance.trailer_id = trailer_response[0].get("key", None)
+                                        except:
+                                            pass
+                                except:
+                                    pass
                         if genre_id:
                             [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
                         try:
