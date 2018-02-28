@@ -17,11 +17,18 @@ class RawData(models.Model):
 
 
 class Person(models.Model):
+    CHOICES = (
+        (1, "Female"),
+        (2, "Male"),
+    )
+    tmdb_id = models.CharField(max_length=50, blank=True, null=True)
+    gender = models.IntegerField(blank=True, null=True)
     name = models.CharField(null=True, blank=True, max_length=100)
+    character = models.CharField(null=True, blank=True, max_length=100)
     birthday = models.CharField(null=True, blank=True, max_length=100)
     profile_path = models.URLField(max_length=1000, null=True, blank=True)
     biography = models.TextField(null=True, blank=True)
-    place_of_birth = models.CharField(null=True, blank=True, max_length=200)
+    place_of_birth = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return "{}".format(self.name)
@@ -52,7 +59,6 @@ class Genres(models.Model):
 
 
 class Entertainment(models.Model):
-    local_data = models.ForeignKey(RawData, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=350, help_text=_("title parsed from raw data"))
     name = models.CharField(max_length=350, null=True, blank=True, help_text=_("name from tmdb API"))
     tmdb_id = models.CharField(max_length=200, blank=True, null=True)
@@ -91,10 +97,7 @@ class Movie(Entertainment):
 
     @property
     def get_short_overview(self):
-        if self.overview:
-            return self.overview[:15]
-        else:
-            return self.overview
+        return self.overview[:15] if self.overview else self.overview
 
     @property
     def get_details(self):
@@ -115,41 +118,66 @@ class Movie(Entertainment):
         verbose_name = _("Movie")
 
 
-class SeasonDetail(Entertainment):
-    season_number = models.IntegerField(null=True, blank=True)
-
-    class Meta:
-        verbose_name = _("TV Seasons")
-
-
 class TVSeries(Entertainment):
-    # related_season = models.ForeignKey(SeasonDetail)
-    person = models.ManyToManyField(Person, through="PersonRole")
+    name = models.CharField(max_length=250)
+    original_name = models.CharField(max_length=500, blank=True, null=True)
+    first_air_date = models.DateField(blank=True, null=True)
+    vote_average = models.FloatField(null=True, blank=True)
     genre_name = models.ManyToManyField(Genres)
     overview = models.TextField(null=True, blank=True)
-    episode_title = models.CharField(max_length=350, null=True, blank=True)
-    season_number = models.IntegerField(null=True, blank=True)
-    episode_number = models.IntegerField(null=True, blank=True)
-    release_date = models.DateField(null=True, blank=True)
-    thumbnail_hq = models.URLField(max_length=1000, null=True, blank=True)
-    thumbnail_lq = models.URLField(max_length=1000, null=True, blank=True)
-    fanart_hq = models.URLField(max_length=1000, null=True, blank=True)
-    fanart_lq = models.URLField(max_length=1000, null=True, blank=True)
-    vote_average = models.FloatField(null=True, blank=True)
-    vote_count = models.IntegerField(null=True, blank=True)
+    backdrop_path = models.URLField(max_length=1000, null=True, blank=True)
+    poster_path = models.URLField(max_length=1000, null=True, blank=True)
+    origin_country = models.CharField(max_length=200, null=True, blank=True)
+    original_language = models.CharField(max_length=20, null=True, blank=True)
+    season_status = models.CharField(max_length=50, null=True, blank=True)
     status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
                                  help_text=_("Mark if all the require possible metadata is fetched"))
 
     @property
     def get_short_overview(self):
-        if self.overview:
-            return self.overview[:15]
-        else:
-            return self.overview
+        return self.overview[:15] if self.overview else self.overview
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("TV Series")
+        verbose_name_plural = _("TV Series")
+
+
+class SeasonDetail(Entertainment):
+    series = models.ForeignKey(TVSeries, on_delete=models.CASCADE)
+    tmdb_id = models.CharField(max_length=50, blank=True, null=True)
+    air_date = models.DateField(blank=True, null=True)
+    season_number = models.IntegerField(null=True, blank=True)
+    backdrop_path = models.URLField(max_length=1000, null=True, blank=True)
+    poster_path = models.URLField(max_length=1000, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("TV Season")
+        verbose_name_plural = _("TV Season")
+
+
+class EpisodeDetail(Entertainment):
+    # related_season = models.ForeignKey(SeasonDetail)
+    season = models.ForeignKey(SeasonDetail, on_delete=models.CASCADE)
+    air_date = models.DateField(blank=True, null=True)
+    person = models.ManyToManyField(Person, through="PersonRole")
+    overview = models.TextField(null=True, blank=True)
+    episode_title = models.CharField(max_length=350, null=True, blank=True)
+    episode_number = models.IntegerField(null=True, blank=True)
+    still_path = models.URLField(max_length=1000, null=True, blank=True)
+    vote_average = models.FloatField(null=True, blank=True)
+    vote_count = models.IntegerField(null=True, blank=True)
+
+    @property
+    def get_short_overview(self):
+        return self.overview[:15] if self.overview else self.overview
 
     @property
     def get_episode_name(self):
-        return "{} Season {} episode {}".format(self.name, self.season_number, self.episode_number)
+        return "{} Season {} episode {}".format(
+            self.season.name, self.season.season_number, self.episode_number)
 
     @property
     def get_details(self):
@@ -176,7 +204,7 @@ class PersonRole(models.Model):
     role = models.CharField(max_length=200)
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, blank=True, null=True)
-    tv = models.ForeignKey(TVSeries, on_delete=models.CASCADE, blank=True, null=True)
+    tv = models.ForeignKey(EpisodeDetail, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return "{} as {}".format(self.person, self.role)
