@@ -142,7 +142,7 @@ def fetch_movie_metadata():
                 if movies_data:
                     movie = movies_data[0]
                     print(">>> Found movie data...")
-                    print(">>> {}".format(movies_data.get('id', None)))
+                    # print(">>> {}".format(movies_data.get('id', None)))
                     genre_id = movie.get('genre_ids', None)
                     # for movie in movies_data:
                     if movie:
