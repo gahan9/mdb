@@ -159,7 +159,10 @@ def fetch_movie_metadata():
                             if trailer_response:
                                 trailer_response = trailer_response.get("results", None)
                                 if trailer_response:
-                                    movie_instance.trailer_id = trailer_response[0].get("key", None)
+                                    try:
+                                        movie_instance.trailer_id = trailer_response[0].get("key", None)
+                                    except:
+                                        pass
                         if genre_id:
                             [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
                         try:
