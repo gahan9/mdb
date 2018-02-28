@@ -75,12 +75,14 @@ def filter_raw_data():
                     '30.rock.s03e21.avi.flv.mp4',
                     'brb.beltm.avi.flv.mp4',
                     'am_erican_graf_fiti.avi.flv.mp4',
-                    ]
+                    'blur - song 2_22656.mp4',
+                    'btaxdxc_big.tit.authority.xxx.dvdrip.x264-chikani.mp4_c04c4.flv.mp4',
+                    'tsdoaaxdxs_the.sexual.desires.of.anikka.albrite.dvdrip.x264-sexcat.mp4_acfab.mp4',]
     for items in LIST_OF_DATA:
-        if all(filter_film(items)):
-            print(items , "----- tv\n")
-        else:
-            print(items , "----- movie\n")
+        if file_category_finder(items) == 'adult':
+            print("item is adult : ", items)
+        elif file_category_finder(items) == 'songs':
+            print("item is song: ", items)
 
     for entry in MediaInfo.objects.all():
         if all(filter_film(entry.file.name)):

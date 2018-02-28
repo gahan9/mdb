@@ -9,6 +9,13 @@ from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT
     TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 
 
+def file_category_finder(name):
+    if re.search(r'XXX|sexual', name.lower(), re.IGNORECASE):
+        return "adult"
+    elif re.search(r" - ", name.lower(), re.IGNORECASE):
+        return "songs"
+    
+
 def name_fetcher(name):
     try:
         regex = "([s]\d{2})+([e]\d{2})|([s]\dx\d{2})|(\d{2}x\d{2})"
@@ -19,6 +26,12 @@ def name_fetcher(name):
             return x.replace("x", "e")
     except Exception as e:
         return name
+
+def filter_film(arg):
+    regex_output = name_fetcher(arg)
+    regex_season = re.findall(r"[s]\d+", regex_output.lower())
+    regex_episode = re.findall(r"[e]\d+", regex_output.lower())
+    return regex_season, regex_episode
 
 
 def validate_value_existence(key, source_dict):
@@ -44,13 +57,6 @@ def get_json_response(url, params):
     except Exception as e:
         # print(url, params)
         return {"request_error": "Couldn't get any response", "detail": str(e)}
-
-
-def filter_film(arg):
-    regex_output = name_fetcher(arg)
-    regex_season = re.findall(r"[s]\d+", regex_output.lower())
-    regex_episode = re.findall(r"[e]\d+", regex_output.lower())
-    return regex_season, regex_episode
 
 
 def name_catcher(filename):
