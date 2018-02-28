@@ -67,52 +67,37 @@ def insert_raw_data(request):
 
 
 def filter_raw_data():
-
-    LIST_OF_DATA = ['2bgs03e24ffdxs_2.broke.girls.s03e24.final.french.dvdrip.x264-sodapop.mkv_799c3.flv.mp4',
-                    '3amledfxk_3.amis.menent.l.enquete.avi_70468.flv.mp4',
-                    'acbwap2014fdxj_avengers.confidential.black.widowm.avi_81680.flv.mp4',
-                    'ads09e04fpxh_american.dad.s09e04.french.pdtv.x264-hybris.mp4_7dc6d.flv.mp4',
-                    '30.rock.s03e21.avi.flv.mp4',
-                    'brb.beltm.avi.flv.mp4',
-                    'am_erican_graf_fiti.avi.flv.mp4',
-                    'blur - song 2_22656.mp4',
-                    'btaxdxc_big.tit.authority.xxx.dvdrip.x264-chikani.mp4_c04c4.flv.mp4',
-                    'tsdoaaxdxs_the.sexual.desires.of.anikka.albrite.dvdrip.x264-sexcat.mp4_acfab.mp4',]
-    for items in LIST_OF_DATA:
-        if file_category_finder(items) == 'adult':
-            print("item is adult : ", items)
-        elif file_category_finder(items) == 'songs':
-            print("item is song: ", items)
-
+    fetcher = MetaFetcher()
     for entry in MediaInfo.objects.all():
         if all(filter_film(entry.file.name)):
             try:
-                # TODO: Season vise data create
-                structure = create_file_structure(file_obj=entry.file)
-                if structure and structure.get('title', None):
-                    tv_instance = TVSeries.objects.get_or_create(**structure)
-                    entry.meta_episode = tv_instance[0]
-                    entry.save()
-                    # FIXME: remove local_data foreign key from tv; and fix streaming
-                    tv_instance[0].local_data = entry.file
-                    tv_instance[0].save()
+                structure = fetcher.organize_tv_data(model_instance=entry.file)
+                if structure:
+                    title = structure.get('title', None)
+                    if title:
+                        # XXX: need to check test case if two TV season with same name exist???
+                        tv_instance = TVSeries.objects.get_or_create(name=title)[0]
+                        season_number = structure.get('season_number', None)
+                        if season_number:
+                            season_instance = SeasonDetail.objects.get_or_create(series=tv_instance[0], season_number=season_number)[0]
+                            episode_number = structure.get('episode_number', None)
+                            if episode_number:
+                                episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance, episode_number=episode_number)[0]
+                                entry.meta_episode = episode_instance
+                                entry.save()
             except Exception as e:
-                print("Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
+                print("filter_raw_data: Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
         else:
-            the_name = name_catcher(entry.file.name)
+            title = fetcher.get_name(entry.file.name)
             # FIXME: handle name match with multiple occurrence of special character
-            if '_' in the_name.split('_'):
-                title = the_name.split('_')[1]
-            else:
-                title = the_name
+            if '_' in title:
+                x = title.split('_')
+                title = x[1] if x > 1 else title
             try:
                 if title:
                     movie_instance = Movie.objects.get_or_create(title=title)
                     entry.meta_movie = movie_instance[0]
                     entry.save()
-                    # FIXME: remove local_data foreign key from movie; and fix streaming
-                    movie_instance[0].local_data = entry.file
-                    movie_instance[0].save()
             except Exception as e:
                 print("Exception during creating Movie object: {}".format(e))
 

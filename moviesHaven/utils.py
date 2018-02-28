@@ -9,6 +9,60 @@ from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT
     TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 
 
+class MetaFetcher(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    @staticmethod
+    def get_name(filename):
+        value = ' '.join(
+            list(filter(
+                lambda x: x not in re.findall(MOVIE_TV_FILTER, filename, re.IGNORECASE),
+                filename.split('.'))))
+        return value
+
+    @staticmethod
+    def name_fetcher(name):
+        try:
+            regex = r"([s]\d{2})+([e]\d{2})|([s]\dx\d{2})|(\d{2}x\d{2})"
+            x = re.search(regex, name.lower()).group(0)
+            if not x.startswith('s'):
+                return 's' + x.replace("x", "e")
+            else:
+                return x.replace("x", "e")
+        except Exception as e:
+            print("Exception in name_fetcher() for : {}\nException Cause: {}".format(name, e))
+            return name
+
+    def organize_tv_data(self, model_instance):
+        """
+
+        :param model_instance: model instance of raw data
+        :return:
+        """
+        if not model_instance:
+            return False
+        try:
+            season_number = self.name_fetcher(model_instance.name)[1:3]
+        except Exception as e:
+            print("organize_tv_data: Exception fetching season_number for : {}\nException Cause: {}".format(model_instance.name, e))
+            return False
+        try:
+            episode_number = self.name_fetcher(model_instance.name)[4:6]
+        except Exception as e:
+            print("organize_tv_data: Exception fetching episode_number for : {}\nException Cause: {}".format(model_instance.name, e))
+            return False
+        try:
+            title = self.name_fetcher(model_instance.name)
+            # FIXME: This behaviour won't be tolerated.. it will break for exception i.e. *__* or *_2018_*
+            if len(title.split('_')) > 1:
+                title = title.split('_')[1]
+            return {"title": title, 'season_number': season_number, 'episode_number': episode_number}
+        except Exception as e:
+            print("organize_tv_data: Exception for : {}\nException Cause: {}".format(model_instance.name, e))
+            return False
+
+
 def file_category_finder(name):
     if re.search(r'XXX|sexual', name.lower(), re.IGNORECASE):
         return "adult"
@@ -26,6 +80,7 @@ def name_fetcher(name):
             return x.replace("x", "e")
     except Exception as e:
         return name
+
 
 def filter_film(arg):
     regex_output = name_fetcher(arg)
@@ -86,7 +141,7 @@ def create_file_structure(file_obj):
         tv_dict = {"title": title,
                    'season_number': season_number, 'episode_number': episode_number}
         return tv_dict
-    except:
+    except Exception as e:
         return None
 
 
