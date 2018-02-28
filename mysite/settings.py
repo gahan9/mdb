@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from .local_settings import DATABASES
-# from .server_settings import DATABASES
+# from .local_settings import DATABASES
+from .server_settings import DATABASES
 from .tmdb_settings import *
 from .regex import *
 from .directory_settings import *
