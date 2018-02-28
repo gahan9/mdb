@@ -49,7 +49,8 @@
 : <strong>genre</strong> = animation  # returns list of movies containing this string as genre (Case insensitive)<br>
 : <strong>latest</strong> = 3  #  returns list of movies added/updated in last 3 days<br>
 : <strong>classics</strong> = true  # returns result of movies since year Jan 1, 1900 to Jan 1, 1970<br>
-: <strong>ordering</strong> = name # available ordering name, release_date, vote_average, vote_count (name orders list of movies in ascending order whereas -name orders in descending order)</p>
+: <strong>ordering</strong> = name # available ordering name, release_date, vote_average, vote_count (name orders list of movies in ascending order whereas -name orders in descending order)<br>
+: <strong>person_name</strong>=Dwayne%20Johnson  # get list of movies by this cast/actor</p>
 </blockquote>
 <hr>
 <h3 id="sample-url">Sample URL</h3>
@@ -103,7 +104,10 @@ post-data<br>
 <strong>name_starts_with</strong> : a   # returns list of actors of given type starts with</p>
 </blockquote>
 <h3 id="sample-url-3">Sample URL</h3>
-<pre><code>http://192.168.5.47:8000/moviesHaven/api/person/?name_starts_with=a&amp;type=movie
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/person/?name_starts_with=d&amp;type=movie
+</code></pre>
+<p>Now hi below url with selecting name from response of above api as below:</p>
+<pre><code>http://192.168.5.47:8000/moviesHaven/api/movie/?person_name=Dwayne%20Johnson
 </code></pre>
 
     </div>
