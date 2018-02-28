@@ -156,9 +156,10 @@ def fetch_movie_metadata():
                         if movie_instance.tmdb_id:
                             trailer_url = TMDB_TRAILER_URL.format(id=movie_instance.tmdb_id)
                             trailer_response = get_json_response(trailer_url, DEFAULT_PARAMS)
-                            trailer_response = trailer_response.get("results", None)
                             if trailer_response:
-                                movie_instance.trailer_id = trailer_response[0].get("key", None)
+                                trailer_response = trailer_response.get("results", None)
+                                if trailer_response:
+                                    movie_instance.trailer_id = trailer_response[0].get("key", None)
                         if genre_id:
                             [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
                         try:
