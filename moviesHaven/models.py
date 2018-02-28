@@ -68,6 +68,8 @@ class Entertainment(models.Model):
 
 
 class Others(Entertainment):
+    category = models.CharField(max_length=50, null=True, blank=True)
+
     class Meta:
         verbose_name = "Other Videos"
 
