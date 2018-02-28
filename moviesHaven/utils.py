@@ -69,7 +69,7 @@ def file_category_finder(name):
         return "adult"
     elif re.search(r" - ", name.lower(), re.IGNORECASE):
         return "songs"
-    
+
 
 def name_fetcher(name):
     try:
@@ -84,10 +84,16 @@ def name_fetcher(name):
 
 
 def filter_film(arg):
-    regex_output = name_fetcher(arg)
-    regex_season = re.match(r"[s]\d+", regex_output.lower())
-    regex_episode = re.match(r"[e]\d+", regex_output.lower())
-    return regex_season, regex_episode
+    if arg:
+        season_episode = re.search(r"[s]\d+[e]\d+", arg.lower())
+        if season_episode:
+            season_episode = season_episode.group(0)
+            season, episode = season_episode[0:round(len(season_episode) / 2)].lower(), season_episode[round(len(season_episode) / 2):].lower()
+            return season, episode
+        else:
+            return False
+    else:
+        return False
 
 
 def validate_value_existence(key, source_dict):

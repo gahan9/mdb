@@ -62,6 +62,7 @@ class Entertainment(models.Model):
     title = models.CharField(max_length=350, help_text=_("title parsed from raw data"))
     name = models.CharField(max_length=350, null=True, blank=True, help_text=_("name from tmdb API"))
     tmdb_id = models.CharField(max_length=200, blank=True, null=True)
+    trailer_id = models.CharField(max_length=200, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -153,6 +154,9 @@ class SeasonDetail(Entertainment):
     backdrop_path = models.URLField(max_length=1000, null=True, blank=True)
     poster_path = models.URLField(max_length=1000, null=True, blank=True)
 
+    def __str__(self):
+        return "{} Season {}".format(self.name, self.season_number)
+
     class Meta:
         verbose_name = _("TV Season")
         verbose_name_plural = _("TV Season")
@@ -221,6 +225,9 @@ class MediaInfo(models.Model):
     bit_rate = models.CharField(max_length=20, null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True,
                                   verbose_name=_("Run time in seconds"))
+    @property
+    def get_resolution(self):
+        return "{}x{}".format(self.frame_width, self.frame_height)
 
     def __str__(self):
         return "{} - {}x{} @ {}".format(self.file, self.frame_width, self.frame_height, self.bit_rate)

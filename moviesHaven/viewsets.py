@@ -107,6 +107,12 @@ class MovieViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Invalid Genre"})
         return queryset
 
+    def get_serializer_class(self):
+        if self.kwargs:
+            return self.serializer_class
+        else:
+            return self.serializer_class
+
 
 class TVSeriesViewSet(viewsets.ModelViewSet):
     queryset = TVSeries.objects.filter(status=True).order_by("name")
@@ -163,8 +169,15 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Invalid Genre"})
         return queryset
 
+    def get_serializer_class(self):
+        if self.kwargs:
+            return self.serializer_class
+        else:
+            return self.serializer_class
+
 
 class MovieByGenreViewSet(viewsets.ModelViewSet):
+    # TODO: combine movie -tv genre
     queryset = Genres.objects.filter(movie__genre_name__isnull=False).distinct()
     serializer_class = MovieByGenreSerializer
     model = Genres
@@ -178,8 +191,8 @@ class MovieByGenreViewSet(viewsets.ModelViewSet):
         queryset = self.model.objects.filter(movie__genre_name__isnull=False).distinct()
         genre = self.request.query_params.get('genre', None)
         genre_year = self.request.query_params.get('year', None)
-        print("genre_name: {}".format(genre))
-        print("genre_year: {}".format(genre_year))
+        # print("genre_name: {}".format(genre))
+        # print("genre_year: {}".format(genre_year))
         if genre:
             try:
                 queryset = queryset.filter(genre_name=genre).order_by("genre_name")
@@ -260,66 +273,58 @@ class MovieByPersonViewSet(viewsets.ModelViewSet):
 
 
 class StreamGenerator(APIView):
-    model = Movie
+    model = MediaInfo
 
     def post(self, request):
         post_data = request.data
-        if post_data.get('type', None):
-            if post_data.get('type') == "movie":
-                self.model = Movie
-            elif post_data.get('type') == "tv":
-                self.model = TVSeries
+        media_id = post_data.get('id', None)
+        stream_key = post_data.get('stream_key', None)
+        if media_id and stream_key:
+            response = requests.get(STREAM_VALIDATOR_API, params={'key': stream_key}, verify=False)
+            log_entry = StreamAuthLog.objects.create(
+                stream_key=stream_key,
+                request_data=str(post_data))
+            if response.status_code == 200:
+                log_entry.response_status = "ok"
+                try:
+                    instance = self.model.objects.get(id=media_id)
+                    file_path = os.path.join(instance.local_data.path, instance.local_data.name)
+                    symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
+                    if not os.path.exists(symlink_path):
+                        try:
+                            os.mkdir(symlink_path)
+                        except PermissionError:
+                            return Response({"detail": "Unable to generate streaming link"})
+                    unique = "{}{}".format(uuid.uuid1(), 'c')
+                    s_path = os.path.join(symlink_path, unique)
+                    # print(s_path.split(TEMP_FOLDER_NAME)[-1])
+                    if not os.path.exists(s_path):
+                        try:
+                            os.symlink(file_path, s_path)
+                        except PermissionError:
+                            return Response({"detail": "Unable to generate streaming link"})
+                    host = '/'.join(request.build_absolute_uri().split('/')[:3])
+                    # NOTE: stream URL configured to work only with apache hosted server
+                    stream_url = "{0}/media/{1}/{2}".format(host, TEMP_FOLDER_NAME, unique)
+                    log_entry.response_status = stream_url
+                    log_entry.sym_link_path = s_path
+                    log_entry.save()
+                    return Response({'stream_link': stream_url})
+                except self.model.DoesNotExist:
+                    err_msg = "provided id does not exist"
+                    log_entry.response_status = err_msg
+                    log_entry.save()
+                    return Response({"detail": err_msg})
             else:
-                return Response({'detail': 'Invalid type in post data'})
-            if post_data.get('id', None) and post_data.get('stream_key', None):
-                stream_key = post_data.get('stream_key')
-                response = requests.get(STREAM_VALIDATOR_API, params={'key': stream_key}, verify=False)
-                log_entry = StreamAuthLog.objects.create(
-                    stream_key=stream_key,
-                    request_data=str(post_data))
-                if response.status_code == 200:
-                    log_entry.response_status = "ok"
-                    try:
-                        instance = self.model.objects.get(id=post_data.get('id'))
-                        file_path = os.path.join(instance.local_data.path, instance.local_data.name)
-                        symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
-                        if not os.path.exists(symlink_path):
-                            try:
-                                os.mkdir(symlink_path)
-                            except PermissionError:
-                                return Response({"detail": "Unable to generate streaming link"})
-                        unique = "{}{}".format(uuid.uuid1(), 'c')
-                        s_path = os.path.join(symlink_path, unique)
-                        # print(s_path.split(TEMP_FOLDER_NAME)[-1])
-                        if not os.path.exists(s_path):
-                            try:
-                                os.symlink(file_path, s_path)
-                            except PermissionError:
-                                return Response({"detail": "Unable to generate streaming link"})
-                        host = '/'.join(request.build_absolute_uri().split('/')[:3])
-                        # NOTE: stream URL configured to work only with apache hosted server
-                        stream_url = "{0}/media/{1}/{2}".format(host, TEMP_FOLDER_NAME, unique)
-                        log_entry.response_status = stream_url
-                        log_entry.sym_link_path = s_path
-                        log_entry.save()
-                        return Response({'stream_link': stream_url})
-                    except self.model.DoesNotExist:
-                        err_msg = "provided id does not exist"
-                        log_entry.response_status = err_msg
-                        log_entry.save()
-                        return Response({"detail": err_msg})
-                else:
-                    try:
-                        log_entry.response_status = {"status": response.status_code, "content": response.json()}
-                        log_entry.save()
-                    except Exception as e:
-                        log_entry.response_status = {"status": response.status_code}
-                        log_entry.save()
-                    return Response({'detail': "Invalid Stream Key"})
-            else:
-                return Response({'detail': 'Missing id or key'})
+                try:
+                    log_entry.response_status = {"status": response.status_code, "content": response.json()}
+                    log_entry.save()
+                except Exception as e:
+                    log_entry.response_status = {"status": response.status_code}
+                    log_entry.save()
+                return Response({'detail': "Invalid Stream Key"})
         else:
-            return Response({'detail': 'NO or Invalid post data'})
+            return Response({'detail': 'Missing id or key'})
 
 
 class SubMenuStructureViewSet(viewsets.ModelViewSet):
@@ -328,3 +333,19 @@ class SubMenuStructureViewSet(viewsets.ModelViewSet):
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'priority')
     model = TVSeries
+
+
+class SeasonDetailViewSet(viewsets.ModelViewSet):
+    serializer_class = SeasonDetailSerializer
+    queryset = SeasonDetail.objects.all()
+    filter_backends = (OrderingFilter,)
+    ordering_fields = ('season_number',)
+    model = SeasonDetail
+
+
+class EpisodeDetailViewSet(viewsets.ModelViewSet):
+    serializer_class = EpisodeDetailSerializer
+    queryset = EpisodeDetail.objects.all()
+    filter_backends = (OrderingFilter,)
+    ordering_fields = ('episode_number',)
+    model = EpisodeDetail

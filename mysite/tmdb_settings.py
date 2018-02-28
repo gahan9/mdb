@@ -7,7 +7,7 @@ TMDB_TV_URL = "https://api.themoviedb.org/3/tv/{id}"
 TMDB_SEASON_URL = TMDB_TV_URL + "/{id}/season/{season_number}"
 TMDB_EPISODE_URL = TMDB_SEASON_URL + "/episode/{episode_number}"
 TMDB_CREDITS_URL = TMDB_EPISODE_URL + "/credits"
-
+TMDB_TRAILER_URL = TMDB_MOVIE_URL + "/videos"
 
 DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": 'fr'}
 STREAM_VALIDATOR_API = "https://planetvision.net/api/streaming/check"

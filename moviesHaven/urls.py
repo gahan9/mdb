@@ -9,6 +9,8 @@ from rest_framework import routers
 router = routers.DefaultRouter()
 router.register(r'movie', viewsets.MovieViewSet)
 router.register(r'tv', viewsets.TVSeriesViewSet)
+router.register(r'season', viewsets.SeasonDetailViewSet)
+router.register(r'episode', viewsets.EpisodeDetailViewSet)
 router.register(r'person', viewsets.PersonViewSet)
 router.register(r'genre_movie', viewsets.MovieByGenreViewSet)
 router.register(r'person_movie', viewsets.MovieByPersonViewSet)
