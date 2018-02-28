@@ -82,7 +82,7 @@ class TVSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TVSeries
-        fields = ['id', 'url', 'episode_title', 'genre_names', 'release_date', 'description',
+        fields = ['id', 'url', 'episode_title', 'name', 'genre_names', 'release_date', 'description',
                   'season_number', 'episode_number',
                   'backdrop_path', 'poster_path'
                   ]
