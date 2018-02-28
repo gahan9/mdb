@@ -136,20 +136,16 @@ def fetch_movie_metadata():
             params = copy.deepcopy(DEFAULT_PARAMS)
             params.update({"query": movie_instance.title})
             movie_result = get_json_response("{}movie/".format(TMDB_SEARCH_URL), params=params)
-            print(movie_result)
-            if 'results' in movie_result:
-                movies_data = movie_result['results']
+            if movie_result:
+                print(">>>Response of movie data... for {}".format(movie_instance.title))
+                movies_data = movie_result.get('results', None)
                 if movies_data:
-                    # try:
-                    #     movie = movies_data[0]
-                    # except Exception as e:
-                    #     continue
-                    # if movie:
+                    movie = movies_data[0]
                     print(">>> Found movie data...")
-                    if 'genre_ids' in movies_data[0]:
-                        if movies_data[0]['genre_ids']:
-                            genre_id = movies_data[0]['genre_ids']
-                    for movie in movies_data:
+                    print(">>> {}".format(movies_data.get('id', None)))
+                    genre_id = movie.get('genre_ids', None)
+                    # for movie in movies_data:
+                    if movie:
                         movie_instance.name = movie.get('title', None)
                         movie_instance.tmdb_id = movie.get('id', None)
                         movie_instance.overview = movie.get('overview', None)
@@ -163,8 +159,12 @@ def fetch_movie_metadata():
                             trailer_response = trailer_response.get("results", None)
                             if trailer_response:
                                 movie_instance.trailer_id = trailer_response[0].get("key", None)
-                        [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
-                        movie_instance.save()
+                        if genre_id:
+                            [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
+                        try:
+                            movie_instance.save()
+                        except Exception as e:
+                            print("Movie... saving meta data exception : {}".format(e))
                         image_set_thread = Thread(target=set_image, args=(movie_instance, movie))
                         image_set_thread.start()
                         # movie_instance = set_image(movie_instance, movie)
