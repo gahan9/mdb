@@ -79,24 +79,26 @@ def filter_raw_data():
                         tv_instance = TVSeries.objects.get_or_create(name=title)[0]
                         season_number = structure.get('season_number', None)
                         if season_number:
-                            season_instance = SeasonDetail.objects.get_or_create(series=tv_instance[0], season_number=season_number)[0]
+                            season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
+                            print("---------", season_number)
                             episode_number = structure.get('episode_number', None)
                             if episode_number:
                                 episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance, episode_number=episode_number)[0]
                                 entry.meta_episode = episode_instance
                                 entry.save()
             except Exception as e:
-                print("filter_raw_data: Exception during creating TVSeries object: {} for object-\n{}".format(e, entry))
+                print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
+                raise Exception(e)
         else:
             title = fetcher.get_name(entry.file.name)
             # FIXME: handle name match with multiple occurrence of special character
             if '_' in title:
                 x = title.split('_')
-                title = x[1] if x > 1 else title
+                title = x[1] if len(x) > 1 else title
             try:
                 if title:
-                    movie_instance = Movie.objects.get_or_create(title=title)
-                    entry.meta_movie = movie_instance[0]
+                    movie_instance = Movie.objects.get_or_create(title=title)[0]
+                    entry.meta_movie = movie_instance
                     entry.save()
             except Exception as e:
                 print("Exception during creating Movie object: {}".format(e))

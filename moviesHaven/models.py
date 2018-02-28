@@ -66,7 +66,7 @@ class Entertainment(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "{}".format(self.title)
+        return self.name if self.name else self.title
 
     class Meta:
         abstract = True
@@ -213,7 +213,7 @@ class PersonRole(models.Model):
 class MediaInfo(models.Model):
     file = models.ForeignKey(RawData, on_delete=models.CASCADE)
     meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.SET_NULL)
-    meta_episode = models.ForeignKey(TVSeries, null=True, blank=True, on_delete=models.SET_NULL)
+    meta_episode = models.ForeignKey(EpisodeDetail, null=True, blank=True, on_delete=models.SET_NULL)
     frame_width = models.CharField(max_length=20, null=True, blank=True)
     frame_height = models.CharField(max_length=20, null=True, blank=True)
     video_codec = models.CharField(max_length=20, null=True, blank=True)

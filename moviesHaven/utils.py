@@ -5,7 +5,8 @@ import requests
 import os
 
 from mysite.regex import MOVIE_TV_FILTER
-from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS, SUPPORTED_EXTENSIONS
+from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS,\
+    TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 
 
 class MetaFetcher(object):
@@ -52,10 +53,11 @@ class MetaFetcher(object):
             print("organize_tv_data: Exception fetching episode_number for : {}\nException Cause: {}".format(model_instance.name, e))
             return False
         try:
-            title = self.name_fetcher(model_instance.name)
+            title = self.get_name(model_instance.name)
             # FIXME: This behaviour won't be tolerated.. it will break for exception i.e. *__* or *_2018_*
             if len(title.split('_')) > 1:
                 title = title.split('_')[1]
+            print(title, season_number, episode_number)
             return {"title": title, 'season_number': season_number, 'episode_number': episode_number}
         except Exception as e:
             print("organize_tv_data: Exception for : {}\nException Cause: {}".format(model_instance.name, e))
@@ -72,21 +74,19 @@ def file_category_finder(name):
 def name_fetcher(name):
     try:
         regex = "([s]\d{2})+([e]\d{2})|([s]\dx\d{2})|(\d{2}x\d{2})"
-        x = re.search(regex, name.lower())
-        if x:
-            value = x.group(0)
-        if not value.startswith('s'):
-            return 's' + value.replace("x", "e")
+        x = re.search(regex, name.lower()).group(0)
+        if not x.startswith('s'):
+            return 's' + x.replace("x", "e")
         else:
-            return value.replace("x", "e")
+            return x.replace("x", "e")
     except Exception as e:
         return name
 
 
 def filter_film(arg):
     regex_output = name_fetcher(arg)
-    regex_season = re.match(r"[s]\d{2}", regex_output.lower())
-    regex_episode = re.match(r"[e]\d{2}", regex_output.lower())
+    regex_season = re.match(r"[s]\d+", regex_output.lower())
+    regex_episode = re.match(r"[e]\d+", regex_output.lower())
     return regex_season, regex_episode
 
 

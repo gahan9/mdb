@@ -37,11 +37,14 @@ class SeasonDetailAdmin(admin.ModelAdmin):
 
 
 class EpisodeDetailAdmin(admin.ModelAdmin):
-    list_display = ['id', 'season',
-                    'episode_title', 'episode_number', 'air_date', 'vote_average'
+    list_display = ['id', 'season_name',
+                    'episode_title', 'episode_number', 'air_date', 'vote_average',
                     'get_short_overview', 'still_path'
                     ]
     search_fields = ['episode_title', 'season__series__name']
+
+    def season_name(self, obj):
+        return obj.season.series.name
 
 
 class GenreAdmin(admin.ModelAdmin):
@@ -72,6 +75,8 @@ class SubMenuContentAdmin(admin.ModelAdmin):
 admin.site.register(RawData, RawDataAdmin)
 admin.site.register(Movie, MovieAdmin)
 admin.site.register(TVSeries, TVSeriesAdmin)
+admin.site.register(SeasonDetail, SeasonDetailAdmin)
+admin.site.register(EpisodeDetail, EpisodeDetailAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(PersonRole, PersonRoleAdmin)
 admin.site.register(Genres, GenreAdmin)

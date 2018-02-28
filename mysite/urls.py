@@ -25,7 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('moviesHaven/', include('moviesHaven.urls',)),
     path('api-docs/', include_docs_urls(title='Api doc')),
-    # path('', include('moviesHaven.urls',)),
+    path('', include('moviesHaven.urls',)),
 ]
 
 if settings.DEBUG:
