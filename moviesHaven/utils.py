@@ -39,10 +39,11 @@ def get_json_response(url, params):
             while status_code == 25:
                 time.sleep(10)
                 return get_json_response(url, params)
+        else:
             return response
     except Exception as e:
         # print(url, params)
-        return {"error": "Couldn't get any response", "detail": str(e)}
+        return {"request_error": "Couldn't get any response", "detail": str(e)}
 
 
 def filter_film(arg):
