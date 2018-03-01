@@ -291,7 +291,7 @@ class StreamGenerator(APIView):
                 log_entry.response_status = "ok"
                 try:
                     instance = self.model.objects.get(id=media_id)
-                    file_path = os.path.join(instance.local_data.path, instance.local_data.name)
+                    file_path = os.path.join(instance.file.path, instance.file.name)
                     symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
                     if not os.path.exists(symlink_path):
                         try:
