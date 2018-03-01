@@ -210,6 +210,16 @@ class EpisodeDetail(Entertainment):
         return [i.name for i in result]
 
     @property
+    def get_streams(self):
+        result = MediaInfo.objects.filter(meta_episode=self)
+        return [{"media_id"  : i.id,
+                 "quality"   : i.get_quality,
+                 "resolution": i.get_resolution,
+                 "duration"  : i.get_duration,
+                 "runtime"   : i.runtime}
+                for i in result]
+
+    @property
     def get_details(self):
         detail_set = {
             "id"            : self.id,
@@ -222,7 +232,8 @@ class EpisodeDetail(Entertainment):
             "poster_path"   : self.still_path if self.still_path else self.season.series.poster_path,
             "description"   : self.overview,
             "director"      : self.get_director,
-            "actor"         : self.get_actor
+            "actor"         : self.get_actor,
+            "streams"       : self.get_streams
         }
         return detail_set
 
