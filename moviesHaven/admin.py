@@ -56,7 +56,7 @@ class EpisodeDetailAdmin(admin.ModelAdmin):
 
 
 class GenreAdmin(admin.ModelAdmin):
-    list_display = ['id', 'genre_id', 'genre_name']
+    list_display = ['id', 'genre_id', 'genre_name', 'backdrop_path', 'poster_path']
 
 
 class PersonRoleAdmin(admin.ModelAdmin):
