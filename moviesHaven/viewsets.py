@@ -99,7 +99,7 @@ class MovieViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Invalid Year"})
         if classics:
             try:
-                queryset = queryset.filter(release_date__range=(datetime.date(1900, 1, 1), datetime.date(1970, 1, 1)))
+                queryset = queryset.filter(release_date__lte=datetime.date(1970, 1, 1))
             except ValueError:
                 return Response({"detail": "Invalid search parameter: {}".format(classics)})
         if genre:
