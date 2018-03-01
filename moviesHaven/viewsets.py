@@ -227,17 +227,17 @@ class TVSeriesByGenreViewSet(viewsets.ModelViewSet):
 
 
 class PersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.filter(personrole__role__iexact="cast")
+    queryset = Person.objects.filter(personrole__role__iexact="cast").distinct()
     serializer_class = PersonSerializer
     model = Person
 
     def get_queryset(self):
         content_type = self.request.query_params.get('type', None)
-        queryset = self.model.objects.filter(personrole__role__iexact="cast")
+        queryset = self.model.objects.filter(personrole__role__iexact="cast").distinct()
         if content_type == "movie":
-            queryset = queryset.filter(personrole__movie__isnull=False)
+            queryset = queryset.filter(personrole__movie__isnull=False).distinct()
         elif content_type == "tv":
-            queryset = queryset.filter(personrole__tv__isnull=False)
+            queryset = queryset.filter(personrole__tv__isnull=False).distinct()
         else:
             return queryset
         name = self.request.query_params.get('name', None)
@@ -245,11 +245,11 @@ class PersonViewSet(viewsets.ModelViewSet):
         # print(self.request.query_params)
         if name_starts_with:
             try:
-                queryset = queryset.filter(name__istartswith=name_starts_with)
+                queryset = queryset.filter(name__istartswith=name_starts_with).order_by("name")
             except ValueError:
                 return queryset
         if name:
-            queryset = queryset.filter(name__icontains=name)
+            queryset = queryset.filter(name__icontains=name).order_by("name")
         return queryset
 
 
@@ -367,5 +367,5 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
                 latest = 3
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
             # queryset = queryset.filter(date_updated__gte=latest_condition)
-            queryset = queryset.filter(air_date__gte=latest_condition)
+            queryset = queryset.filter(air_date__gte=latest_condition).order_by('-air_date')
         return queryset
