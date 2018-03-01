@@ -3,10 +3,11 @@ TMDB_BASE_URL = "http://api.themoviedb.org/3/"
 TMDB_IMAGE_URL = "http://image.tmdb.org/t/p/"
 TMDB_SEARCH_URL = TMDB_BASE_URL + "search/"
 TMDB_MOVIE_URL = "https://api.themoviedb.org/3/movie/{id}"
+TMDB_MOVIE_CREDITS_URL = TMDB_MOVIE_URL + "/credits"
 TMDB_TV_URL = "https://api.themoviedb.org/3/tv/{id}"
 TMDB_SEASON_URL = TMDB_TV_URL + "/{id}/season/{season_number}"
 TMDB_EPISODE_URL = TMDB_SEASON_URL + "/episode/{episode_number}"
-TMDB_CREDITS_URL = TMDB_EPISODE_URL + "/credits"
+TMDB_EPISODE_CREDITS_URL = TMDB_EPISODE_URL + "/credits"
 TMDB_TRAILER_URL = TMDB_MOVIE_URL + "/videos"
 
 DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": 'fr'}

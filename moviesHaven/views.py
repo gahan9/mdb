@@ -68,9 +68,9 @@ def insert_raw_data(request):
 
 
 def filter_raw_data():
-    fetcher = MetaFetcher()
+    fetcher = DataFilter()
     for entry in MediaInfo.objects.all():
-        filter1 = filter_film(entry.file.name)
+        filter1 = fetcher.filter_film(entry.file.name)
         if filter1:
             if all(filter1):
                 try:

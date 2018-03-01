@@ -349,5 +349,17 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
     serializer_class = EpisodeDetailSerializer
     queryset = EpisodeDetail.objects.all()
     filter_backends = (OrderingFilter,)
-    ordering_fields = ('episode_number',)
+    ordering_fields = ('episode_number', 'air_date')
     model = EpisodeDetail
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter().order_by('-air_date')
+        latest = self.request.query_params.get('latest', None)
+        if latest:
+            try:
+                latest = int(latest)
+            except Exception as e:
+                latest = 3
+            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
+            queryset = queryset.filter(date_updated__gte=latest_condition)
+        return queryset
