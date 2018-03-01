@@ -11,6 +11,7 @@ class RawDataAdmin(admin.ModelAdmin):
 class MediaInfoAdmin(admin.ModelAdmin):
     list_display = ['id', 'file', 'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
                     'video_codec', 'audio_codec', 'runtime']
+    search_fields = ['file__name', 'meta_movie', 'meta_episode']
 
     def file_short(self, obj):
         return obj.file[:10] if obj.file else obj.file
