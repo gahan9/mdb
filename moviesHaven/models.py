@@ -231,6 +231,12 @@ class MediaInfo(models.Model):
         return "{}x{}".format(self.frame_width, self.frame_height)
 
     @property
+    def get_duration(self):
+        minutes, seconds = self.runtime // 60, self.runtime % 60
+        hour, minutes = minutes // 60, minutes % 60
+        return "{}:{}:{}".format(hour, minutes, seconds)
+
+    @property
     def get_quality(self):
         # HD : if frame resolution greater then 896000(1280 * 700)
         quality = "HD" if (int(self.frame_width) * int(self.frame_height)) > 896000 else "SD"

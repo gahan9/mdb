@@ -37,6 +37,7 @@ class MovieSerializer(serializers.ModelSerializer):
         return [{"media_id"  : i.id,
                  "quality"   : i.get_quality,
                  "resolution": i.get_resolution,
+                 "duration"  : i.get_duration,
                  "runtime"   : i.runtime}
                 for i in result]
 
