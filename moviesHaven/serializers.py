@@ -91,7 +91,7 @@ class TVSeriesSerializer(serializers.ModelSerializer):
 
     def get_seasons(self, obj):
         result = SeasonDetail.objects.filter(series=obj)
-        return [{"id": i.id, "season_number": i.season_number} for i in result]
+        return [{"id": i.id, "name": "Season {}".format(i.season_number),"season_number": i.season_number} for i in result]
 
     # def get_name(self, obj):
     #     return "{} Season {} episode {}".format(obj.episode_title, obj.season_number, obj.episode_number)
@@ -112,7 +112,7 @@ class SeasonDetailSerializer(serializers.ModelSerializer):
 
     def get_episodes(self, obj):
         result = EpisodeDetail.objects.filter(season=obj)
-        return [{"id": i.id, "episode_number": i.episode_number} for i in result]
+        return [{"id": i.id, "name": "{} Episode {}".format(i.episode_title, i.episode_number), "episode_number": i.episode_number} for i in result]
 
     class Meta:
         model = SeasonDetail

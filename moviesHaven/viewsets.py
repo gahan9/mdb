@@ -28,18 +28,21 @@ class DetailView(APIView):
     model = Movie
 
     def get(self, request):
-        content_type = self.request.query_params.get('type', None)
+        content_type = self.request.query_params.get('type', 'movie')
         category = self.request.query_params.get('category', None)
         response = {}
+        filter_for = 'release_date'
         # print(movie_name, movie_year)
         if content_type == "movie":
             self.model = Movie
         elif content_type == "tv":
             self.model = TVSeries
+            filter_for = 'first_air_date'
         queryset = self.model.objects.filter(status=True)
+        print(content_type, filter_for)
         if category == "year":
             try:
-                year_list = [i.year for i in queryset.dates('release_date', 'year', order='DESC')]
+                year_list = [i.year for i in queryset.dates(filter_for, 'year', order='DESC')]
                 response["results"] = year_list
             except ValueError:
                 return Response({"detail": "Invalid search parameter"})
@@ -118,7 +121,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
     queryset = TVSeries.objects.filter(status=True).order_by("name")
     serializer_class = TVSeriesSerializer
     filter_backends = (OrderingFilter,)
-    ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
+    ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
     model = TVSeries
 
     def get_queryset(self):
@@ -154,12 +157,12 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(date_updated__gte=latest_condition)
         if year:
             try:
-                queryset = queryset.filter(release_date__year=year).order_by("name")
+                queryset = queryset.filter(first_air_date__year=year).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Year"})
         if classics:
             try:
-                queryset = queryset.filter(release_date__range=(datetime.date(1900, 1, 1), datetime.date(1970, 1, 1)))
+                queryset = queryset.filter(first_air_date__range=(datetime.date(1700, 1, 1), datetime.date(1970, 1, 1)))
             except ValueError:
                 return Response({"detail": "Invalid search parameter: {}".format(classics)})
         if genre:
