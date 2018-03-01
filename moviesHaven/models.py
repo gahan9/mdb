@@ -154,6 +154,14 @@ class SeasonDetail(Entertainment):
     backdrop_path = models.URLField(max_length=1000, null=True, blank=True)
     poster_path = models.URLField(max_length=1000, null=True, blank=True)
 
+    @property
+    def get_detail(self):
+        return {"id"           : self.id,
+                "backdrop_path": self.backdrop_path if self.backdrop_path else self.series.backdrop_path,
+                "poster_path"  : self.poster_path if self.poster_path else self.series.poster_path,
+                "name"         : "Season {}".format(self.season_number),
+                "season_number": self.season_number}
+
     def __str__(self):
         return "{} Season {}".format(self.name, self.season_number)
 
@@ -210,6 +218,7 @@ class EpisodeDetail(Entertainment):
             "episode_number": self.episode_number,
             "vote_average"  : self.vote_average,
             "vote_count"    : self.vote_count,
+            "backdrop_path" : self.season.backdrop_path if self.season.backdrop_path else self.season.series.backdrop_path,
             "poster_path"   : self.still_path if self.still_path else self.season.series.poster_path,
             "description"   : self.overview,
             "director"      : self.get_director,
