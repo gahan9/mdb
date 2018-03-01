@@ -36,6 +36,7 @@ class PopulateMetaData(object):
             update_thread.start()
 
     def update_tv_data(self, episode_instance=None):
+        fetcher_object = MetaFetcher()
         if not episode_instance:
             return False
         season_instance = episode_instance.season
@@ -47,20 +48,62 @@ class PopulateMetaData(object):
             for key, value in tv_detail.items():
                 if value is not None:  # used is not None to allow 0 as valid value
                     setattr(tv_instance, key, value)
-            tv_instance.save()  # saved tv_data
+            tv_instance.status = True
+            try:
+                tv_instance.save()  # saved tv_data
+            except Exception as e:
+                print("Exception in saving tv instance id: {}\n tmdb id: {} \n title: {}".format(tv_instance.id,
+                                                                                                 tv_instance.tmdb_id,
+                                                                                                 tv_instance.title))
         # SEASON DATA
         season_detail = fetcher.get_season_detail(tv_instance.tmdb_id, season_instance.season_number)
         if season_detail:
             for key, value in season_detail.items():
                 if value is not None:  # used is not None to allow 0 as valid value
                     setattr(season_instance, key, value)
-            season_instance.save()  # saved season_detail
-        episode_detail = fetcher.get_episode_detail(tv_instance.tmdb_id, season_instance.season_number, episode_instance.episode_number)
+            try:
+                season_instance.save()  # saved season_detail
+            except Exception as e:
+                print("Exception in saving tv instance id: {}\n tmdb id: {} \n title: {}".format(season_instance.id,
+                                                                                                 season_instance.tmdb_id,
+                                                                                                 season_instance.title))
+        episode_detail = fetcher.get_episode_detail(tv_instance.tmdb_id, season_instance.season_number,
+                                                    episode_instance.episode_number)
         if episode_detail:
             for key, value in episode_detail.items():
                 if value is not None:  # used is not None to allow 0 as valid value
                     setattr(episode_instance, key, value)
-            episode_instance.save()  # saved episode_detail
+            episode_instance.meta_stat = True
+            try:
+                episode_instance.save()  # saved episode_detail
+            except Exception as e:
+                print("Exception in saving tv instance id: {}\n tmdb id: {} \n title: {}".format(episode_instance.id,
+                                                                                                 episode_instance.tmdb_id,
+                                                                                                 episode_instance.title))
+
+            casts, crews = fetcher_object.get_movie_credits(episode_instance.tmdb_id)
+            if crews:
+                for crew in crews:
+                    crew_role = crew.pop('role')
+                    crew_work = crew.pop('character')
+                    try:
+                        person_instance = Person.objects.get_or_create(**crews)[0]
+                        PersonRole.objects.create(person=person_instance,
+                                                  role=crew_role, character=crew_work,
+                                                  episodedetail=episode_instance)
+                    except Exception as e:
+                        print("Exception in creating person role: {}".format(e))
+            if casts:
+                for cast in casts:
+                    cast_role = cast.pop('role')
+                    cast_work = cast.pop('character')
+                    try:
+                        person_instance = Person.objects.get_or_create(**crews)[0]
+                        PersonRole.objects.create(person=person_instance,
+                                                  role=cast_role, character=cast_work,
+                                                  episodedetail=episode_instance)
+                    except Exception as e:
+                        print("Exception in creating person role: {}".format(e))
 
 
 class HomePageView(TemplateView):
@@ -134,15 +177,19 @@ def filter_raw_data():
                             tv_instance = TVSeries.objects.get_or_create(title=title)[0]
                             season_number = structure.get('season_number', None)
                             if season_number:
-                                season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
+                                season_instance = \
+                                SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
                                 print("---------", season_number)
                                 episode_number = structure.get('episode_number', None)
                                 if episode_number:
-                                    episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance, episode_number=episode_number)[0]
+                                    episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance,
+                                                                                           episode_number=episode_number)[
+                                        0]
                                     entry.meta_episode = episode_instance
                                     entry.save()
                 except Exception as e:
-                    print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
+                    print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e,
+                                                                                                                  entry))
                     raise Exception(e)
         else:
             title = fetcher.get_name(entry.file.name)
@@ -249,8 +296,9 @@ def fetch_movie_metadata():
                                             PersonRole.objects.create(role="Cast", person=person_instance,
                                                                       movie=movie_instance)
                                         except Exception as e:
-                                            print("Exception occurred during creating person role-- {}\n for {}".format(e,
-                                                                                                                        person_instance))
+                                            print(
+                                                "Exception occurred during creating person role-- {}\n for {}".format(e,
+                                                                                                                      person_instance))
                                     except Exception as e:
                                         print("Exception occurred during creating person-- {}".format(e))
                         movie_instance.status = True
@@ -286,7 +334,7 @@ def fetch_tv_metadata():
                     tv_instance.vote_average = episode.get('vote_average')
                     try:
                         if genre_ids:
-                            [tv_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_ids]
+                            [tv_instance.genre_name.add(Genres.objects.get_or_create(genre_id=i)[0]) for i in genre_ids]
                     except Exception as e:
                         print("Genre adding exception : {}".format(e))
                         # print(e , "second error")
@@ -318,9 +366,9 @@ def fetch_tv_metadata():
 
 
 def update_meta_data(request):
-    movie_thread = Thread(target=fetch_movie_metadata)
-    movie_thread.start()
     populate_obj = PopulateMetaData()
+    movie_thread = Thread(target=fetch_movie_metadata)
     tv_thread = Thread(target=populate_obj.search_tv_data)
     tv_thread.start()
+    movie_thread.start()
     return HttpResponseRedirect(reverse_lazy('index'))

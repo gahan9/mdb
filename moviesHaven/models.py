@@ -138,7 +138,7 @@ class TVSeries(Entertainment):
         return self.overview[:15] if self.overview else self.overview
 
     def __str__(self):
-        return self.name
+        return self.name if self.name else self.title
 
     class Meta:
         verbose_name = _("TV Title")
@@ -187,7 +187,7 @@ class EpisodeDetail(Entertainment):
     def get_details(self):
         detail_set = {
             "id"            : self.id,
-            "name"          : self.episode_title,
+            "name"          : self.episode_title if self.episode_title else "Episode {}".format(self.episode_number),
             "air_date"      : self.air_date,
             "episode_number": self.episode_number,
             "vote_average"  : self.vote_average,

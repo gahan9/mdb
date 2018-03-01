@@ -143,7 +143,7 @@ class MetaFetcher(object):
 
     def get_movie_trailer(self, movie_id=None):
         if movie_id:
-            _response = get_json_response(self.get_movie_trailer_url(id=movie_id))
+            _response = get_json_response(self.get_movie_trailer_url(movie_id))
             if _response:
                 _result = _response.get('results', None)
                 if _result:
@@ -207,24 +207,25 @@ class MetaFetcher(object):
         _url = self.get_tv_url(tv_id)
         if _url:
             _response = get_json_response(_url)
-            tv_data = {
-                'tmdb_id'          : _response.get('id', None),
-                'name'             : _response.get('name', None),
-                'original_name'    : _response.get('original_name', None),
-                'first_air_date'   : _response.get('first_air_date', None),
-                'vote_average'     : _response.get('vote_average', None),
-                'overview'         : _response.get('overview', None),
-                'season_status'    : _response.get('season_status', None),
-                'origin_country'   : _response.get('origin_country', None),
-                'original_language': _response.get('original_language', None),
-            }
-            _backdrop_path = _response.get('backdrop_path', None)
-            _poster_path = _response.get('poster_path', None)
-            if _backdrop_path:
-                tv_data['backdrop_path'] = "{}{}".format(self.backdrop_path, _backdrop_path)
-            if _poster_path:
-                tv_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
-            return tv_data
+            if _response:
+                tv_data = {
+                    'tmdb_id'          : _response.get('id', None),
+                    'name'             : _response.get('name', None),
+                    'original_name'    : _response.get('original_name', None),
+                    'first_air_date'   : _response.get('first_air_date', None),
+                    'vote_average'     : _response.get('vote_average', None),
+                    'overview'         : _response.get('overview', None),
+                    'season_status'    : _response.get('season_status', None),
+                    'origin_country'   : _response.get('origin_country', None),
+                    'original_language': _response.get('original_language', None),
+                }
+                _backdrop_path = _response.get('backdrop_path', None)
+                _poster_path = _response.get('poster_path', None)
+                if _backdrop_path:
+                    tv_data['backdrop_path'] = "{}{}".format(self.backdrop_path, _backdrop_path)
+                if _poster_path:
+                    tv_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
+                return tv_data
         else:
             return False
 
@@ -232,22 +233,23 @@ class MetaFetcher(object):
         _url = self.get_season_url(tv_id, season_number)
         if _url:
             _response = get_json_response(_url)
-            season_data = {
-                'tmdb_id'       : _response.get('id', None),
-                'name'          : _response.get('name', None),
-                'episode_number': _response.get('episode_number', None),
-                'air_date'      : _response.get('air_date', None),
-                'vote_average'  : _response.get('vote_average', None),
-                'vote_count'    : _response.get('vote_count', None),
-                'overview'      : _response.get('overview', None),
-            }
-            _backdrop_path = _response.get('backdrop_path', None)
-            _poster_path = _response.get('poster_path', None)
-            if _backdrop_path:
-                season_data['backdrop_path'] = "{}{}".format(self.backdrop_path, _backdrop_path)
-            if _poster_path:
-                season_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
-            return season_data
+            if _response:
+                season_data = {
+                    'tmdb_id'       : _response.get('id', None),
+                    'name'          : _response.get('name', None),
+                    'episode_number': _response.get('episode_number', None),
+                    'air_date'      : _response.get('air_date', None),
+                    'vote_average'  : _response.get('vote_average', None),
+                    'vote_count'    : _response.get('vote_count', None),
+                    'overview'      : _response.get('overview', None),
+                }
+                _backdrop_path = _response.get('backdrop_path', None)
+                _poster_path = _response.get('poster_path', None)
+                if _backdrop_path:
+                    season_data['backdrop_path'] = "{}{}".format(self.backdrop_path, _backdrop_path)
+                if _poster_path:
+                    season_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
+                return season_data
         else:
             return False
 
@@ -255,19 +257,20 @@ class MetaFetcher(object):
         _url = self.get_episode_url(tv_id, season_number, episode_number)
         if _url:
             _response = get_json_response(_url)
-            episode_data = {
-                'tmdb_id'       : _response.get('id', None),
-                'name'          : _response.get('name', None),
-                'episode_number': _response.get('episode_number', None),
-                'air_date'      : _response.get('air_date', None),
-                'vote_average'  : _response.get('vote_average', None),
-                'vote_count'    : _response.get('vote_count', None),
-                'overview'      : _response.get('overview', None),
-            }
-            _poster_path = _response.get('still_path', None)
-            if _poster_path:
-                episode_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
-            return episode_data
+            if _response:
+                episode_data = {
+                    'tmdb_id'       : _response.get('id', None),
+                    'name'          : _response.get('name', None),
+                    'episode_number': _response.get('episode_number', None),
+                    'air_date'      : _response.get('air_date', None),
+                    'vote_average'  : _response.get('vote_average', None),
+                    'vote_count'    : _response.get('vote_count', None),
+                    'overview'      : _response.get('overview', None),
+                }
+                _poster_path = _response.get('still_path', None)
+                if _poster_path:
+                    episode_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
+                return episode_data
         else:
             return False
 

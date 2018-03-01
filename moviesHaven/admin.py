@@ -37,12 +37,13 @@ class TVSeriesAdmin(admin.ModelAdmin):
                     'original_name', 'first_air_date', 'vote_average',
                     'origin_country', 'original_language', 'status', 'season_status',
                     'get_short_overview', 'backdrop_path', 'poster_path']
+    list_filter = ['status']
     search_fields = ['title', 'name', 'tmdb_id', 'overview']
 
 
 class SeasonDetailAdmin(admin.ModelAdmin):
     list_display = ['id', 'series', 'tmdb_id', 'air_date', 'season_number']
-    search_fields = ['season_number', 'series__name']
+    search_fields = ['season_number']
 
 
 class EpisodeDetailAdmin(admin.ModelAdmin):
@@ -50,6 +51,7 @@ class EpisodeDetailAdmin(admin.ModelAdmin):
                     'episode_title', 'episode_number', 'air_date', 'vote_average',
                     'get_short_overview', 'still_path'
                     ]
+    list_filter = ['meta_stat']
     search_fields = ['tmdb_id', 'episode_title', 'season__series__name']
 
     def season_name(self, obj):

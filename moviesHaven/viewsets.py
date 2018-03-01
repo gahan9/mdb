@@ -118,7 +118,7 @@ class MovieViewSet(viewsets.ModelViewSet):
 
 
 class TVSeriesViewSet(viewsets.ModelViewSet):
-    queryset = TVSeries.objects.filter().order_by("name")
+    queryset = TVSeries.objects.filter(status=True).order_by("name")
     serializer_class = TVSeriesSerializer
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
@@ -128,7 +128,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
-        queryset = self.model.objects.filter().order_by("name")
+        queryset = self.model.objects.filter(status=True).order_by("name")
         name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         year = self.request.query_params.get('year', None)
@@ -358,7 +358,7 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
     model = EpisodeDetail
 
     def get_queryset(self):
-        queryset = self.model.objects.filter().order_by('-air_date')
+        queryset = self.model.objects.filter(meta_stat=True).order_by('-air_date')
         latest = self.request.query_params.get('latest', None)
         if latest:
             try:
@@ -366,6 +366,6 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 latest = 3
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
-            queryset = queryset.filter(date_updated__gte=latest_condition)
-            # queryset = queryset.filter(air_date__gte=latest_condition)
+            # queryset = queryset.filter(date_updated__gte=latest_condition)
+            queryset = queryset.filter(air_date__gte=latest_condition)
         return queryset
