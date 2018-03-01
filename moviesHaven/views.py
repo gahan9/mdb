@@ -22,6 +22,9 @@ class PopulateMetaData(object):
             params = copy.deepcopy(DEFAULT_PARAMS)
             params.update({"query": tv_instance.title})
             tv_result = get_json_response(self.tv_search_url, params=params)
+            episode_instance.scan_stat = True
+            episode_instance.season.series.scan_stat = True
+            episode_instance.save()
             results = tv_result.get('results', None)
             results0 = results[0] if results else None
             tv_instance.tmdb_id = results[0].get('id', None) if results else None
@@ -31,6 +34,7 @@ class PopulateMetaData(object):
                     [tv_instance.genre_name.add(Genres.objects.get_or_create(genre_id=i)[0]) for i in genre_ids]
             except Exception as e:
                 print("Genre adding exception : {}".format(e))
+            tv_instance.scan_stat = True
             tv_instance.save()
             update_thread = Thread(target=self.update_tv_data, args=(episode_instance,))
             update_thread.start()
@@ -237,6 +241,8 @@ def fetch_movie_metadata():
             params = copy.deepcopy(DEFAULT_PARAMS)
             params.update({"query": movie_instance.title})
             movie_result = get_json_response("{}movie/".format(TMDB_SEARCH_URL), params=params)
+            movie_instance.scan_stat = True
+            movie_instance.save()
             if movie_result:
                 print(">>>Response of movie data... for {}".format(movie_instance.title))
                 movies_data = movie_result.get('results', None)

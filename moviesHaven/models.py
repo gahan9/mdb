@@ -95,6 +95,8 @@ class Movie(Entertainment):
     vote_count = models.IntegerField(null=True, blank=True)
     status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
                                  help_text=_("Mark if all the require possible metadata is fetched"))
+    scan_stat = models.BooleanField(default=False, verbose_name=_("Scanned?"),
+                                    help_text=_("Mark if scanned with tmdb API"))
 
     @property
     def get_short_overview(self):
@@ -133,6 +135,8 @@ class TVSeries(Entertainment):
     season_status = models.CharField(max_length=50, null=True, blank=True)
     status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
                                  help_text=_("Mark if all the require possible metadata is fetched"))
+    scan_stat = models.BooleanField(default=False, verbose_name=_("Scanned?"),
+                                    help_text=_("Mark if scanned with tmdb API"))
 
     @property
     def get_short_overview(self):
@@ -182,6 +186,8 @@ class EpisodeDetail(Entertainment):
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
     meta_stat = models.BooleanField(default=False)
+    scan_stat = models.BooleanField(default=False, verbose_name=_("Scanned?"),
+                                    help_text=_("Mark if scanned with tmdb API"))
 
     @property
     def get_short_overview(self):
