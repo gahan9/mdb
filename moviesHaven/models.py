@@ -18,13 +18,13 @@ class RawData(models.Model):
 
 class Person(models.Model):
     CHOICES = (
+        (0, "Unknown"),
         (1, "Female"),
         (2, "Male"),
     )
     tmdb_id = models.CharField(max_length=50, blank=True, null=True)
     gender = models.IntegerField(blank=True, null=True)
     name = models.CharField(null=True, blank=True, max_length=100)
-    character = models.CharField(null=True, blank=True, max_length=100)
     birthday = models.CharField(null=True, blank=True, max_length=100)
     profile_path = models.URLField(max_length=1000, null=True, blank=True)
     biography = models.TextField(null=True, blank=True)
@@ -71,7 +71,7 @@ class Entertainment(models.Model):
 
     class Meta:
         abstract = True
-        unique_together = ('title', )
+        unique_together = ('title',)
 
 
 class Others(Entertainment):
@@ -94,7 +94,6 @@ class Movie(Entertainment):
     vote_count = models.IntegerField(null=True, blank=True)
     status = models.BooleanField(default=False, verbose_name=_("Meta Data fetched?"),
                                  help_text=_("Mark if all the require possible metadata is fetched"))
-
 
     @property
     def get_short_overview(self):
@@ -120,7 +119,7 @@ class Movie(Entertainment):
 
 
 class TVSeries(Entertainment):
-    name = models.CharField(max_length=250)
+    """ title, name, tmdb_id, trailer_id in base class """
     original_name = models.CharField(max_length=500, blank=True, null=True)
     first_air_date = models.DateField(blank=True, null=True)
     vote_average = models.FloatField(null=True, blank=True)
@@ -142,8 +141,8 @@ class TVSeries(Entertainment):
         return self.name
 
     class Meta:
-        verbose_name = _("TV Series")
-        verbose_name_plural = _("TV Series")
+        verbose_name = _("TV Title")
+        verbose_name_plural = _("TV Title")
 
 
 class SeasonDetail(Entertainment):
@@ -164,7 +163,7 @@ class SeasonDetail(Entertainment):
 
 class EpisodeDetail(Entertainment):
     # related_season = models.ForeignKey(SeasonDetail)
-    season = models.ForeignKey(SeasonDetail, on_delete=models.CASCADE)
+    season = models.ForeignKey(SeasonDetail, on_delete=models.CASCADE, related_name="seasons")
     air_date = models.DateField(blank=True, null=True)
     person = models.ManyToManyField(Person, through="PersonRole")
     overview = models.TextField(null=True, blank=True)
@@ -173,6 +172,7 @@ class EpisodeDetail(Entertainment):
     still_path = models.URLField(max_length=1000, null=True, blank=True)
     vote_average = models.FloatField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
+    meta_stat = models.BooleanField(default=False)
 
     @property
     def get_short_overview(self):
@@ -187,13 +187,12 @@ class EpisodeDetail(Entertainment):
     def get_details(self):
         detail_set = {
             "id"            : self.id,
-            "name"          : self.get_episode_name,
-            "overview"      : self.overview,
-            "release_date"  : self.release_date,
-            "poster_path"   : self.thumbnail_lq,
-            "backdrop_path" : self.fanart_hq,
-            "season_number" : self.season_number,
-            "episode_number": self.episode_number
+            "name"          : self.episode_title,
+            "air_date"      : self.air_date,
+            "episode_number": self.episode_number,
+            "vote_average"  : self.vote_average,
+            "vote_count"    : self.vote_count,
+            "poster_path"   : self.still_path,
         }
         return detail_set
 
@@ -201,7 +200,7 @@ class EpisodeDetail(Entertainment):
         return "{}. {} - {}".format(self.id, self.title[:10], self.vote_average)
 
     class Meta:
-        verbose_name = verbose_name_plural = _("Episodes")
+        verbose_name = verbose_name_plural = _("TV Episodes")
 
 
 class PersonRole(models.Model):
@@ -209,9 +208,13 @@ class PersonRole(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, blank=True, null=True)
     tv = models.ForeignKey(EpisodeDetail, on_delete=models.CASCADE, blank=True, null=True)
+    character = models.CharField(null=True, blank=True, max_length=100)
+    order = models.IntegerField(null=True, blank=True)
+    cast_id = models.IntegerField(null=True, blank=True)
+    tmdb_id = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return "{} as {}".format(self.person, self.role)
+        return "{} as ".format(self.person, self.character)
 
 
 class MediaInfo(models.Model):
@@ -274,7 +277,7 @@ class MainMenuConstructor(models.Model):
     addon_cmd = models.TextField(blank=True, null=True,
                                  verbose_name=_("addon command to be execute"))
     priority = models.IntegerField(default=10, verbose_name=_("Order/Priority of item"),
-                                help_text=_("Determines in which order item should be displayed"))
+                                   help_text=_("Determines in which order item should be displayed"))
 
 
 class MainMenuContent(MainMenuConstructor):

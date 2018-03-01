@@ -11,6 +11,58 @@ from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, DEFAULT_PARAMS, SCRA
 from .models import *
 
 
+class PopulateMetaData(object):
+    def __init__(self, *args, **kwargs):
+        self.tv_search_url = TMDB_SEARCH_URL + "tv/"
+        self.default_params = DEFAULT_PARAMS
+
+    def search_tv_data(self):
+        for episode_instance in EpisodeDetail.objects.filter(meta_stat=False):
+            tv_instance = episode_instance.season.series
+            params = copy.deepcopy(DEFAULT_PARAMS)
+            params.update({"query": tv_instance.title})
+            tv_result = get_json_response(self.tv_search_url, params=params)
+            results = tv_result.get('results', None)
+            results0 = results[0] if results else None
+            tv_instance.tmdb_id = results[0].get('id', None) if results else None
+            genre_ids = results0.get('genre_ids', None) if results0 else None
+            try:
+                if genre_ids:
+                    [tv_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_ids]
+            except Exception as e:
+                print("Genre adding exception : {}".format(e))
+            tv_instance.save()
+            update_thread = Thread(target=self.update_tv_data, args=(episode_instance,))
+            update_thread.start()
+
+    def update_tv_data(self, episode_instance=None):
+        if not episode_instance:
+            return False
+        season_instance = episode_instance.season
+        tv_instance = season_instance.series
+        fetcher = MetaFetcher()
+        # TV DATA
+        tv_detail = fetcher.get_tv_detail(tv_instance.tmdb_id)
+        if tv_detail:
+            for key, value in tv_detail.items():
+                if value is not None:  # used is not None to allow 0 as valid value
+                    setattr(tv_instance, key, value)
+            tv_instance.save()  # saved tv_data
+        # SEASON DATA
+        season_detail = fetcher.get_season_detail(tv_instance.tmdb_id, season_instance.season_number)
+        if season_detail:
+            for key, value in season_detail.items():
+                if value is not None:  # used is not None to allow 0 as valid value
+                    setattr(season_instance, key, value)
+            season_instance.save()  # saved season_detail
+        episode_detail = fetcher.get_episode_detail(tv_instance.tmdb_id, season_instance.season_number, episode_instance.episode_number)
+        if episode_detail:
+            for key, value in episode_detail.items():
+                if value is not None:  # used is not None to allow 0 as valid value
+                    setattr(episode_instance, key, value)
+            episode_instance.save()  # saved episode_detail
+
+
 class HomePageView(TemplateView):
     """ Home page view """
     template_name = "index.html"
@@ -79,7 +131,7 @@ def filter_raw_data():
                         title = structure.get('title', None)
                         if title:
                             # XXX: need to check test case if two TV season with same name exist???
-                            tv_instance = TVSeries.objects.get_or_create(name=title)[0]
+                            tv_instance = TVSeries.objects.get_or_create(title=title)[0]
                             season_number = structure.get('season_number', None)
                             if season_number:
                                 season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
@@ -131,6 +183,7 @@ def file_filter(request):
 
 def fetch_movie_metadata():
     print("fetching movie data...")
+    fetcher = MetaFetcher()
     for movie_instance in Movie.objects.filter(status=False):
         try:
             params = copy.deepcopy(DEFAULT_PARAMS)
@@ -158,18 +211,21 @@ def fetch_movie_metadata():
                             print("Movie... saving meta data exception : {}".format(e))
                         # TODO: INCLUDE ME IN CLASS!!! GET TRAILER
                         if movie_instance.tmdb_id:
-                            trailer_url = TMDB_TRAILER_URL.format(id=movie_instance.tmdb_id)
-                            trailer_response = get_json_response(trailer_url, DEFAULT_PARAMS)
-                            if trailer_response:
-                                try:
-                                    trailer_response = trailer_response.get("results", None)
-                                    if trailer_response:
-                                        try:
-                                            movie_instance.trailer_id = trailer_response[0].get("key", None)
-                                        except:
-                                            pass
-                                except:
-                                    pass
+                            trailer_id = fetcher.get_movie_trailer(movie_instance.tmdb_id)
+                            if trailer_id:
+                                movie_instance.trailer_id = trailer_id
+                            casts, crews = fetcher.get_movie_credits(movie_instance.tmdb_id)
+                            if crews:
+                                for crew in crews:
+                                    crew_role = crew.pop('role')
+                                    crew_work = crew.pop('character')
+                                    try:
+                                        person_instance = Person.objects.get_or_create(**crews)[0]
+                                        PersonRole.objects.create(person=person_instance,
+                                                                  role=crew_role, character=crew_work,
+                                                                  movie=movie_instance)
+                                    except Exception as e:
+                                        print("Exception in creating person role: {}".format(e))
                         if genre_id:
                             [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
                         try:
@@ -264,6 +320,7 @@ def fetch_tv_metadata():
 def update_meta_data(request):
     movie_thread = Thread(target=fetch_movie_metadata)
     movie_thread.start()
-    # tv_thread = Thread(target=fetch_tv_metadata)
-    # tv_thread.start()
+    populate_obj = PopulateMetaData()
+    tv_thread = Thread(target=populate_obj.search_tv_data)
+    tv_thread.start()
     return HttpResponseRedirect(reverse_lazy('index'))

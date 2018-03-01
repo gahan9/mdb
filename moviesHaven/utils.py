@@ -60,12 +60,14 @@ class DataFilter(object):
         try:
             season_number = self.name_fetcher(model_instance.name)[1:3]
         except Exception as e:
-            print("organize_tv_data: Exception fetching season_number for : {}\nException Cause: {}".format(model_instance.name, e))
+            print("organize_tv_data: Exception fetching season_number for : {}\nException Cause: {}".format(
+                model_instance.name, e))
             return False
         try:
             episode_number = self.name_fetcher(model_instance.name)[4:6]
         except Exception as e:
-            print("organize_tv_data: Exception fetching episode_number for : {}\nException Cause: {}".format(model_instance.name, e))
+            print("organize_tv_data: Exception fetching episode_number for : {}\nException Cause: {}".format(
+                model_instance.name, e))
             return False
         try:
             title = self.get_name(model_instance.name)
@@ -83,36 +85,191 @@ class MetaFetcher(object):
     def __init__(self, *args, **kwargs):
         self.default_movie_id = 1726  # Iron Man TMDB ID
         self.movie_url = TMDB_MOVIE_URL.format(id=self.default_movie_id)
-        self.movie_credits_url = TMDB_MOVIE_CREDITS_URL.format(id=self.default_movie_id)
+        self.movie_credits_url = self.movie_url + "/credits"
+        self.default_trailer_url = TMDB_TRAILER_URL.format(id=self.default_movie_id)
         self.default_tv_id = 71728  # Young Sheldon TMDB ID
         self.default_season = 1
         self.default_episode = 1
-        self.tv_url = TMDB_TV_URL.format(id=self.default_movie_id)
-        self.episode_credits_url = TMDB_EPISODE_CREDITS_URL.format(id=self.default_movie_id)
+        self.tv_url = TMDB_TV_URL.format(id=self.default_tv_id)
+        self.season_url = TMDB_SEASON_URL.format(id=self.default_tv_id, season_number=self.default_season)
+        self.episode_url = TMDB_EPISODE_URL.format(id=self.default_tv_id, season_number=self.default_season,
+                                                   episode_number=self.default_episode)
+        self.episode_credits_url = self.episode_url + "/credits"
+        self.params = DEFAULT_PARAMS
+        self.backdrop_path = TMDB_BACKDROP_PATH
+        self.poster_path = TMDB_POSTER_PATH
 
     def get_movie_url(self, movie_id=None):
         if movie_id:
             return TMDB_MOVIE_URL.format(id=movie_id)
         else:
-            return self.movie_url
+            return False
+
+    def get_movie_trailer_url(self, movie_id=None):
+        if movie_id:
+            return TMDB_TRAILER_URL.format(id=movie_id)
+        else:
+            return False
 
     def get_credits_url(self, movie_id=None):
         if movie_id:
             return TMDB_MOVIE_CREDITS_URL.format(id=movie_id)
         else:
-            return self.movie_url
+            return False
 
     def get_tv_url(self, tv_id=None):
         if tv_id:
             return TMDB_TV_URL.format(id=tv_id)
         else:
-            return self.movie_url
+            return False
+
+    def get_season_url(self, tv_id=None, season_number=None):
+        if tv_id and season_number is not None:
+            return TMDB_SEASON_URL.format(id=tv_id, season_number=season_number)
+        else:
+            return False
+
+    def get_episode_url(self, tv_id=None, season_number=None, episode_number=None):
+        if tv_id and season_number is not None and episode_number is not None:
+            return TMDB_EPISODE_URL.format(id=tv_id, season_number=season_number, episode_number=episode_number)
+        else:
+            return False
 
     def get_episode_credits_url(self, tv_id=None):
         if tv_id:
             return TMDB_MOVIE_CREDITS_URL.format(id=tv_id)
         else:
-            return self.movie_url
+            return False
+
+    def get_movie_trailer(self, movie_id=None):
+        if movie_id:
+            _response = get_json_response(self.get_movie_trailer_url(id=movie_id))
+            if _response:
+                _result = _response.get('results', None)
+                if _result:
+                    try:
+                        return _result[0].get("key", None)
+                    except Exception as e:
+                        print(
+                            "Caught Exception: {}\n while performing get_movie_trailer() for id {}".format(e, movie_id))
+                        return False
+        else:
+            return False
+
+    def get_person_url(self, person_id=None):
+        if person_id:
+            return TMDB_PERSON_URL.format(id=person_id)
+
+    def get_person_detail(self, person_id=None):
+        if person_id:
+            get_json_response(self)
+        else:
+            return False
+
+    def get_movie_credits(self, movie_id=None, url=None):
+        if not url:
+            url = self.get_credits_url(movie_id)
+        _cast_list = []
+        _crew_list = []
+        if movie_id:
+            response = get_json_response(url, params=self.params)
+            if response:
+                cast = response.get('cast', None)
+                crew = response.get('crew', None)
+                if cast:
+                    for person in cast:
+                        try:
+                            _cast_list.append({
+                                'cast_id'  : person.get('cast_id', None),
+                                'tmdb_id'  : person.get('id', None),
+                                'role'     : person.get('job', None),
+                                'name'     : person.get('name', None),
+                                'gender'   : person.get('gender', None),
+                                'character': person.get('character', None)
+                            })
+                        except:
+                            pass
+                if crew:
+                    for person in crew:
+                        try:
+                            _crew_list.append({
+                                'tmdb_id'  : person.get('id', None),
+                                'role'     : person.get('job', None),
+                                'name'     : person.get('name', None),
+                                'gender'   : person.get('gender', None),
+                                'character': person.get('department', None)
+                            })
+                        except:
+                            pass
+        return _cast_list, _crew_list
+
+    def get_tv_detail(self, tv_id=None):
+        _url = self.get_tv_url(tv_id)
+        if _url:
+            _response = get_json_response(_url)
+            tv_data = {
+                'tmdb_id'          : _response.get('id', None),
+                'name'             : _response.get('name', None),
+                'original_name'    : _response.get('original_name', None),
+                'first_air_date'   : _response.get('first_air_date', None),
+                'vote_average'     : _response.get('vote_average', None),
+                'overview'         : _response.get('overview', None),
+                'season_status'    : _response.get('season_status', None),
+                'origin_country'   : _response.get('origin_country', None),
+                'original_language': _response.get('original_language', None),
+            }
+            _backdrop_path = _response.get('backdrop_path', None)
+            _poster_path = _response.get('poster_path', None)
+            if _backdrop_path:
+                tv_data['backdrop_path'] = "{}{}".format(self.backdrop_path, _backdrop_path)
+            if _poster_path:
+                tv_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
+            return tv_data
+        else:
+            return False
+
+    def get_season_detail(self, tv_id=None, season_number=None):
+        _url = self.get_season_url(tv_id, season_number)
+        if _url:
+            _response = get_json_response(_url)
+            season_data = {
+                'tmdb_id'       : _response.get('id', None),
+                'name'          : _response.get('name', None),
+                'episode_number': _response.get('episode_number', None),
+                'air_date'      : _response.get('air_date', None),
+                'vote_average'  : _response.get('vote_average', None),
+                'vote_count'    : _response.get('vote_count', None),
+                'overview'      : _response.get('overview', None),
+            }
+            _backdrop_path = _response.get('backdrop_path', None)
+            _poster_path = _response.get('poster_path', None)
+            if _backdrop_path:
+                season_data['backdrop_path'] = "{}{}".format(self.backdrop_path, _backdrop_path)
+            if _poster_path:
+                season_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
+            return season_data
+        else:
+            return False
+
+    def get_episode_detail(self, tv_id=None, season_number=None, episode_number=None):
+        _url = self.get_episode_url(tv_id, season_number, episode_number)
+        if _url:
+            _response = get_json_response(_url)
+            episode_data = {
+                'tmdb_id'       : _response.get('id', None),
+                'name'          : _response.get('name', None),
+                'episode_number': _response.get('episode_number', None),
+                'air_date'      : _response.get('air_date', None),
+                'vote_average'  : _response.get('vote_average', None),
+                'vote_count'    : _response.get('vote_count', None),
+                'overview'      : _response.get('overview', None),
+            }
+            _poster_path = _response.get('still_path', None)
+            if _poster_path:
+                episode_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
+            return episode_data
+        else:
+            return False
 
 
 def file_category_finder(name):
@@ -132,7 +289,7 @@ def validate_value_existence(key, source_dict):
         return False
 
 
-def get_json_response(url, params):
+def get_json_response(url, params=DEFAULT_PARAMS):
     try:
         response = requests.get(url, params=params).json()
         status_code = response.get('status_code', None)

@@ -6,7 +6,7 @@ from .models import *
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genres
-        fields = ['id', 'genre_id', 'genre_name']
+        fields = ['id', 'genre_id', 'genre_name', 'backdrop_path', 'poster_path']
 
 
 class PersonSerializer(serializers.ModelSerializer):
@@ -109,22 +109,14 @@ class TVSeriesSerializer(serializers.ModelSerializer):
                   ]
 
 
-class SeasonDetailSerializer(serializers.ModelSerializer):
-    episodes = serializers.SerializerMethodField(read_only=True, required=False)
-
-    def get_episodes(self, obj):
-        result = EpisodeDetail.objects.filter(season=obj)
-        return [{"id": i.id, "name": "{} Episode {}".format(i.episode_title, i.episode_number), "episode_number": i.episode_number} for i in result]
-
-    class Meta:
-        model = SeasonDetail
-        fields = ["id", "url", "episodes"]
-
-
 class EpisodeDetailSerializer(serializers.ModelSerializer):
     director = serializers.SerializerMethodField(read_only=True, required=False)
     actor = serializers.SerializerMethodField(read_only=True, required=False)
     writer = serializers.SerializerMethodField(read_only=True, required=False)
+    name = serializers.SerializerMethodField(read_only=True, required=False)
+
+    def get_name(self, obj):
+        return obj.episode_title
 
     def get_director(self, obj):
         result = Person.objects.filter(personrole__role__iexact='director',
@@ -142,8 +134,22 @@ class EpisodeDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EpisodeDetail
-        fields = ["id", "url", 'director', 'actor', 'writer', 'trailer_id',
+        fields = ["id", "url", 'name',
+                  'director', 'actor', 'writer', 'trailer_id',
                   "episode_title"]
+
+
+class SeasonDetailSerializer(serializers.ModelSerializer):
+    results = serializers.SerializerMethodField(read_only=True, required=False)
+    # seasons = EpisodeDetailSerializer(source="seasons")
+
+    def get_results(self, obj):
+        result = EpisodeDetail.objects.filter(season=obj)
+        return [i.get_details for i in result]
+
+    class Meta:
+        model = SeasonDetail
+        fields = ["id", "url", "results", "seasons"]
 
 
 class MovieByGenreSerializer(serializers.ModelSerializer):
@@ -160,7 +166,7 @@ class MovieByGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genres
-        fields = ['id', 'genre_id', 'genre_name', 'results']
+        fields = ['id', 'genre_id', 'genre_name', 'results', 'backdrop_path', 'poster_path']
 
 
 class TVSeriesByGenreSerializer(serializers.ModelSerializer):

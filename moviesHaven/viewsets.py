@@ -367,4 +367,5 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
                 latest = 3
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
             queryset = queryset.filter(date_updated__gte=latest_condition)
+            # queryset = queryset.filter(air_date__gte=latest_condition)
         return queryset
