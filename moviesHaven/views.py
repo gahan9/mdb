@@ -17,7 +17,7 @@ class PopulateMetaData(object):
         self.default_params = DEFAULT_PARAMS
 
     def search_tv_data(self):
-        for episode_instance in EpisodeDetail.objects.filter(meta_stat=False):
+        for episode_instance in EpisodeDetail.objects.filter(meta_stat=False, scan_stat=False):
             tv_instance = episode_instance.season.series
             params = copy.deepcopy(DEFAULT_PARAMS)
             params.update({"query": tv_instance.title})
@@ -236,7 +236,7 @@ def file_filter(request):
 def fetch_movie_metadata():
     print("fetching movie data...")
     fetcher = MetaFetcher()
-    for movie_instance in Movie.objects.filter(status=False):
+    for movie_instance in Movie.objects.filter(status=False, scan_stat=False):
         try:
             params = copy.deepcopy(DEFAULT_PARAMS)
             params.update({"query": movie_instance.title})
