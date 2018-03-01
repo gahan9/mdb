@@ -135,9 +135,9 @@ class MetaFetcher(object):
         else:
             return False
 
-    def get_episode_credits_url(self, tv_id=None):
-        if tv_id:
-            return TMDB_MOVIE_CREDITS_URL.format(id=tv_id)
+    def get_episode_credits_url(self, tv_id=None, season_number=None, episode_number=None):
+        if tv_id and season_number is not None and episode_number is not None:
+            return TMDB_EPISODE_CREDITS_URL.format(id=tv_id, season_number=season_number, episode_number=episode_number)
         else:
             return False
 

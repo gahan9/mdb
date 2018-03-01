@@ -185,6 +185,23 @@ class EpisodeDetail(Entertainment):
             self.season.name, self.season.season_number, self.episode_number)
 
     @property
+    def get_director(self):
+        result = Person.objects.filter(personrole__role__iexact='director',
+                                       episodedetail=self)
+        return [i.name for i in result]
+
+    @property
+    def get_actor(self):
+        result = Person.objects.filter(personrole__role__iexact='cast',
+                                       episodedetail=self)
+        return [i.name for i in result]
+
+    @property
+    def get_writer(self):
+        result = Person.objects.filter(personrole__role__iexact='writer', episodedetail=self)
+        return [i.name for i in result]
+
+    @property
     def get_details(self):
         detail_set = {
             "id"            : self.id,
@@ -193,7 +210,10 @@ class EpisodeDetail(Entertainment):
             "episode_number": self.episode_number,
             "vote_average"  : self.vote_average,
             "vote_count"    : self.vote_count,
-            "poster_path"   : self.still_path,
+            "poster_path"   : self.still_path if self.still_path else self.season.series.poster_path,
+            "description"   : self.overview,
+            "director"      : self.get_director,
+            "actor"         : self.get_actor
         }
         return detail_set
 

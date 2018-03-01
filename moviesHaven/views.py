@@ -28,7 +28,7 @@ class PopulateMetaData(object):
             genre_ids = results0.get('genre_ids', None) if results0 else None
             try:
                 if genre_ids:
-                    [tv_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_ids]
+                    [tv_instance.genre_name.add(Genres.objects.get_or_create(genre_id=i)[0]) for i in genre_ids]
             except Exception as e:
                 print("Genre adding exception : {}".format(e))
             tv_instance.save()
@@ -80,8 +80,10 @@ class PopulateMetaData(object):
                 print("Exception in saving tv instance id: {}\n tmdb id: {} \n title: {}".format(episode_instance.id,
                                                                                                  episode_instance.tmdb_id,
                                                                                                  episode_instance.title))
-
-            casts, crews = fetcher_object.get_movie_credits(episode_instance.tmdb_id)
+            credits_url = fetcher.get_episode_credits_url(tv_id=tv_instance.tmdb_id,
+                                                          season_number=season_instance.season_number,
+                                                          episode_number=episode_instance.episode_number)
+            casts, crews = fetcher_object.get_movie_credits(episode_instance.tmdb_id, url=credits_url)
             if crews:
                 for crew in crews:
                     crew_role = crew.pop('role')
@@ -90,7 +92,7 @@ class PopulateMetaData(object):
                         person_instance = Person.objects.get_or_create(**crew)[0]
                         PersonRole.objects.create(person=person_instance,
                                                   role=crew_role, character=crew_work,
-                                                  episodedetail=episode_instance)
+                                                  tv=episode_instance)
                     except Exception as e:
                         print("Exception in creating person role: {}".format(e))
             if casts:
@@ -101,7 +103,7 @@ class PopulateMetaData(object):
                         person_instance = Person.objects.get_or_create(**cast)[0]
                         PersonRole.objects.create(person=person_instance,
                                                   role=cast_role, character=cast_work,
-                                                  episodedetail=episode_instance)
+                                                  tv=episode_instance)
                     except Exception as e:
                         print("Exception in creating person role: {}".format(e))
 
