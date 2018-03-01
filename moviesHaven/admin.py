@@ -12,12 +12,17 @@ class MediaInfoAdmin(admin.ModelAdmin):
     list_display = ['id', 'file', 'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
                     'video_codec', 'audio_codec', 'runtime']
 
+    def file_short(self, obj):
+        return obj.file[:10] if obj.file else obj.file
+
 
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'name', 'get_short_overview', 'vote_average', 'vote_count',
-                    'movie_genre', 'release_date', 'status',
-                    'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq']
-    search_fields = ['name']
+    list_display = ['id', 'title', 'name', 'tmdb_id', 'vote_average', 'vote_count',
+                    'movie_genre', 'release_date', 'status', 'get_short_overview',
+                    # 'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq'
+                    ]
+    list_filter = ['status']
+    search_fields = ['name', 'title', 'tmdb_id', 'overview']
 
     def movie_genre(self, obj):
         return "\n".join([p.genre_name for p in obj.genre_name.all()])
@@ -28,7 +33,7 @@ class TVSeriesAdmin(admin.ModelAdmin):
                     'original_name', 'first_air_date', 'vote_average',
                     'origin_country', 'original_language', 'status', 'season_status',
                     'get_short_overview', 'backdrop_path', 'poster_path']
-    search_fields = ['title', 'name', 'overview']
+    search_fields = ['title', 'name', 'tmdb_id', 'overview']
 
 
 class SeasonDetailAdmin(admin.ModelAdmin):
@@ -37,11 +42,11 @@ class SeasonDetailAdmin(admin.ModelAdmin):
 
 
 class EpisodeDetailAdmin(admin.ModelAdmin):
-    list_display = ['id', 'season_name',
+    list_display = ['id', 'tmdb_id', 'season_name',
                     'episode_title', 'episode_number', 'air_date', 'vote_average',
                     'get_short_overview', 'still_path'
                     ]
-    search_fields = ['episode_title', 'season__series__name']
+    search_fields = ['tmdb_id', 'episode_title', 'season__series__name']
 
     def season_name(self, obj):
         return obj.season.series.name
@@ -53,10 +58,13 @@ class GenreAdmin(admin.ModelAdmin):
 
 class PersonRoleAdmin(admin.ModelAdmin):
     list_display = ['id', 'role', 'person', 'movie', 'tv']
+    list_filter = ['role']
+    search_fields = ['person__name']
 
 
 class PersonAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'birthday', 'profile_path', 'get_short_biography', 'place_of_birth']
+    search_fields = ['name']
 
 
 class StreamAuthLogAdmin(admin.ModelAdmin):
@@ -65,11 +73,13 @@ class StreamAuthLogAdmin(admin.ModelAdmin):
 
 class MainMenuContentAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'name_en', 'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']
+    search_fields = ['name', 'name_en', 'addon_id', 'addon_cmd']
 
 
 class SubMenuContentAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'name_en', 'overview', 'overview_en',
                     'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']
+    search_fields = ['name', 'name_en', 'addon_id', 'addon_cmd']
 
 
 admin.site.register(RawData, RawDataAdmin)
