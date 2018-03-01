@@ -182,7 +182,7 @@ class MetaFetcher(object):
                             _cast_list.append({
                                 'cast_id'  : person.get('cast_id', None),
                                 'tmdb_id'  : person.get('id', None),
-                                'role'     : person.get('job', None),
+                                'role'     : 'cast',
                                 'name'     : person.get('name', None),
                                 'gender'   : person.get('gender', None),
                                 'character': person.get('character', None)

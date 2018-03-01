@@ -87,7 +87,7 @@ class PopulateMetaData(object):
                     crew_role = crew.pop('role')
                     crew_work = crew.pop('character')
                     try:
-                        person_instance = Person.objects.get_or_create(**crews)[0]
+                        person_instance = Person.objects.get_or_create(**crew)[0]
                         PersonRole.objects.create(person=person_instance,
                                                   role=crew_role, character=crew_work,
                                                   episodedetail=episode_instance)
@@ -98,7 +98,7 @@ class PopulateMetaData(object):
                     cast_role = cast.pop('role')
                     cast_work = cast.pop('character')
                     try:
-                        person_instance = Person.objects.get_or_create(**crews)[0]
+                        person_instance = Person.objects.get_or_create(**cast)[0]
                         PersonRole.objects.create(person=person_instance,
                                                   role=cast_role, character=cast_work,
                                                   episodedetail=episode_instance)
@@ -177,8 +177,7 @@ def filter_raw_data():
                             tv_instance = TVSeries.objects.get_or_create(title=title)[0]
                             season_number = structure.get('season_number', None)
                             if season_number:
-                                season_instance = \
-                                SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
+                                season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
                                 print("---------", season_number)
                                 episode_number = structure.get('episode_number', None)
                                 if episode_number:
@@ -262,17 +261,29 @@ def fetch_movie_metadata():
                             if trailer_id:
                                 movie_instance.trailer_id = trailer_id
                             casts, crews = fetcher.get_movie_credits(movie_instance.tmdb_id)
+                            if casts:
+                                for cast in casts:
+                                    cast_role = cast.pop('role')
+                                    cast_work = cast.pop('character')
+                                    try:
+                                        person_instance = Person.objects.get_or_create(**cast)[0]
+                                        PersonRole.objects.create(person=person_instance,
+                                                                  role=cast_role, character=cast_work,
+                                                                  movie=movie_instance)
+                                    except Exception as e:
+                                        print(
+                                            "Exception in creating person role: {}\n cast: {} \n cast_role:>> {} <<".format(e, cast, cast_role))
                             if crews:
                                 for crew in crews:
                                     crew_role = crew.pop('role')
                                     crew_work = crew.pop('character')
                                     try:
-                                        person_instance = Person.objects.get_or_create(**crews)[0]
+                                        person_instance = Person.objects.get_or_create(**crew)[0]
                                         PersonRole.objects.create(person=person_instance,
                                                                   role=crew_role, character=crew_work,
                                                                   movie=movie_instance)
                                     except Exception as e:
-                                        print("Exception in creating person role: {}".format(e))
+                                        print("Exception in creating person role: {}\n crew: {} \n crew_role:>> {} <<".format(e, crew, crew_role))
                         if genre_id:
                             [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
                         try:
@@ -281,88 +292,29 @@ def fetch_movie_metadata():
                             print("Movie... saving meta data exception : {}".format(e))
                         image_set_thread = Thread(target=set_image, args=(movie_instance, movie))
                         image_set_thread.start()
-                        # movie_instance = set_image(movie_instance, movie)
 
-                        # TODO: INCLUDE ME IN CLASS!!! GET CAST/CREW DATA!
-                        cast_movie_url = "{}movie/{}/credits".format(TMDB_BASE_URL, movies_data[0]['id'])
-                        cast_list = get_json_response(cast_movie_url, DEFAULT_PARAMS)['cast']
-                        for cast in cast_list:
-                            person_data = fetch_cast_data(cast)
-                            if person_data:
-                                if not Person.objects.filter(**person_data):
-                                    try:
-                                        person_instance = Person.objects.create(**person_data)
-                                        try:
-                                            PersonRole.objects.create(role="Cast", person=person_instance,
-                                                                      movie=movie_instance)
-                                        except Exception as e:
-                                            print(
-                                                "Exception occurred during creating person role-- {}\n for {}".format(e,
-                                                                                                                      person_instance))
-                                    except Exception as e:
-                                        print("Exception occurred during creating person-- {}".format(e))
+                        # # TODO: INCLUDE ME IN CLASS!!! GET CAST/CREW DATA!
+                        # cast_movie_url = "{}movie/{}/credits".format(TMDB_BASE_URL, movies_data[0]['id'])
+                        # cast_list = get_json_response(cast_movie_url, DEFAULT_PARAMS)['cast']
+                        # for cast in cast_list:
+                        #     person_data = fetch_cast_data(cast)
+                        #     if person_data:
+                        #         if not Person.objects.filter(**person_data):
+                        #             try:
+                        #                 person_instance = Person.objects.get_or_create(**person_data)[0]
+                        #                 try:
+                        #                     PersonRole.objects.create(role="Cast", person=person_instance,
+                        #                                               movie=movie_instance)
+                        #                 except Exception as e:
+                        #                     print(
+                        #                         "Exception occurred during creating person role-- {}\n for {}".format(e,
+                        #                                                                                               person_instance))
+                        #             except Exception as e:
+                        #                 print("Exception occurred during creating person-- {}".format(e))
                         movie_instance.status = True
                         movie_instance.save()
         except Exception as e:
             print("Exception in movie creation for object :  {}\n Exception: {}".format(movie_instance, e))
-
-
-def fetch_tv_metadata():
-    # LARGE CHANGE to Do
-    print("fetching tv data...")
-    for tv_instance in TVSeries.objects.filter(status=False):
-        params = copy.deepcopy(DEFAULT_PARAMS)
-        params.update({"query": tv_instance.title})
-        tv_result = get_json_response("{}tv/".format(TMDB_SEARCH_URL), params=params)
-        results = tv_result.get('results', None)
-        results0 = results[0] if results else None
-        tv_id = results[0].get('id', None) if results else None
-        genre_ids = results0.get('genre_ids', None) if results0 else None
-        url = str(TMDB_BASE_URL) + 'tv/' + str(tv_id) + '/season/' + str(tv_instance.season_number)
-        episode_result = get_json_response(url, params=DEFAULT_PARAMS)
-        episodes = episode_result.get('episodes', None)
-        if episodes:
-            for episode in episodes:
-                if episode['episode_number'] == tv_instance.episode_number:
-                    tv_instance.tmdb_id = episode.get('id')
-                    tv_instance.episode_number = episode.get('episode_number')
-                    tv_instance.season_number = episode.get('season_number')
-                    tv_instance.episode_title = episode.get('name')
-                    tv_instance.release_date = episode.get('air_date')
-                    tv_instance.overview = episode.get('overview')
-                    tv_instance.vote_count = episode.get('vote_count')
-                    tv_instance.vote_average = episode.get('vote_average')
-                    try:
-                        if genre_ids:
-                            [tv_instance.genre_name.add(Genres.objects.get_or_create(genre_id=i)[0]) for i in genre_ids]
-                    except Exception as e:
-                        print("Genre adding exception : {}".format(e))
-                        # print(e , "second error")
-                        tv_instance.save()
-                    image_set_thread = Thread(target=set_image, args=(tv_instance, tv_result['results'][0]))
-                    image_set_thread.start()
-
-        # FIXME: Use this url for crew+cast : cast_tv_url = "{}tv/{}/season/{}/episode/{}/".format(TMDB_BASE_URL, tv_id)
-        cast_tv_url = "{}tv/{}/credits".format(TMDB_BASE_URL, tv_id)
-        cast_list = get_json_response(cast_tv_url, DEFAULT_PARAMS)
-        cast_list = cast_list.get('cast', None)
-        if cast_list:
-            for cast in cast_list:
-                person_data = fetch_cast_data(cast)
-                if person_data:
-                    if not Person.objects.filter(**person_data):
-                        try:
-                            person_instance = Person.objects.create(**person_data)
-                            try:
-                                PersonRole.objects.create(role="Cast", person=person_instance, tv=tv_instance)
-                            except Exception as e:
-                                print("Exception occurred during creating person role-- {}\n for {}".format(
-                                    e, person_instance))
-                        except Exception as e:
-                            print("Exception occurred during creating person-- {}".format(e))
-        if cast_list and episodes:
-            tv_instance.status = True
-            tv_instance.save()
 
 
 def update_meta_data(request):

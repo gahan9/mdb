@@ -22,6 +22,7 @@ class Person(models.Model):
         (1, "Female"),
         (2, "Male"),
     )
+    cast_id = models.CharField(max_length=50, blank=True, null=True)
     tmdb_id = models.CharField(max_length=50, blank=True, null=True)
     gender = models.IntegerField(blank=True, null=True)
     name = models.CharField(null=True, blank=True, max_length=100)
