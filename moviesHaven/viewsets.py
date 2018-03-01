@@ -13,6 +13,7 @@ from moviesHaven.models import *
 from moviesHaven.serializers import *
 from rest_framework import viewsets
 
+from mysite.directory_settings import MEDIA_MAP
 from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
 
 
@@ -291,7 +292,11 @@ class StreamGenerator(APIView):
                 try:
                     instance = self.model.objects.get(id=media_id)
                     file_path = os.path.join(instance.file.path, instance.file.name)
-                    symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
+                    if os.path.exists(MEDIA_MAP):
+                        symlink_path = os.path.join(MEDIA_MAP, TEMP_FOLDER_NAME)
+                    else:
+                        symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
+                    # print(symlink_path, SCRAPE_DIR)
                     if not os.path.exists(symlink_path):
                         try:
                             os.mkdir(symlink_path)

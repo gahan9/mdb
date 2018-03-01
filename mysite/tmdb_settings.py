@@ -13,3 +13,4 @@ TMDB_TRAILER_URL = TMDB_MOVIE_URL + "/videos"
 DEFAULT_PARAMS = {"api_key": TMDB_API_KEY, "language": 'fr'}
 STREAM_VALIDATOR_API = "https://planetvision.net/api/streaming/check"
 OPTION_QUALITY = [1000, 780, 500, 300, 185]
+MEDIA_MAP = "/media/data"
