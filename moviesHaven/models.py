@@ -225,9 +225,22 @@ class MediaInfo(models.Model):
     bit_rate = models.CharField(max_length=20, null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True,
                                   verbose_name=_("Run time in seconds"))
+
     @property
     def get_resolution(self):
         return "{}x{}".format(self.frame_width, self.frame_height)
+
+    @property
+    def get_duration(self):
+        minutes, seconds = self.runtime // 60, self.runtime % 60
+        hour, minutes = minutes // 60, minutes % 60
+        return "{}:{}:{}".format(hour, minutes, seconds)
+
+    @property
+    def get_quality(self):
+        # HD : if frame resolution greater then 896000(1280 * 700)
+        quality = "HD" if (int(self.frame_width) * int(self.frame_height)) > 896000 else "SD"
+        return "{1} ({0}p)".format(self.frame_height, quality)
 
     def __str__(self):
         return "{} - {}x{} @ {}".format(self.file, self.frame_width, self.frame_height, self.bit_rate)

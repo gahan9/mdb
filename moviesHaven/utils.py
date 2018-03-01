@@ -5,13 +5,28 @@ import requests
 import os
 
 from mysite.regex import MOVIE_TV_FILTER
-from mysite.settings import TMDB_API_KEY, TMDB_BASE_URL, TMDB_IMAGE_URL, DEFAULT_PARAMS,\
-    TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
+from mysite.settings import TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
+from mysite.tmdb_settings import *
 
 
-class MetaFetcher(object):
+class DataFilter(object):
     def __init__(self, *args, **kwargs):
         pass
+
+    def filter_film(self, title):
+        if title:
+            season_episode = re.search(r"[s]\d+[e]\d+", title.lower())
+            if season_episode:
+                season_episode = season_episode.group(0)
+                season = season_episode[0:round(len(season_episode) / 2)].lower()
+                episode = season_episode[round(len(season_episode) / 2):].lower()
+                return season, episode
+            else:
+                print("season episode couldn't fetched for : {}".format(title))
+                return False
+        else:
+            print("title not found : {}".format(title))
+            return False
 
     @staticmethod
     def get_name(filename):
@@ -64,36 +79,47 @@ class MetaFetcher(object):
             return False
 
 
+class MetaFetcher(object):
+    def __init__(self, *args, **kwargs):
+        self.default_movie_id = 1726  # Iron Man TMDB ID
+        self.movie_url = TMDB_MOVIE_URL.format(id=self.default_movie_id)
+        self.movie_credits_url = TMDB_MOVIE_CREDITS_URL.format(id=self.default_movie_id)
+        self.default_tv_id = 71728  # Young Sheldon TMDB ID
+        self.default_season = 1
+        self.default_episode = 1
+        self.tv_url = TMDB_TV_URL.format(id=self.default_movie_id)
+        self.episode_credits_url = TMDB_EPISODE_CREDITS_URL.format(id=self.default_movie_id)
+
+    def get_movie_url(self, movie_id=None):
+        if movie_id:
+            return TMDB_MOVIE_URL.format(id=movie_id)
+        else:
+            return self.movie_url
+
+    def get_credits_url(self, movie_id=None):
+        if movie_id:
+            return TMDB_MOVIE_CREDITS_URL.format(id=movie_id)
+        else:
+            return self.movie_url
+
+    def get_tv_url(self, tv_id=None):
+        if tv_id:
+            return TMDB_TV_URL.format(id=tv_id)
+        else:
+            return self.movie_url
+
+    def get_episode_credits_url(self, tv_id=None):
+        if tv_id:
+            return TMDB_MOVIE_CREDITS_URL.format(id=tv_id)
+        else:
+            return self.movie_url
+
+
 def file_category_finder(name):
     if re.search(r'XXX|sexual', name.lower(), re.IGNORECASE):
         return "adult"
     elif re.search(r" - ", name.lower(), re.IGNORECASE):
         return "songs"
-
-
-def name_fetcher(name):
-    try:
-        regex = "([s]\d{2})+([e]\d{2})|([s]\dx\d{2})|(\d{2}x\d{2})"
-        x = re.search(regex, name.lower()).group(0)
-        if not x.startswith('s'):
-            return 's' + x.replace("x", "e")
-        else:
-            return x.replace("x", "e")
-    except Exception as e:
-        return name
-
-
-def filter_film(arg):
-    if arg:
-        season_episode = re.search(r"[s]\d+[e]\d+", arg.lower())
-        if season_episode:
-            season_episode = season_episode.group(0)
-            season, episode = season_episode[0:round(len(season_episode) / 2)].lower(), season_episode[round(len(season_episode) / 2):].lower()
-            return season, episode
-        else:
-            return False
-    else:
-        return False
 
 
 def validate_value_existence(key, source_dict):
@@ -121,11 +147,6 @@ def get_json_response(url, params):
         return {"request_error": "Couldn't get any response", "detail": str(e)}
 
 
-def name_catcher(filename):
-    value = ' '.join(list(filter(lambda x: x not in re.findall(MOVIE_TV_FILTER, filename, re.IGNORECASE), filename.split('.'))))
-    return value
-
-
 def get_genre(flag):
     url = TMDB_BASE_URL
     if flag == "tv":
@@ -134,22 +155,6 @@ def get_genre(flag):
         url += "genre/movie/list?"
     response = requests.get(url, params=DEFAULT_PARAMS)
     return response.json()
-
-
-def create_file_structure(file_obj):
-    try:
-        title = file_obj.name  # [:end]
-        season_number = name_fetcher(file_obj.name)[1:3]  # [:1][0][0][1:]
-        episode_number = name_fetcher(file_obj.name)[4:6]  # [1:][0][0][1:]
-        if len(name_catcher(title).split('_')) > 1:
-            title = name_catcher(title).split('_')[1]
-        else:
-            title = name_catcher(title)
-        tv_dict = {"title": title,
-                   'season_number': season_number, 'episode_number': episode_number}
-        return tv_dict
-    except Exception as e:
-        return None
 
 
 def set_image(instance, source_json):
@@ -164,6 +169,8 @@ def set_image(instance, source_json):
             instance.thumbnail_hq = thumbnail_image_url
     if instance.thumbnail_hq and not instance.thumbnail_lq:
         instance.thumbnail_lq = instance.thumbnail_hq
+    if instance.fanart_hq and not instance.fanart_lq:
+        instance.fanart_lq = instance.fanart_hq
     instance.save()
     return instance
 

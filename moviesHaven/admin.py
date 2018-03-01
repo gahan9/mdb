@@ -21,7 +21,8 @@ class MediaInfoAdmin(admin.ModelAdmin):
 
 class MovieAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'name', 'tmdb_id', 'vote_average', 'vote_count',
-                    'movie_genre', 'release_date', 'status', 'get_short_overview',
+                    'trailer_id',
+                    'movie_genre', 'release_date', 'get_short_overview', 'status',
                     # 'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq'
                     ]
     list_filter = ['status']
@@ -56,7 +57,7 @@ class EpisodeDetailAdmin(admin.ModelAdmin):
 
 
 class GenreAdmin(admin.ModelAdmin):
-    list_display = ['id', 'genre_id', 'genre_name']
+    list_display = ['id', 'genre_id', 'genre_name', 'backdrop_path', 'poster_path']
 
 
 class PersonRoleAdmin(admin.ModelAdmin):

@@ -13,6 +13,7 @@ from moviesHaven.models import *
 from moviesHaven.serializers import *
 from rest_framework import viewsets
 
+from mysite.directory_settings import MEDIA_MAP
 from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
 
 
@@ -24,7 +25,6 @@ class DetailView(APIView):
     :list
     all the alphabets/year contained by tv/movie
     """
-    ordering_fields = ('name', 'release_date')
     model = Movie
 
     def get(self, request):
@@ -100,7 +100,7 @@ class MovieViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Invalid Year"})
         if classics:
             try:
-                queryset = queryset.filter(release_date__range=(datetime.date(1900, 1, 1), datetime.date(1970, 1, 1)))
+                queryset = queryset.filter(release_date__lte=datetime.date(1970, 1, 1))
             except ValueError:
                 return Response({"detail": "Invalid search parameter: {}".format(classics)})
         if genre:
@@ -118,7 +118,7 @@ class MovieViewSet(viewsets.ModelViewSet):
 
 
 class TVSeriesViewSet(viewsets.ModelViewSet):
-    queryset = TVSeries.objects.filter(status=True).order_by("name")
+    queryset = TVSeries.objects.filter().order_by("name")
     serializer_class = TVSeriesSerializer
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
@@ -128,7 +128,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
-        queryset = self.model.objects.filter(status=True).order_by("name")
+        queryset = self.model.objects.filter().order_by("name")
         name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         year = self.request.query_params.get('year', None)
@@ -291,8 +291,12 @@ class StreamGenerator(APIView):
                 log_entry.response_status = "ok"
                 try:
                     instance = self.model.objects.get(id=media_id)
-                    file_path = os.path.join(instance.local_data.path, instance.local_data.name)
-                    symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
+                    file_path = os.path.join(instance.file.path, instance.file.name)
+                    if os.path.exists(MEDIA_MAP):
+                        symlink_path = os.path.join(MEDIA_MAP, TEMP_FOLDER_NAME)
+                    else:
+                        symlink_path = os.path.join(SCRAPE_DIR, TEMP_FOLDER_NAME)
+                    # print(symlink_path, SCRAPE_DIR)
                     if not os.path.exists(symlink_path):
                         try:
                             os.mkdir(symlink_path)
@@ -350,5 +354,17 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
     serializer_class = EpisodeDetailSerializer
     queryset = EpisodeDetail.objects.all()
     filter_backends = (OrderingFilter,)
-    ordering_fields = ('episode_number',)
+    ordering_fields = ('episode_number', 'air_date')
     model = EpisodeDetail
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter().order_by('-air_date')
+        latest = self.request.query_params.get('latest', None)
+        if latest:
+            try:
+                latest = int(latest)
+            except Exception as e:
+                latest = 3
+            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
+            queryset = queryset.filter(date_updated__gte=latest_condition)
+        return queryset

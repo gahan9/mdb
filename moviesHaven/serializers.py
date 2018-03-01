@@ -35,7 +35,9 @@ class MovieSerializer(serializers.ModelSerializer):
     def get_streams(obj):
         result = MediaInfo.objects.filter(meta_movie=obj)
         return [{"media_id"  : i.id,
+                 "quality"   : i.get_quality,
                  "resolution": i.get_resolution,
+                 "duration"  : i.get_duration,
                  "runtime"   : i.runtime}
                 for i in result]
 
