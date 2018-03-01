@@ -24,7 +24,6 @@ class DetailView(APIView):
     :list
     all the alphabets/year contained by tv/movie
     """
-    ordering_fields = ('name', 'release_date')
     model = Movie
 
     def get(self, request):
@@ -118,7 +117,7 @@ class MovieViewSet(viewsets.ModelViewSet):
 
 
 class TVSeriesViewSet(viewsets.ModelViewSet):
-    queryset = TVSeries.objects.filter(status=True).order_by("name")
+    queryset = TVSeries.objects.filter().order_by("name")
     serializer_class = TVSeriesSerializer
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
@@ -128,7 +127,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
-        queryset = self.model.objects.filter(status=True).order_by("name")
+        queryset = self.model.objects.filter().order_by("name")
         name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         year = self.request.query_params.get('year', None)
