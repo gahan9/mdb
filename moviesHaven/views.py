@@ -195,7 +195,7 @@ def filter_raw_data():
                 except Exception as e:
                     print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e,
                                                                                                                   entry))
-                    raise Exception(e)
+                    # raise Exception(e)
         else:
             title = fetcher.get_name(entry.file.name)
             # FIXME: handle name match with multiple occurrence of special character

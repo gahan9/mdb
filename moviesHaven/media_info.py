@@ -56,6 +56,6 @@ class FetchMediaInfo(object):
                     # raise Exception(e)
                     return False
             except Exception as e:
-                print("MediaInfo: fetching unsuccessful\nreason: {}".format(e))
+                print("MediaInfo: cmd fetching unsuccessful\nreason: {}".format(e))
                 # raise Exception(e)
                 return False
