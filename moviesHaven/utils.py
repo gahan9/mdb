@@ -1,3 +1,4 @@
+# coding=utf-8
 import re
 import time
 
@@ -137,7 +138,7 @@ class MetaFetcher(object):
         else:
             return False
 
-    def get_episode_credits_url(self, tv_id=None, season_number=None, episode_number=None):
+    def get_episode_credits_url (self, tv_id=None, season_number=None, episode_number=None):
         if tv_id and season_number is not None and episode_number is not None:
             return TMDB_EPISODE_CREDITS_URL.format(id=tv_id, season_number=season_number, episode_number=episode_number)
         else:
@@ -152,7 +153,24 @@ class MetaFetcher(object):
     def get_person_detail(self, person_id=None):
         _url = self.get_person_url(person_id)
         if _url:
-            _response = get_json_response(person_id)
+            try:
+                _response = get_json_response(_url)
+                if _response:
+                    cast_data = {
+                        'popularity'    : _response.get('popularity', None),
+                        'place_of_birth': _response.get('place_of_birth', None),
+                        'biography'     : _response.get('biography', None),
+                        'birthday'      : _response.get('birthday', None),
+                        'deathday'      : _response.get('deathday', None),
+                        'homepage'      : _response.get('homepage', None),
+                        'imdb_id'       : _response.get('imdb_id', None),
+                    }
+                    _profile_path = _response.get('profile_path', None)
+                    if _profile_path:
+                        cast_data['profile_path'] = "{}{}".format(self.poster_path, _profile_path)
+                    return cast_data
+            except Exception as e:
+                return False
 
     def get_movie_trailer(self, movie_id=None):
         if movie_id:

@@ -1,13 +1,13 @@
 from threading import Thread
 import copy
+
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from moviesHaven.media_info import FetchMediaInfo
-from mysite.tmdb_settings import TMDB_TRAILER_URL
 from .utils import *
-from mysite.settings import TMDB_SEARCH_URL, TMDB_BASE_URL, DEFAULT_PARAMS, SCRAPE_DIR
+from mysite.settings import TMDB_SEARCH_URL, DEFAULT_PARAMS, SCRAPE_DIR
 from .models import *
 
 
@@ -111,6 +111,22 @@ class PopulateMetaData(object):
                     except Exception as e:
                         print("Exception in creating person role: {}".format(e))
 
+    def update_person_data(self):
+        fetcher = MetaFetcher()
+        for person_instance in Person.objects.filter(status=0):
+            try:
+                person_data = fetcher.get_person_detail(person_instance.tmdb_id)
+                person_instance.status = 1
+                person_instance.save()
+                # print(person_instance)
+                if person_data:
+                    for key, value in person_data.items():
+                        setattr(person_instance, key, value)
+                    person_instance.status = 2
+                    person_instance.save()
+            except Exception as e:
+                print("Unable to fetch person data for {}\nreason:".format(person_instance, e))
+
 
 class HomePageView(TemplateView):
     """ Home page view """
@@ -121,6 +137,16 @@ class HomePageView(TemplateView):
         context = super(HomePageView, self).get_context_data(**kwargs)
         context['movies'] = Movie.objects.all()
         return context
+
+    def get(self, request, *args, **kwargs):
+        task = self.kwargs.get('task', None)
+        if task:
+            if task == "update_person_data":
+                meta_fetcher_obj = PopulateMetaData()
+                t = Thread(target=meta_fetcher_obj.update_person_data)
+                t.start()
+        return super(HomePageView, self).get(request, *args, **kwargs)
+
 
 
 #

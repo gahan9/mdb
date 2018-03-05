@@ -22,14 +22,23 @@ class Person(models.Model):
         (1, "Female"),
         (2, "Male"),
     )
+    STATUS_CHOICE = (
+        (0, "to be scan"),
+        (1, "Scanned"),
+        (2, "Updated")
+    )
     cast_id = models.CharField(max_length=50, blank=True, null=True)
     tmdb_id = models.CharField(max_length=50, blank=True, null=True)
-    gender = models.IntegerField(blank=True, null=True)
-    name = models.CharField(null=True, blank=True, max_length=100)
+    imdb_id = models.CharField(max_length=50, blank=True, null=True)
+    gender = models.IntegerField(blank=True, null=True)  # can be filled in slot 1
+    name = models.CharField(null=True, blank=True, max_length=100)  # filled in slot 1
     birthday = models.CharField(null=True, blank=True, max_length=100)
+    deathday = models.CharField(null=True, blank=True, max_length=100)
     profile_path = models.URLField(max_length=1000, null=True, blank=True)
     biography = models.TextField(null=True, blank=True)
     place_of_birth = models.CharField(max_length=200, null=True, blank=True)
+    popularity = models.FloatField(blank=True, null=True)
+    status = models.IntegerField(choices=STATUS_CHOICE, default=0)
 
     def __str__(self):
         return "{}".format(self.name)

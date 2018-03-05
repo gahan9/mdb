@@ -7,6 +7,9 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+{% block navbar %}
+    {% include 'navbar.html' %}
+{% endblock %}
 <div class="container" style="margin-top: 10%">
     <table class="table table-bordered">
         <thead>
@@ -14,6 +17,7 @@
             <th scope="col">Insert into Database!</th>
             <th scope="col">Filter Files!</th>
             <th scope="col">Fetch API Data!</th>
+            <th scope="col">Update Person Detail</th>
         </tr>
         </thead>
         <tbody>
@@ -34,6 +38,13 @@
             </td>
             <td>
                 <form action="{% url 'update_meta_data' %}">
+                    <button class="btn btn-primary" type="submit">
+                        {% trans "Fetch MetaData" %}
+                    </button>
+                </form>
+            </td>
+            <td>
+                <form action="{% url 'index' task='update_person_data' %}">
                     <button class="btn btn-primary" type="submit">
                         {% trans "Fetch MetaData" %}
                     </button>

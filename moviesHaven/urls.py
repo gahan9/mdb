@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.generic import RedirectView
 
 from . import views
@@ -20,6 +20,7 @@ router.register(r'menu', viewsets.SubMenuStructureViewSet)
 
 urlpatterns = [
     path('', views.HomePageView.as_view(), name='index'),
+    path('<slug:task>', views.HomePageView.as_view(), name='index'),
     path('api/', include(router.urls)),
     # path('api/v1/', RedirectView.as_view(url='/api/')),
     path('insert_raw_data/', views.insert_raw_data, name='insert_raw_data'),

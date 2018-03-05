@@ -3,6 +3,7 @@ import os
 import uuid
 
 import requests
+from django.db.models import Q
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
@@ -76,8 +77,12 @@ class MovieViewSet(viewsets.ModelViewSet):
         year = self.request.query_params.get('year', None)
         classics = self.request.query_params.get('classics', None)
         genre = self.request.query_params.get('genre', None)
+        exclude = self.request.query_params.get('exclude', None)
         latest = self.request.query_params.get('latest', None)
         # print(movie_name, movie_year, genre)
+        if exclude:
+            for category in ['animation', 'documentaire']:
+                queryset = queryset.exclude(genre_name__genre_name__iexact=category)
         if name:
             queryset = queryset.filter(name__icontains=name)
         if name_starts_with:
@@ -170,7 +175,6 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("genre_name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
-
         return queryset
 
     def get_serializer_class(self):
@@ -182,7 +186,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
 
 class MovieByGenreViewSet(viewsets.ModelViewSet):
     # TODO: combine movie -tv genre
-    queryset = Genres.objects.filter(movie__genre_name__isnull=False).exclude(genre_id=10770).distinct()
+    queryset = Genres.objects.filter(movie__genre_name__isnull=False).exclude(Q(genre_name='animation') | Q(genre_id=10770) | Q(genre_name='documentaire')).distinct()
     serializer_class = MovieByGenreSerializer
     model = Genres
     filter_backends = (OrderingFilter,)
@@ -192,7 +196,7 @@ class MovieByGenreViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
-        queryset = self.model.objects.filter(movie__genre_name__isnull=False).exclude(genre_id=10770).distinct()
+        queryset = self.model.objects.filter(movie__genre_name__isnull=False).exclude(Q(genre_name='animation') | Q(genre_id=10770) | Q(genre_name='documentaire')).distinct()
         genre = self.request.query_params.get('genre', None)
         genre_year = self.request.query_params.get('year', None)
         # print("genre_name: {}".format(genre))
