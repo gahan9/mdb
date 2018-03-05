@@ -81,7 +81,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         latest = self.request.query_params.get('latest', None)
         # print(movie_name, movie_year, genre)
         if exclude:
-            for category in ['animation', 'documentaire', 'Comédie']:
+            for category in ['animation', 'documentaire']:
                 queryset = queryset.exclude(genre_name__genre_name__iexact=category)
         if name:
             queryset = queryset.filter(name__icontains=name)
