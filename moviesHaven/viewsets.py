@@ -86,7 +86,10 @@ class MovieViewSet(viewsets.ModelViewSet):
         if name:
             queryset = queryset.filter(name__icontains=name)
         if name_starts_with:
-            queryset = queryset.filter(name__istartswith=name_starts_with)
+            if str(name_starts_with) == "0":
+                queryset = queryset.filter(name__iregex=r'^[0-9](.*)').order_by('name')
+            else:
+                queryset = queryset.filter(name__istartswith=name_starts_with)
         if person_name:
             queryset = queryset.filter(personrole__role__iexact=person_role, person__name__icontains=person_name)
         if person_name_starts_with:
