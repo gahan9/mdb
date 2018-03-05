@@ -33,7 +33,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_streams(obj):
-        result = MediaInfo.objects.filter(meta_movie=obj)
+        result = MediaInfo.objects.filter(meta_movie__tmdb_id=obj.tmdb_id)
         return [{"media_id"  : i.id,
                  "quality"   : i.get_quality,
                  "name"      : "{} ({})".format(obj.name, i.get_quality),
