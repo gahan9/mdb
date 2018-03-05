@@ -74,7 +74,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ['id', 'url', 'name', 'genre_names', 'release_date', 'description',
+        fields = ['id', 'tmdb_id', 'url', 'name', 'genre_names', 'release_date', 'description',
                   'director', 'actor', 'writer', 'streams',
                   'thumbnail_lq', 'status', 'trailer_id',
                   'backdrop_path', 'poster_path'
@@ -104,7 +104,7 @@ class TVSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TVSeries
-        fields = ['id', 'url', 'name', 'title',
+        fields = ['id', 'tmdb_id', 'url', 'name', 'title',
                   'genre_names', 'first_air_date', 'description', 'seasons',
                   'backdrop_path', 'poster_path',
                   ]
@@ -135,7 +135,7 @@ class EpisodeDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EpisodeDetail
-        fields = ["id", "url", 'name',
+        fields = ["id", 'tmdb_id', "url", 'name',
                   'director', 'actor', 'writer', 'trailer_id',
                   "episode_title"]
 
@@ -151,7 +151,7 @@ class SeasonDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SeasonDetail
-        fields = ["id", "url", "results", "seasons"]
+        fields = ["id", 'tmdb_id', "url", "results", "seasons"]
 
 
 class MovieByGenreSerializer(serializers.ModelSerializer):
@@ -231,23 +231,3 @@ class SubMenuContentSerializer(serializers.ModelSerializer):
         model = SubMenuContent
         fields = ['id', 'name', 'name_en', 'overview', 'overview_en',
                   'poster_path', 'backdrop_path', 'addon_id', 'addon_cmd']
-
-
-class MovieDetail(MovieSerializer):
-    cast = serializers.SerializerMethodField(required=False, read_only=True)
-    crew = serializers.SerializerMethodField(required=False, read_only=True)
-
-    def get_cast(self, obj):
-        result = ""
-        return result
-
-    def get_director(self, obj):
-        result = Person.objects.filter(personrole__role__iexact='director', movie=obj)
-        return [i.name for i in result]
-
-    class Meta:
-        model = Movie
-        fields = ['id', 'url', 'name', 'genre_names', 'release_date', 'description',
-                  'thumbnail_lq', 'status', 'cast',
-                  'backdrop_path', 'poster_path'
-                  ]

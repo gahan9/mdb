@@ -148,28 +148,6 @@ class HomePageView(TemplateView):
         return super(HomePageView, self).get(request, *args, **kwargs)
 
 
-
-#
-# class FilterPageView(TemplateView):
-#     """ Filter page view """
-#     template_name = "index.html"
-#     success_url = reverse_lazy('index')
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(FilterPageView, self).get_context_data(**kwargs)
-#         context['entry'] = RawData.objects.all()
-#         return context
-#
-#     def get(self,request):
-#         filter_thread = Thread(target=filter_raw_data)
-#         filter_thread.start()
-#
-#         genres = get_genre("tv")
-#         genres.update(get_genre("movie"))
-#         genre_thread = Thread(target=genre_maker, args=(genres))
-#         genre_thread.start()
-#         return HttpResponseRedirect(reverse_lazy('index'))
-
 def structure_maker():
     contents = content_fetcher(directory_path=SCRAPE_DIR)
     for video in contents:
