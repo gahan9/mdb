@@ -98,6 +98,8 @@ class MetaFetcher(object):
         self.params = DEFAULT_PARAMS
         self.backdrop_path = TMDB_BACKDROP_PATH
         self.poster_path = TMDB_POSTER_PATH
+        self.default_person_id = 3223  # Robert Downey Jr.
+        self.person_url = TMDB_PERSON_URL.format(id=self.default_person_id)
 
     def get_movie_url(self, movie_id=None):
         if movie_id:
@@ -141,6 +143,17 @@ class MetaFetcher(object):
         else:
             return False
 
+    def get_person_url(self, person_id=None):
+        if person_id:
+            return TMDB_PERSON_URL.format(id=person_id)
+        else:
+            return False
+
+    def get_person_detail(self, person_id=None):
+        _url = self.get_person_url(person_id)
+        if _url:
+            _response = get_json_response(person_id)
+
     def get_movie_trailer(self, movie_id=None):
         if movie_id:
             _response = get_json_response(self.get_movie_trailer_url(movie_id))
@@ -156,26 +169,16 @@ class MetaFetcher(object):
         else:
             return False
 
-    def get_person_url(self, person_id=None):
-        if person_id:
-            return TMDB_PERSON_URL.format(id=person_id)
-
-    def get_person_detail(self, person_id=None):
-        if person_id:
-            get_json_response(self)
-        else:
-            return False
-
-    def get_movie_credits(self, movie_id=None, url=None):
+    def get_credits(self, movie_id=None, url=None):
         if not url:
             url = self.get_credits_url(movie_id)
         _cast_list = []
         _crew_list = []
         if movie_id:
-            response = get_json_response(url, params=self.params)
-            if response:
-                cast = response.get('cast', None)
-                crew = response.get('crew', None)
+            _response = get_json_response(url, params=self.params)
+            if _response:
+                cast = _response.get('cast', None)
+                crew = _response.get('crew', None)
                 if cast:
                     for person in cast:
                         try:
@@ -282,16 +285,6 @@ def file_category_finder(name):
         return "songs"
 
 
-def validate_value_existence(key, source_dict):
-    if key in source_dict:
-        if source_dict[key]:
-            return True
-        else:
-            return False
-    else:
-        return False
-
-
 def get_json_response(url, params=DEFAULT_PARAMS):
     try:
         response = requests.get(url, params=params).json()
@@ -319,11 +312,11 @@ def get_genre(flag):
 
 def set_image(instance, source_json):
     print(">>> In set_image()")
-    if validate_value_existence('backdrop_path', source_json):
+    if source_json.get('backdrop_path', None):
         fanart_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, 780, source_json.get('backdrop_path'))
         if requests.get(fanart_image_url).status_code == 200:
             instance.fanart_hq = fanart_image_url
-    if validate_value_existence('poster_path', source_json):
+    if source_json.get('poster_path', None):
         thumbnail_image_url = "{}w{}/{}".format(TMDB_IMAGE_URL, 300, source_json.get('poster_path'))
         if requests.get(thumbnail_image_url).status_code == 200:
             instance.thumbnail_hq = thumbnail_image_url

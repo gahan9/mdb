@@ -2,3 +2,7 @@
 __pycache__
 moviesHaven/migrations
 static/moviesHaven/images
+userfiles/
+mysite/directory_settings.py
+db.sqlite3
+mysql.conf

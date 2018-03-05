@@ -87,7 +87,7 @@ class PopulateMetaData(object):
             credits_url = fetcher.get_episode_credits_url(tv_id=tv_instance.tmdb_id,
                                                           season_number=season_instance.season_number,
                                                           episode_number=episode_instance.episode_number)
-            casts, crews = fetcher_object.get_movie_credits(episode_instance.tmdb_id, url=credits_url)
+            casts, crews = fetcher_object.get_credits(episode_instance.tmdb_id, url=credits_url)
             if crews:
                 for crew in crews:
                     crew_role = crew.pop('role')
@@ -268,7 +268,7 @@ def fetch_movie_metadata():
                             trailer_id = fetcher.get_movie_trailer(movie_instance.tmdb_id)
                             if trailer_id:
                                 movie_instance.trailer_id = trailer_id
-                            casts, crews = fetcher.get_movie_credits(movie_instance.tmdb_id)
+                            casts, crews = fetcher.get_credits(movie_instance.tmdb_id)
                             if casts:
                                 for cast in casts:
                                     cast_role = cast.pop('role')

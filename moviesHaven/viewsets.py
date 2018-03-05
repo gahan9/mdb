@@ -181,7 +181,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
 
 class MovieByGenreViewSet(viewsets.ModelViewSet):
     # TODO: combine movie -tv genre
-    queryset = Genres.objects.filter(movie__genre_name__isnull=False).distinct()
+    queryset = Genres.objects.filter(movie__genre_name__isnull=False).exclude(genre_id=10770).distinct()
     serializer_class = MovieByGenreSerializer
     model = Genres
     filter_backends = (OrderingFilter,)
@@ -191,7 +191,7 @@ class MovieByGenreViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
-        queryset = self.model.objects.filter(movie__genre_name__isnull=False).distinct()
+        queryset = self.model.objects.filter(movie__genre_name__isnull=False).exclude(genre_id=10770).distinct()
         genre = self.request.query_params.get('genre', None)
         genre_year = self.request.query_params.get('year', None)
         # print("genre_name: {}".format(genre))

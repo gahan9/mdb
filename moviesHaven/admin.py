@@ -12,8 +12,9 @@ class MediaInfoAdmin(admin.ModelAdmin):
     list_display = ['id', 'file', 'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
                     'video_codec', 'audio_codec', 'runtime']
     search_fields = ['file__name',
-                     'meta_movie__name', 'meta_episode__name',
-                     'meta_movie__title', 'meta_episode__title']
+                     'meta_episode__season__series__name',
+                     'meta_movie__name', 'meta_episode__name', 'meta_movie__tmdb_id',
+                     'meta_movie__title', 'meta_episode__title', 'meta_episode__tmdb_id']
 
     def file_short(self, obj):
         return obj.file[:10] if obj.file else obj.file
@@ -69,7 +70,7 @@ class PersonRoleAdmin(admin.ModelAdmin):
 
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'birthday', 'profile_path', 'get_short_biography', 'place_of_birth']
+    list_display = ['id', 'tmdb_id', 'name', 'birthday', 'profile_path', 'get_short_biography', 'place_of_birth']
     search_fields = ['name']
 
 

@@ -18,7 +18,7 @@ class PersonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Person
-        fields = ['id', 'url', 'name', 'birthday', 'biography', 'place_of_birth', 'poster_path']
+        fields = ['id', 'tmdb_id', 'url', 'name', 'birthday', 'biography', 'place_of_birth', 'poster_path']
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -36,6 +36,7 @@ class MovieSerializer(serializers.ModelSerializer):
         result = MediaInfo.objects.filter(meta_movie=obj)
         return [{"media_id"  : i.id,
                  "quality"   : i.get_quality,
+                 "name"      : "{} ({})".format(obj.name, i.get_quality),
                  "resolution": i.get_resolution,
                  "duration"  : i.get_duration,
                  "runtime"   : i.runtime}
@@ -141,6 +142,7 @@ class EpisodeDetailSerializer(serializers.ModelSerializer):
 
 class SeasonDetailSerializer(serializers.ModelSerializer):
     results = serializers.SerializerMethodField(read_only=True, required=False)
+
     # seasons = EpisodeDetailSerializer(source="seasons")
 
     def get_results(self, obj):

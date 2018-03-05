@@ -216,10 +216,15 @@ class EpisodeDetail(Entertainment):
         return [i.name for i in result]
 
     @property
+    def get_episode_name(self):
+        return self.episode_title if self.episode_title else "Episode {}".format(self.episode_number),
+
+    @property
     def get_streams(self):
         result = MediaInfo.objects.filter(meta_episode=self)
         return [{"media_id"  : i.id,
                  "quality"   : i.get_quality,
+                 "name"      : "{} ({})".format(self.get_episode_name, i.get_quality),
                  "resolution": i.get_resolution,
                  "duration"  : i.get_duration,
                  "runtime"   : i.runtime}
