@@ -118,7 +118,7 @@ class MovieViewSet(viewsets.ModelViewSet):
 
 
 class TVSeriesViewSet(viewsets.ModelViewSet):
-    queryset = TVSeries.objects.filter(status=True).distinct('name').order_by("name")
+    queryset = TVSeries.objects.filter(status=True).order_by("name")
     serializer_class = TVSeriesSerializer
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
@@ -128,7 +128,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
-        queryset = self.model.objects.filter(status=True).distinct('name').order_by("name")
+        queryset = self.model.objects.filter(status=True).order_by("name")
         name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         year = self.request.query_params.get('year', None)
@@ -170,6 +170,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("genre_name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
+
         return queryset
 
     def get_serializer_class(self):
