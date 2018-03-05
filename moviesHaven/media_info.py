@@ -34,7 +34,11 @@ class FetchMediaInfo(object):
                 cmd = "{} '{}'".format(self.base_command, media_path)
                 # print("cmd:-----------> {}".format(cmd))
                 try:
-                    media_data = os.popen(cmd).read()
+                    try:
+                        media_data = os.popen(cmd).read().decode('utf-8')
+                    except Exception as e:
+                        print("MediaInfo: unable to fetch media information \nreason: {}".format(e))
+                        return False
                     # print(media_data)
                     media_info["frame_width"] = re.findall(r'width=(\d+)', media_data)[0]
                     media_info["frame_height"] = re.findall(r'height=(\d+)', media_data)[0]

@@ -93,7 +93,7 @@ class TVSeriesSerializer(serializers.ModelSerializer):
             return []
 
     def get_seasons(self, obj):
-        result = SeasonDetail.objects.filter(series=obj)
+        result = SeasonDetail.objects.filter(series__tmdb_id=obj.tmdb_id)
         return [i.get_detail for i in result]
 
     # def get_name(self, obj):

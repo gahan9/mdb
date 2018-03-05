@@ -193,8 +193,7 @@ def filter_raw_data():
                                     entry.meta_episode = episode_instance
                                     entry.save()
                 except Exception as e:
-                    print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e,
-                                                                                                                  entry))
+                    print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
                     # raise Exception(e)
         else:
             title = fetcher.get_name(entry.file.name)
