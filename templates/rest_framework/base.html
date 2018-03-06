@@ -1,0 +1,14 @@
+{% extends "rest_framework/base.html" %}
+{% load i18n %}
+
+{% block branding %}
+    <a class="navbar-brand" rel="nofollow" href="/moviesHaven/api/">
+        {% trans 'Api-Home' %}
+    </a>
+    <a class="navbar-brand" rel="nofollow" href="/">
+        {% trans 'View-site' %}
+    </a>
+    <a class="navbar-brand" rel="nofollow" href="/admin/">
+        {% trans 'Admin' %}
+    </a>
+{% endblock %}
