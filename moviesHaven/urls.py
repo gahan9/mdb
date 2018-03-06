@@ -32,6 +32,7 @@ urlpatterns = [
     path('update_meta_data/', views.update_meta_data, name='update_meta_data'),
     path('api/generate_stream/', viewsets.StreamGenerator.as_view(), name='generate_stream'),
     path('api/filter_set/', viewsets.DetailView.as_view(), name='filter_set'),
+    path('api_example/', views.APIDOCView.as_view(), name='api_example'),
     # path('genre/movie/<int:pk>', views.MovieByGenre.as_view(), name=''),
 ]
 try:

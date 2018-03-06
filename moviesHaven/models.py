@@ -291,6 +291,13 @@ class MediaInfo(models.Model):
                                   verbose_name=_("Run time in seconds"))
 
     @property
+    def has_movie(self):
+        if self.meta_movie:
+            return True
+        else:
+            return False
+
+    @property
     def get_resolution(self):
         return "{}x{}".format(self.frame_width, self.frame_height)
 

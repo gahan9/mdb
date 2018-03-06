@@ -23,10 +23,10 @@ class MediaInfoAdmin(admin.ModelAdmin):
 class MovieAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'name', 'tmdb_id', 'vote_average', 'vote_count',
                     'trailer_id',
-                    'movie_genre', 'release_date', 'get_short_overview', 'status',
+                    'movie_genre', 'release_date', 'get_short_overview', 'status', 'scan_stat',
                     # 'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq'
                     ]
-    list_filter = ['status']
+    list_filter = ['status', 'scan_stat']
     search_fields = ['name', 'title', 'tmdb_id', 'overview']
 
     def movie_genre(self, obj):

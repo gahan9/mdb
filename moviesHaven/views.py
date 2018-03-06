@@ -12,6 +12,45 @@ from mysite.settings import TMDB_SEARCH_URL, DEFAULT_PARAMS, SCRAPE_DIR
 from .models import *
 
 
+class HomePageView(LoginRequiredMixin, TemplateView):
+    """ Home page view """
+    template_name = "index.html"
+    success_url = reverse_lazy('index')
+    login_url = reverse_lazy('login')
+
+    def get_context_data(self, **kwargs):
+        context = super(HomePageView, self).get_context_data(**kwargs)
+        context['total_movies'] = Movie.objects.all().count()
+        context['movies_scanned'] = Movie.objects.filter(scan_stat=True).count()
+        context['movies_with_metadata'] = Movie.objects.filter(status=True).count()
+        context['total_episodes'] = EpisodeDetail.objects.all().count()
+        context['episodes_scanned'] = EpisodeDetail.objects.filter(scan_stat=True).count()
+        context['episodes_with_metadata'] = EpisodeDetail.objects.filter(meta_stat=True).count()
+        context['total_raw_data'] = RawData.objects.all().count()
+        context['total_raw_data_with_media_info'] = MediaInfo.objects.all().count()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        task = self.kwargs.get('task', None)
+        if task:
+            if task == "update_person_data":
+                meta_fetcher_obj = PopulateMetaData()
+                t = Thread(target=meta_fetcher_obj.update_person_data)
+                t.start()
+        return super(HomePageView, self).get(request, *args, **kwargs)
+
+
+class APIDOCView(LoginRequiredMixin, TemplateView):
+    """ Home page view """
+    template_name = "api-doc.html"
+    success_url = reverse_lazy('api_example')
+    login_url = reverse_lazy('login')
+
+    def get_context_data(self, **kwargs):
+        context = super(APIDOCView, self).get_context_data(**kwargs)
+        return context
+
+
 class PopulateMetaData(object):
     def __init__(self, *args, **kwargs):
         self.tv_search_url = TMDB_SEARCH_URL + "tv/"
@@ -131,27 +170,6 @@ class PopulateMetaData(object):
                 print("Unable to fetch person data for {}\nreason:".format(person_instance, e))
 
 
-class HomePageView(LoginRequiredMixin, TemplateView):
-    """ Home page view """
-    template_name = "index.html"
-    success_url = reverse_lazy('index')
-    login_url = reverse_lazy('login')
-
-    def get_context_data(self, **kwargs):
-        context = super(HomePageView, self).get_context_data(**kwargs)
-        context['movies'] = Movie.objects.all()
-        return context
-
-    def get(self, request, *args, **kwargs):
-        task = self.kwargs.get('task', None)
-        if task:
-            if task == "update_person_data":
-                meta_fetcher_obj = PopulateMetaData()
-                t = Thread(target=meta_fetcher_obj.update_person_data)
-                t.start()
-        return super(HomePageView, self).get(request, *args, **kwargs)
-
-
 def structure_maker():
     contents = content_fetcher(directory_path=SCRAPE_DIR)
     if contents:
@@ -170,6 +188,7 @@ def structure_maker():
                 print("Structure Maker exception : {}".format(e))
     else:
         print("Structure Maker: Path Does not exist")
+
 
 def insert_raw_data(request):
     success_url = reverse_lazy('index')
@@ -340,4 +359,6 @@ def update_meta_data(request):
     tv_thread = Thread(target=populate_obj.search_tv_data)
     tv_thread.start()
     movie_thread.start()
+    # tv_thread_status = [t for t in tv_thread if t.is_alive()]
+    # print(tv_thread_status)
     return HttpResponseRedirect(reverse_lazy('index'))
