@@ -269,7 +269,7 @@ class PersonRole(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, blank=True, null=True)
     tv = models.ForeignKey(EpisodeDetail, on_delete=models.CASCADE, blank=True, null=True)
-    character = models.CharField(null=True, blank=True, max_length=100)
+    character = models.CharField(null=True, blank=True, max_length=500)
     order = models.IntegerField(null=True, blank=True)
     cast_id = models.IntegerField(null=True, blank=True)
     tmdb_id = models.IntegerField(null=True, blank=True)
