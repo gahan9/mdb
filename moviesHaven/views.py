@@ -150,20 +150,22 @@ class HomePageView(TemplateView):
 
 def structure_maker():
     contents = content_fetcher(directory_path=SCRAPE_DIR)
-    for video in contents:
-        try:
-            if not RawData.objects.filter(**video):
-                try:
-                    raw_object = RawData.objects.create(**video)
-                    media_info_obj = FetchMediaInfo()
-                    media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
-                    if media_data:
-                        MediaInfo.objects.create(file=raw_object, **media_data)
-                except Exception as e:
-                    print("Structure Maker exception : {}".format(e))
-        except Exception as e:
-            print("Structure Maker exception : {}".format(e))
-
+    if contents:
+        for video in contents:
+            try:
+                if not RawData.objects.filter(**video):
+                    try:
+                        raw_object = RawData.objects.create(**video)
+                        media_info_obj = FetchMediaInfo()
+                        media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
+                        if media_data:
+                            MediaInfo.objects.create(file=raw_object, **media_data)
+                    except Exception as e:
+                        print("Structure Maker exception : {}".format(e))
+            except Exception as e:
+                print("Structure Maker exception : {}".format(e))
+    else:
+        print("Structure Maker: Path Does not exist")
 
 def insert_raw_data(request):
     success_url = reverse_lazy('index')

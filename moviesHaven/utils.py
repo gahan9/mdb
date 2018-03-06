@@ -390,4 +390,5 @@ def content_fetcher(directory_path):
                         data_set.append(d)
         return data_set
     else:
-        return "Path Does not exist"
+        print("content_fetcher: path does not exist : {}".format(directory_path))
+        return False

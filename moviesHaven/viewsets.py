@@ -116,6 +116,7 @@ class MovieViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("genre_name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
+        # TODO: remove duplicates values of tmdb_id from queryset using extra() or distinct ON
         return queryset
 
     def get_serializer_class(self):
