@@ -35,7 +35,7 @@ class FetchMediaInfo(object):
                 # print("cmd:-----------> {}".format(cmd))
                 try:
                     try:
-                        media_data = os.popen(cmd).read().encode('utf-8')
+                        media_data = os.popen(cmd).read()
                     except Exception as e:
                         print("MediaInfo: unable to fetch media information \nreason: {}".format(e))
                         return False
