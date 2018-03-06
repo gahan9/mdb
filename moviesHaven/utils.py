@@ -291,6 +291,7 @@ class MetaFetcher(object):
                 _poster_path = _response.get('still_path', None)
                 if _poster_path:
                     episode_data['poster_path'] = "{}{}".format(self.poster_path, _poster_path)
+                print("Episode data found: {}".format(episode_data.get('tmdb_id')))
                 return episode_data
         else:
             return False

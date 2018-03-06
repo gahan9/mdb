@@ -10,10 +10,25 @@
             <li class="nav-item active">
                 <a class="nav-link" href="{% url 'index' %}">Home <span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url "admin:index" %}">Admin</a>
-            </li>
-            <!-- <li class="nav-item dropdown">
+            {% if user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "admin:index" %}">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="/api/">API-doc</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="/api-docs/">Interactive API-doc</a>
+                </li>
+            {% endif %}
+        </ul>
+        {% if user.is_authenticated %}
+            <form action="{% url 'logout' %}">
+                <button class="btn btn-dark my-2 my-sm-0" type="submit">Logout</button>
+            </form>
+        {% endif %}
+        <!-- <ul class="navbar-nav">
+            <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
                     Dropdown
@@ -24,11 +39,8 @@
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">Something else here</a>
                 </div>
-            </li>-->
-            <li class="nav-item">
-                <a class="nav-link disabled" href="/api/">API-doc</a>
             </li>
-        </ul>
+        </ul> -->
         <!--<form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>

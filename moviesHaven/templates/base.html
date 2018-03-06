@@ -1,0 +1,25 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Planet Vision{% endblock %}</title>
+    {% block css %}
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    {% endblock %}
+    {% block extracss %}
+    {% endblock %}
+</head>
+<body>
+{% block navbar %}
+    {% include 'navbar.html' %}
+{% endblock %}
+{% block content %}
+{% endblock %}
+</body>
+<script>
+    {% block js %}
+
+    {% endblock %}
+</script>
+</html>

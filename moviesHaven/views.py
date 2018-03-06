@@ -1,6 +1,7 @@
 from threading import Thread
 import copy
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
@@ -36,6 +37,7 @@ class PopulateMetaData(object):
                 print("Genre adding exception : {}".format(e))
             tv_instance.scan_stat = True
             tv_instance.save()
+            print("Instance_saved: {}".format(tv_instance))
             update_thread = Thread(target=self.update_tv_data, args=(episode_instance,))
             update_thread.start()
 
@@ -128,10 +130,11 @@ class PopulateMetaData(object):
                 print("Unable to fetch person data for {}\nreason:".format(person_instance, e))
 
 
-class HomePageView(TemplateView):
+class HomePageView(LoginRequiredMixin, TemplateView):
     """ Home page view """
     template_name = "index.html"
     success_url = reverse_lazy('index')
+    login_url = reverse_lazy('login')
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)

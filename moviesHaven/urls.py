@@ -1,7 +1,9 @@
 from django.conf.urls import url
 from django.urls import path, include, re_path
 from django.views.generic import RedirectView
+from django.contrib.auth.views import login as django_login, logout as django_logout
 
+from moviesHaven.forms import LoginForm
 from . import views
 from . import viewsets
 from rest_framework import routers
@@ -19,6 +21,8 @@ router.register(r'genre_tv', viewsets.TVSeriesByGenreViewSet)
 router.register(r'menu', viewsets.SubMenuStructureViewSet)
 
 urlpatterns = [
+    path('login/', django_login, {'template_name': 'login.html', 'authentication_form': LoginForm}, name='login'),
+    path('logout/', django_logout, {'next_page': '/'}, name='logout'),
     path('', views.HomePageView.as_view(), name='index'),
     path('<slug:task>', views.HomePageView.as_view(), name='index'),
     path('api/', include(router.urls)),
