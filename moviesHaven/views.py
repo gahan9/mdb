@@ -18,6 +18,7 @@ class PopulateMetaData(object):
         self.default_params = DEFAULT_PARAMS
 
     def search_tv_data(self):
+        print("fetching tv data...")
         for episode_instance in EpisodeDetail.objects.filter(meta_stat=False, scan_stat=False):
             tv_instance = episode_instance.season.series
             params = copy.deepcopy(DEFAULT_PARAMS)
