@@ -20,14 +20,15 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)
-        context['total_movies'] = Movie.objects.all().count()
-        context['movies_scanned'] = Movie.objects.filter(scan_stat=True).count()
-        context['movies_with_metadata'] = Movie.objects.filter(status=True).count()
-        context['total_episodes'] = EpisodeDetail.objects.all().count()
-        context['episodes_scanned'] = EpisodeDetail.objects.filter(scan_stat=True).count()
-        context['episodes_with_metadata'] = EpisodeDetail.objects.filter(meta_stat=True).count()
-        context['total_raw_data'] = RawData.objects.all().count()
-        context['total_raw_data_with_media_info'] = MediaInfo.objects.all().count()
+        context['total_actors'] = PersonRole.objects.filter(role="cast").distinct().count()
+        context['total_movies'] = Movie.objects.all().distinct().count()
+        context['movies_scanned'] = Movie.objects.filter(scan_stat=True).distinct().count()
+        context['movies_with_metadata'] = Movie.objects.filter(status=True).distinct().count()
+        context['total_episodes'] = EpisodeDetail.objects.all().distinct().count()
+        context['episodes_scanned'] = EpisodeDetail.objects.filter(scan_stat=True).distinct().count()
+        context['episodes_with_metadata'] = EpisodeDetail.objects.filter(meta_stat=True).distinct().count()
+        context['total_raw_data'] = RawData.objects.all().distinct().count()
+        context['total_raw_data_with_media_info'] = MediaInfo.objects.all().distinct().count()
         return context
 
     def get(self, request, *args, **kwargs):

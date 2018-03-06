@@ -97,8 +97,16 @@
                 </tr>
                 <tr>
                     <td>Episode</td>
-                    <td>{{ episodes_with_metadata }}</td>
-                    <td>{{ episodes_scanned }}</td>
+                    <td>
+                        <a href="{% url 'admin:moviesHaven_episodedetail_changelist' %}?meta_stat__exact=1">
+                            {{ episodes_with_metadata }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'admin:moviesHaven_episodedetail_changelist' %}?scan_stat__exact=1">
+                            {{ episodes_scanned }}
+                        </a>
+                    </td>
                     <td>
                         <a href="{% url 'admin:moviesHaven_episodedetail_changelist' %}">
                             {{ total_episodes }}
