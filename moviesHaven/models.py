@@ -302,12 +302,13 @@ class MediaInfo(models.Model):
         file_path = os.path.join(self.file.path, self.file.name)
         # host = '/'.join(request.build_absolute_uri().split('/')[:3])
         try:
-            from mysite.directory_settings import DOMAIN
+            from mysite.directory_settings import DOMAIN, MEDIA_MAP
             domain = DOMAIN
+            stream_url = "http://{0}/media/{1}".format(domain, file_path.replace(MEDIA_MAP, ''))
         except Exception as e:
             domain = "54.36.48.153:8000"
+            stream_url = "http://{0}/media/{1}".format(domain, file_path.replace(SCRAPE_DIR, ''))
         # NOTE: stream URL configured to work only with apache hosted server
-        stream_url = "http://{0}/media/{1}".format(domain, file_path.replace(SCRAPE_DIR, ''))
         return "<a href='{0}'>{1}</a>".format(stream_url, link_name)
 
     @property
