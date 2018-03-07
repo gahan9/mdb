@@ -1,5 +1,10 @@
+import os
+
 from django.contrib import admin
+from django.utils.html import format_html
+
 from .models import *
+from django.utils.translation import ugettext_lazy as _
 
 
 class RawDataAdmin(admin.ModelAdmin):
@@ -8,19 +13,63 @@ class RawDataAdmin(admin.ModelAdmin):
     search_fields = ['name', 'path']
 
 
+class RawDataInline(admin.TabularInline):
+    model = RawData
+
+
+class MediaInfoInline(admin.TabularInline):
+    fields = ('get_playable_stream', 'file', 'meta_movie', 'meta_episode',
+              'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime')
+    readonly_fields = ('get_playable_stream', 'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime')
+    model = MediaInfo
+
+    def get_playable_stream(self, obj):
+        # file_path = os.path.join(obj.file.path, obj.file.name)
+        # return file_path
+        return format_html(obj.get_stream_link())
+
+
 class MediaInfoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'file', 'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
-                    'video_codec', 'audio_codec', 'runtime']
+    fieldsets = (
+        (None, {'fields': ('file', 'meta_movie', 'meta_episode', 'get_playable_stream')}),
+        (_('Media info'), {'fields': ('frame_width', 'frame_height', 'video_codec', 'audio_codec',
+                                      'runtime')}),
+        # (_('Stream'), {'fields': ('get_stream',)})
+    )
+    list_display = ['id', 'file', 'get_playable_stream',
+                    'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
+                    'video_codec', 'audio_codec', 'runtime'
+                    ]
+    readonly_fields = ['get_playable_stream', 'frame_width', 'frame_height',
+                       'video_codec', 'audio_codec', 'runtime']
+    list_filter = ['meta_movie', 'meta_episode']
     search_fields = ['file__name',
                      'meta_episode__season__series__name',
                      'meta_movie__name', 'meta_episode__name', 'meta_movie__tmdb_id',
                      'meta_movie__title', 'meta_episode__title', 'meta_episode__tmdb_id']
+
+    def get_fieldsets(self, request, obj=None):
+        # Add 'item_type' on add forms and remove it on changeforms.
+        fieldsets = super(MediaInfoAdmin, self).get_fieldsets(request, obj)
+        if not obj:  # this is an add form
+            if 'name' not in fieldsets[0][1]['fields']:
+                fieldsets[0][1]['fields'] += ('name',)
+        else:  # this is a change form
+            print(fieldsets[0][1]['fields'])
+            fieldsets[0][1]['fields'] = tuple(x for x in fieldsets[0][1]['fields'] if x != 'name')
+        return fieldsets
+
+    def get_playable_stream(self, obj):
+        # file_path = os.path.join(obj.file.path, obj.file.name)
+        # return file_path
+        return format_html(obj.get_stream_link())
 
     def file_short(self, obj):
         return obj.file[:10] if obj.file else obj.file
 
 
 class MovieAdmin(admin.ModelAdmin):
+    inlines = [MediaInfoInline]
     list_display = ['id', 'title', 'name', 'tmdb_id', 'vote_average', 'vote_count',
                     'trailer_id',
                     'movie_genre', 'release_date', 'get_short_overview', 'status', 'scan_stat',
@@ -48,6 +97,7 @@ class SeasonDetailAdmin(admin.ModelAdmin):
 
 
 class EpisodeDetailAdmin(admin.ModelAdmin):
+    inlines = [MediaInfoInline]
     list_display = ['id', 'tmdb_id', 'season_name',
                     'episode_title', 'episode_number', 'air_date', 'vote_average',
                     'get_short_overview', 'still_path'

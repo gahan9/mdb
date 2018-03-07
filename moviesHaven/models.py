@@ -1,5 +1,9 @@
+import os
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from mysite.directory_settings import SCRAPE_DIR
 
 
 class RawData(models.Model):
@@ -8,7 +12,7 @@ class RawData(models.Model):
     extension = models.CharField(blank=True, null=True, max_length=10)
 
     def __str__(self):
-        return "{}".format(self.name)
+        return "{}".format(self.name)[:10]
 
     class Meta:
         verbose_name = _("Raw Video Data in local")
@@ -280,8 +284,10 @@ class PersonRole(models.Model):
 
 class MediaInfo(models.Model):
     file = models.ForeignKey(RawData, on_delete=models.CASCADE)
-    meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.SET_NULL)
-    meta_episode = models.ForeignKey(EpisodeDetail, null=True, blank=True, on_delete=models.SET_NULL)
+    meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.SET_NULL,
+                                   help_text=_("Related Movie of stream (if exist)"))
+    meta_episode = models.ForeignKey(EpisodeDetail, null=True, blank=True, on_delete=models.SET_NULL,
+                                     help_text=_("Related TV Episode of stream (if exist)"))
     frame_width = models.CharField(max_length=20, null=True, blank=True)
     frame_height = models.CharField(max_length=20, null=True, blank=True)
     video_codec = models.CharField(max_length=20, null=True, blank=True)
@@ -289,6 +295,20 @@ class MediaInfo(models.Model):
     bit_rate = models.CharField(max_length=20, null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True,
                                   verbose_name=_("Run time in seconds"))
+
+    def get_stream_link(self, link_name=None):
+        if not link_name:
+            link_name = self.file.name
+        file_path = os.path.join(self.file.path, self.file.name)
+        # host = '/'.join(request.build_absolute_uri().split('/')[:3])
+        try:
+            from mysite.directory_settings import DOMAIN
+            domain = DOMAIN
+        except Exception as e:
+            domain = "54.36.48.153:8000"
+        # NOTE: stream URL configured to work only with apache hosted server
+        stream_url = "http://{0}/media/{1}".format(domain, file_path.replace(SCRAPE_DIR, ''))
+        return "<a href='{0}'>{1}</a>".format(stream_url, link_name)
 
     @property
     def has_movie(self):

@@ -126,16 +126,22 @@
             </tbody>
         </table>
     </div>
+    <div class="container">
+        <a href="{% url 'admin:moviesHaven_mediainfo_changelist' %}?meta_episode__isnull=True&meta_movie__isnull=True">
+            <span>Add Unknown Media Info</span>
+        </a>
+    </div>
 {% endblock %}
 {% block js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
         function autoRefresh_div(id) {
-            $("#"+id).load("", function () {
+            $("#" + id).load("", function () {
                 console.log("refreshed..");
                 setTimeout(autoRefresh_div, 5000);
             });
         }
+
         {#autoRefresh_div("continuous-update")#}
     </script>
 {% endblock %}
