@@ -21,7 +21,7 @@ class RawData(models.Model):
 
 
 class Person(models.Model):
-    CHOICES = (
+    GENDER_CHOICES = (
         (0, "Unknown"),
         (1, "Female"),
         (2, "Male"),
@@ -34,7 +34,7 @@ class Person(models.Model):
     cast_id = models.CharField(max_length=50, blank=True, null=True)
     tmdb_id = models.CharField(max_length=50, blank=True, null=True)
     imdb_id = models.CharField(max_length=50, blank=True, null=True)
-    gender = models.IntegerField(blank=True, null=True)  # can be filled in slot 1
+    gender = models.IntegerField(choices=GENDER_CHOICES, blank=True, null=True)  # can be filled in slot 1
     name = models.CharField(null=True, blank=True, max_length=100)  # filled in slot 1
     birthday = models.CharField(null=True, blank=True, max_length=100)
     deathday = models.CharField(null=True, blank=True, max_length=100)
@@ -207,11 +207,6 @@ class EpisodeDetail(Entertainment):
         return self.overview[:15] if self.overview else self.overview
 
     @property
-    def get_episode_name(self):
-        return "{} Season {} episode {}".format(
-            self.season.name, self.season.season_number, self.episode_number)
-
-    @property
     def get_director(self):
         result = Person.objects.filter(personrole__role__iexact='director',
                                        episodedetail=self)
@@ -285,9 +280,11 @@ class PersonRole(models.Model):
 class MediaInfo(models.Model):
     file = models.ForeignKey(RawData, on_delete=models.CASCADE)
     meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.SET_NULL,
-                                   help_text=_("Related Movie of stream (if exist)"))
+                                   help_text=_("Related Movie of stream (if exist)"),
+                                   related_name='movie_media_info')
     meta_episode = models.ForeignKey(EpisodeDetail, null=True, blank=True, on_delete=models.SET_NULL,
-                                     help_text=_("Related TV Episode of stream (if exist)"))
+                                     help_text=_("Related TV Episode of stream (if exist)"),
+                                     related_name='movie_episode_info')
     frame_width = models.CharField(max_length=20, null=True, blank=True)
     frame_height = models.CharField(max_length=20, null=True, blank=True)
     video_codec = models.CharField(max_length=20, null=True, blank=True)

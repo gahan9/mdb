@@ -9,19 +9,20 @@ from django.utils.translation import ugettext_lazy as _
 
 class RawDataAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'path', 'extension']
+    readonly_fields = ['id', 'name', 'path', 'extension']
     list_filter = ['extension']
     search_fields = ['name', 'path']
 
 
-class RawDataInline(admin.TabularInline):
-    model = RawData
-
-
 class MediaInfoInline(admin.TabularInline):
-    fields = ('get_playable_stream', 'file', 'meta_movie', 'meta_episode',
+    fields = ('get_playable_stream',
               'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime')
     readonly_fields = ('get_playable_stream', 'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime')
     model = MediaInfo
+    extra = 0
+
+    def has_add_permission(self, request):
+        return False
 
     def get_playable_stream(self, obj):
         # file_path = os.path.join(obj.file.path, obj.file.name)
@@ -31,14 +32,13 @@ class MediaInfoInline(admin.TabularInline):
 
 class MediaInfoAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {'fields': ('file', 'meta_movie', 'meta_episode', 'get_playable_stream')}),
+        (None, {'fields': ('file', 'meta_movie', 'meta_episode')}),
         (_('Media info'), {'fields': ('frame_width', 'frame_height', 'video_codec', 'audio_codec',
                                       'runtime')}),
-        # (_('Stream'), {'fields': ('get_stream',)})
+        (_('Stream'), {'fields': ('get_playable_stream',)})
     )
-    list_display = ['id', 'file', 'get_playable_stream',
-                    'meta_movie', 'meta_episode', 'frame_width', 'frame_height',
-                    'video_codec', 'audio_codec', 'runtime'
+    list_display = ['id', 'get_playable_stream', 'meta_movie', 'meta_episode',
+                    'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime'
                     ]
     readonly_fields = ['get_playable_stream', 'frame_width', 'frame_height',
                        'video_codec', 'audio_codec', 'runtime']
@@ -70,8 +70,7 @@ class MediaInfoAdmin(admin.ModelAdmin):
 
 class MovieAdmin(admin.ModelAdmin):
     inlines = [MediaInfoInline]
-    list_display = ['id', 'title', 'name', 'tmdb_id', 'vote_average', 'vote_count',
-                    'trailer_id',
+    list_display = ['id', 'title', 'name', 'tmdb_id', 'vote_average', 'vote_count', 'trailer_id',
                     'movie_genre', 'release_date', 'get_short_overview', 'status', 'scan_stat',
                     # 'thumbnail_hq', 'thumbnail_lq', 'fanart_hq', 'fanart_lq'
                     ]
@@ -87,6 +86,7 @@ class TVSeriesAdmin(admin.ModelAdmin):
                     'original_name', 'first_air_date', 'vote_average',
                     'origin_country', 'original_language', 'status', 'season_status',
                     'get_short_overview', 'backdrop_path', 'poster_path']
+    readonly_fields = ['title']
     list_filter = ['status']
     search_fields = ['title', 'name', 'tmdb_id', 'overview']
 
@@ -94,19 +94,21 @@ class TVSeriesAdmin(admin.ModelAdmin):
 class SeasonDetailAdmin(admin.ModelAdmin):
     list_display = ['id', 'series', 'tmdb_id', 'air_date', 'season_number']
     search_fields = ['season_number']
+    readonly_fields = ['title', 'date_created', 'date_updated']
 
 
 class EpisodeDetailAdmin(admin.ModelAdmin):
     inlines = [MediaInfoInline]
     list_display = ['id', 'tmdb_id', 'season_name',
                     'episode_title', 'episode_number', 'air_date', 'vote_average',
-                    'get_short_overview', 'still_path'
+                    'get_short_overview', 'still_path', 'meta_stat', 'scan_stat'
                     ]
-    list_filter = ['meta_stat']
+    list_filter = ['meta_stat', 'scan_stat']
     search_fields = ['tmdb_id', 'episode_title', 'season__series__name']
+    readonly_fields = ['title', 'date_created', 'date_updated']
 
     def season_name(self, obj):
-        return obj.season.series.name
+        return obj.season.series.name if obj.season.series.name else obj.season.series.title
 
 
 class GenreAdmin(admin.ModelAdmin):
@@ -119,7 +121,14 @@ class PersonRoleAdmin(admin.ModelAdmin):
     search_fields = ['person__name']
 
 
+class PersonRoleInline(admin.TabularInline):
+    list_display = ['id', 'character', 'role', 'person', 'movie', 'tv', 'tmdb_id']
+    model = PersonRole
+    extra = 0
+
+
 class PersonAdmin(admin.ModelAdmin):
+    inlines = [PersonRoleInline]
     list_display = ['id', 'tmdb_id', 'name', 'birthday', 'profile_path', 'get_short_biography', 'place_of_birth']
     search_fields = ['name']
 
