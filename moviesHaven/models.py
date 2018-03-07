@@ -3,7 +3,7 @@ import os
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from mysite.directory_settings import SCRAPE_DIR
+from mysite.directory_settings import SCRAPE_DIR, MEDIA_MAP
 
 
 class RawData(models.Model):
@@ -302,12 +302,15 @@ class MediaInfo(models.Model):
         file_path = os.path.join(self.file.path, self.file.name)
         # host = '/'.join(request.build_absolute_uri().split('/')[:3])
         try:
-            from mysite.directory_settings import DOMAIN, MEDIA_MAP
+            from mysite.directory_settings import DOMAIN
             domain = DOMAIN
-            stream_url = "http://{0}/media/{1}".format(domain, file_path.replace(MEDIA_MAP, ''))
         except Exception as e:
             domain = "54.36.48.153:8000"
-            stream_url = "http://{0}/media/{1}".format(domain, file_path.replace(SCRAPE_DIR, ''))
+        if os.path.exists(MEDIA_MAP) and MEDIA_MAP in file_path:
+            file_path = file_path.replace(MEDIA_MAP, '')
+        else:
+            file_path = file_path.replace(SCRAPE_DIR, '')
+        stream_url = "http://{0}/media/{1}".format(domain, file_path)
         # NOTE: stream URL configured to work only with apache hosted server
         return "<a href='{0}'>{1}</a>".format(stream_url, link_name)
 
