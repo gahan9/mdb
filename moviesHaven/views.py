@@ -232,7 +232,7 @@ def insert_raw_data(request):
 
 def filter_raw_data():
     fetcher = DataFilter()
-    for entry in MediaInfo.objects.all():
+    for entry in MediaInfo.objects.filter(meta_movie__isnull=True, meta_episode__isnull=True):
         filter1 = fetcher.filter_film(entry.file.name)
         if filter1:
             if all(filter1):
