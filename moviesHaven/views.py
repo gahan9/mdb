@@ -171,12 +171,39 @@ class PopulateMetaData(object):
                 print("Unable to fetch person data for {}\nreason:".format(person_instance, e))
 
 
+def get_mediainfo():
+    for raw_object in RawData.objects.filter(mediainfo__isnull=True):
+        try:
+            # RawData.objects.filter(mediainfo__isnull=True)
+            # raw_object = RawData.objects.get_or_create(**video)[0]
+            media_info_obj = FetchMediaInfo()
+            try:
+                path = os.path.join(raw_object.path, raw_object.name)
+                if os.path.exists(path):
+                    media_data = media_info_obj.get_all_info()
+                    if media_data:
+                        try:
+                            MediaInfo.objects.create(file=raw_object, **media_data)
+                        except Exception as e:
+                            print(
+                                "Create query for media info failed for object: {} and media data: {}\n reason: {}".format(
+                                    raw_object.values(), media_data, e))
+                    else:
+                        print("Media data couldn't found for: {}".format(raw_object.values()))
+                else:
+                    print("path not exist")
+            except Exception as e:
+                print("Could not fetch media information for : {}".format(raw_object.values()))
+        except Exception as e:
+            print("RawData objects could not created for: {}\nEXCEPTION==>reason: ".format(raw_object, e))
+
+
 def structure_maker():
     contents = content_fetcher(directory_path=SCRAPE_DIR)
     if contents:
         for video in contents:
             try:
-                RawData.objects.filter(mediainfo__isnull=True)
+                # RawData.objects.filter(mediainfo__isnull=True)
                 raw_object = RawData.objects.get_or_create(**video)[0]
                 media_info_obj = FetchMediaInfo()
                 try:

@@ -42,7 +42,7 @@ class MediaInfoAdmin(admin.ModelAdmin):
                     ]
     readonly_fields = ['get_playable_stream', 'frame_width', 'frame_height',
                        'video_codec', 'audio_codec', 'runtime']
-    list_filter = ['meta_movie', 'meta_episode']
+    # list_filter = ['meta_movie', 'meta_episode']
     search_fields = ['file__name',
                      'meta_episode__season__series__name',
                      'meta_movie__name', 'meta_episode__name', 'meta_movie__tmdb_id',
