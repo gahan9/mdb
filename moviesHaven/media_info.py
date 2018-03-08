@@ -40,17 +40,17 @@ class FetchMediaInfo(object):
                         print("MediaInfo: unable to fetch media information \nreason: {}".format(e))
                         return False
                     # print(media_data)
-                    media_info["frame_width"] = re.findall(r'width=(\d+)', media_data)[0]
-                    media_info["frame_height"] = re.findall(r'height=(\d+)', media_data)[0]
-                    media_info["runtime"] = re.findall(r'duration=(\d+)', media_data)[0]
-                    media_info["video_codec"] = re.findall(r'codec_name=(\w+)', media_data)[0]
+                    media_info["frame_width"] = re.findall(r'width=(\d+)', media_data)[0] if re.findall(r'width=(\d+)', media_data) else None
+                    media_info["frame_height"] = re.findall(r'height=(\d+)', media_data)[0] if re.findall(r'height=(\d+)', media_data) else None
+                    media_info["runtime"] = re.findall(r'duration=(\d+)', media_data)[0] if re.findall(r'duration=(\d+)', media_data) else None
+                    media_info["video_codec"] = re.findall(r'codec_name=(\w+)', media_data)[0] if re.findall(r'codec_name=(\w+)', media_data) else None
                     try:
-                        media_info["audio_codec"] = re.findall(r'codec_name=(\w+)', media_data)[1]
+                        media_info["audio_codec"] = re.findall(r'codec_name=(\w+)', media_data)[1] if len(re.findall(r'codec_name=(\w+)', media_data)) > 0 else ''
                     except Exception as e:
                         print("MediaInfo: fetching audio_codec unsuccessful\nreason: {}".format(e))
                         # raise Exception(e)
                     try:
-                        media_info["bit_rate"] = re.findall(r'bit_rate=(\w+)', media_data)[0]
+                        media_info["bit_rate"] = re.findall(r'bit_rate=(\w+)', media_data)[0] if re.findall(r'bit_rate=(\w+)', media_data) else ''
                     except Exception as e:
                         print("MediaInfo: fetching bit_rate unsuccessful\nreason: {}".format(e))
                         # raise Exception(e)

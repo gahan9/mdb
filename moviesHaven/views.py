@@ -176,17 +176,22 @@ def structure_maker():
     if contents:
         for video in contents:
             try:
-                if not RawData.objects.filter(**video):
-                    try:
-                        raw_object = RawData.objects.create(**video)
-                        media_info_obj = FetchMediaInfo()
-                        media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
-                        if media_data:
+                RawData.objects.filter(mediainfo__isnull=True)
+                raw_object = RawData.objects.get_or_create(**video)[0]
+                media_info_obj = FetchMediaInfo()
+                try:
+                    media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
+                    if media_data:
+                        try:
                             MediaInfo.objects.create(file=raw_object, **media_data)
-                    except Exception as e:
-                        print("Structure Maker exception : {}".format(e))
+                        except Exception as e:
+                            print("Create query for media info failed for object: {} and media data: {}\n reason: {}".format(raw_object.values(), media_data, e))
+                    else:
+                        print("Media data couldn't found for: {}".format(raw_object.values()))
+                except Exception as e:
+                    print("Could not fetch media information for : {}".format(raw_object.values()))
             except Exception as e:
-                print("Structure Maker exception : {}".format(e))
+                print("RawData objects could not created for: {}\nEXCEPTION==>reason: ".format(video, e))
     else:
         print("Structure Maker: Path Does not exist")
 
