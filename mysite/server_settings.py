@@ -11,6 +11,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
             'read_default_file': os.path.join(BASE_DIR, 'mysql.conf'),
+            "init_command": "SET GLOBAL max_connections = 100000",
         },
     }
 }
