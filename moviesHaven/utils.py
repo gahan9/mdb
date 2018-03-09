@@ -201,7 +201,7 @@ class MetaFetcher(object):
                     for person in cast:
                         try:
                             _cast_list.append({
-                                'cast_id'  : person.get('cast_id', None),
+                                # 'cast_id'  : person.get('cast_id', None),
                                 'tmdb_id'  : person.get('id', None),
                                 'role'     : 'cast',
                                 'name'     : person.get('name', None),
