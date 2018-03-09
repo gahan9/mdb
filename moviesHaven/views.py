@@ -49,6 +49,8 @@ class APIDOCView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(APIDOCView, self).get_context_data(**kwargs)
+        query = self.kwargs.get('q', None)
+        context['regex'] = True if query else None
         return context
 
 

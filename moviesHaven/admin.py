@@ -117,12 +117,14 @@ class GenreAdmin(admin.ModelAdmin):
 
 class PersonRoleAdmin(admin.ModelAdmin):
     list_display = ['id', 'role', 'person', 'movie', 'tv']
+    readonly_fields = ['id']
     list_filter = ['role']
     search_fields = ['person__name']
 
 
 class PersonRoleInline(admin.TabularInline):
-    list_display = ['id', 'character', 'role', 'person', 'movie', 'tv', 'tmdb_id']
+    list_display = ['id', 'character', 'role', 'person', 'movie', 'tv', 'tmdb_id', 'order']
+    readonly_fields = ['id', 'role', 'person', 'movie', 'tv', 'tmdb_id', 'cast_id']
     model = PersonRole
     extra = 0
 
