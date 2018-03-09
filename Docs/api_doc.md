@@ -6,12 +6,11 @@
 **tv**						: http://54.36.48.153:8000/api/tv/
 **season**				: http://54.36.48.153:8000/api/season/
 **episode**           	: http://54.36.48.153:8000/api/episode/
-**person**            	: http://54.36.48.153:8000/api/person_movie/
-**genre_movie**	: http://54.36.48.153:8000/api/genre_tv/
+**person**            	: http://54.36.48.153:8000/api/person/
+**genre_movie**	: http://54.36.48.153:8000/api/genre_movie/
 **person_movie**	: http://54.36.48.153:8000/api/person_movie/
 **genre_tv**			: http://54.36.48.153:8000/api/genre_tv/
-**menu**				: http://54.36.48.153:8000/api/menu/
-
+ 
 ----------
 
 Movie
@@ -24,10 +23,10 @@ Movie
 > **no parameters** will list out all available movies
 > **parameters**
 >  :  **name** = the  # returns list of movies containing this string (Case insensitive)
->  : **name_starts_with** = A  # returns list of movies starts with this string (Case insensitive)
+>  : **name_starts_with** = A  # returns list of movies starts with this string (Case insensitive) 
 >   if **name_starts_with** = 0 # will return list of all movies starts with number *[0-9]*
 > : **year** = 2018   # returns list of movies with release year
-> : **genre** = animation  # returns list of movies containing this string as genre (Case insensitive)
+> : **genre** = animation  # returns list of movies containing this string as genre (Case insensitive) 
 > : **latest** = 3  #  returns list of movies added/updated in last 3 days
 > : **classics** = true  # returns result of movies since year Jan 1, 1900 to Jan 1, 1970
 >  : **ordering** = name # available ordering *name, release_date, vote_average, vote_count* (name orders list of movies in ascending order whereas *-name* orders in descending order)
@@ -46,7 +45,7 @@ Movie By Genre
 : URL: *domain*/moviesHaven/api/genre_movie/
  Response Type: json
  Response:  list of genres
-
+ 
 ### Sample URL
 ```
 http://192.168.5.47:8000/moviesHaven/api/genre_movie/
@@ -103,3 +102,4 @@ Generate Stream
 ```
 ### Sample URL
 ```http://192.168.5.47:8000/moviesHaven/api/generate_stream/```
+
