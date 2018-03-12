@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         arg = options.get('hours', None)
-        if arg:
+        if arg is not None:
             self.diff_hours = arg
         time_diff = timezone.now() - timezone.timedelta(hours=self.diff_hours)
         stream_instances = StreamAuthLog.objects.filter(date_created__lt=time_diff)
@@ -24,6 +24,7 @@ class Command(BaseCommand):
                 try:
                     if os.path.exists(stream.sym_link_path):
                         os.remove(stream.sym_link_path)
+                    self.stdout.write(self.style.SUCCESS('Successfully removed stream: {}'.format(stream.sym_link_path)))
                     stream.delete()
                 except Exception as e:
                     print("STREAM DELETE FAILED: {} - {}\nreason: {}".format(stream.id, stream.sym_link_path, e))
