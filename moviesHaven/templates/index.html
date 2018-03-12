@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
-    <div class="container">
+    <!--<div class="container">
         <div>
             <span>Thread status: {{ thread.staus }} - {{ thread.get_status_display }}</span>
         </div>
         <div>
             <span>Thread type: {{ thread.type }} - {{ thread.get_type_display }}</span>
         </div>
-    </div>
+    </div>-->
     <div class="container" style="margin-top: 1%">
         <table class="table table-bordered">
             <thead>
@@ -152,7 +152,11 @@
             <tr>
                 <td>Person</td>
                 <td></td>
-                <td></td>
+                <td>
+                    <a href="{% url 'admin:moviesHaven_person_changelist' %}?status__gte=2">
+                        Cast and Crew Detail
+                    </a>
+                </td>
                 <td>
                     <a href="{% url 'admin:moviesHaven_personrole_changelist' %}?role=cast">
                         {{ total_actors }}
