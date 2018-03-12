@@ -11,11 +11,7 @@ def message_filter(msg, **kwargs):
 
 
 @register.filter
-def get_display(arg, **kwargs):
-    print(arg)
-    return arg
-
-
-@register.filter
-def filter_range(start, end):
-    return range(start, end)
+def toogle_button_status(thread_instance, *args):
+    if thread_instance:
+        if thread_instance.status != 0:
+            return "enabled"

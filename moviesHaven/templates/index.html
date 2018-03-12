@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
+    <div class="container">
+        <div>
+            <span>Thread status: {{ thread.staus }} - {{ thread.get_status_display }}</span>
+        </div>
+        <div>
+            <span>Thread type: {{ thread.type }} - {{ thread.get_type_display }}</span>
+        </div>
+    </div>
     <div class="container" style="margin-top: 1%">
         <table class="table table-bordered">
             <thead>
@@ -14,29 +22,57 @@
             <tbody>
             <tr>
                 <td>
+                    {% if thread.type == 0 %}
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped bg-success progress-bar-animated"
+                                 role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                                 style="width: 100%">{{ thread.get_status_display }}</div>
+                        </div>
+                    {% endif %}
                     <form action="{% url 'insert_raw_data' %}">
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" {% if thread.status == 0 %} disabled {% endif %}>
                             {% trans "Fetch local content" %}
                         </button>
                     </form>
                 </td>
                 <td>
+                    {% if thread.type == 1 %}
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped bg-success progress-bar-animated"
+                                 role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                                 style="width: 100%">{{ thread.get_status_display }}</div>
+                        </div>
+                    {% endif %}
                     <form action="{% url 'file_filter' %}">
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" {% if thread.status == 0 %} disabled {% endif %}>
                             {% trans "Filter Local Content" %}
                         </button>
                     </form>
                 </td>
                 <td>
+                    {% if thread.type == 2 or thread.type == 3 %}
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped bg-success progress-bar-animated"
+                                 role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                                 style="width: 100%">{{ thread.get_status_display }}</div>
+                        </div>
+                    {% endif %}
                     <form action="{% url 'update_meta_data' %}">
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" {% if thread.status == 0 %} disabled {% endif %}>
                             {% trans "Fetch MetaData" %}
                         </button>
                     </form>
                 </td>
                 <td>
+                    {% if thread.type == 4 %}
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped bg-success progress-bar-animated"
+                                 role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                                 style="width: 100%">{{ thread.get_status_display }}</div>
+                        </div>
+                    {% endif %}
                     <form action="{% url 'index' task='update_person_data' %}">
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit"  {% if thread.status == 0 %} disabled {% endif %}>
                             {% trans "Fetch MetaData" %}
                         </button>
                     </form>

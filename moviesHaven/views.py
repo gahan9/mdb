@@ -12,6 +12,43 @@ from mysite.settings import TMDB_SEARCH_URL, DEFAULT_PARAMS, SCRAPE_DIR
 from .models import *
 
 
+def structure_maker():
+    thread_instance, created = ThreadManager.objects.get_or_create(type=0, status=0)
+    print("thread created: {}; created: {}".format(thread_instance, created))
+    util_obj = DataFilter()
+    # print(created)
+    # print(util_obj.content_fetcher(directory_path=SCRAPE_DIR))
+    if created:
+        contents = util_obj.content_fetcher(directory_path=SCRAPE_DIR)
+        print(contents)
+        if contents:
+            for video in contents:
+                try:
+                    # RawData.objects.filter(mediainfo__isnull=True)
+                    raw_object = RawData.objects.get_or_create(**video)[0]
+                    media_info_obj = FetchMediaInfo()
+                    try:
+                        print("fetching media info")
+                        media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
+                        if media_data:
+                            try:
+                                MediaInfo.objects.create(file=raw_object, **media_data)
+                            except Exception as e:
+                                print("Create query for media info failed for object: {} and media data: {}\n reason: {}".format(raw_object.values(), media_data, e))
+                        else:
+                            print("Media data couldn't found for: {}".format(raw_object.values()))
+                    except Exception as e:
+                        print("Could not fetch media information for : {}".format(raw_object.values()))
+                except Exception as e:
+                    print("RawData objects could not created for: {}\nEXCEPTION==>reason: ".format(video, e))
+        else:
+            print("Structure Maker: Path Does not exist")
+        thread_instance.delete()
+        print("deleted thread instance")
+    else:
+        return False
+
+
 class HomePageView(LoginRequiredMixin, TemplateView):
     """ Home page view """
     template_name = "index.html"
@@ -20,6 +57,8 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)
+        thread_instance = ThreadManager.objects.last()
+        context['thread'] = thread_instance if thread_instance else None
         context['total_actors'] = PersonRole.objects.filter(role="cast").distinct().count()
         context['total_movies'] = Movie.objects.all().distinct().count()
         context['movies_scanned'] = Movie.objects.filter(scan_stat=True).distinct().count()
@@ -61,6 +100,9 @@ class PopulateMetaData(object):
 
     def search_tv_data(self):
         print("fetching tv data...")
+        thread_instance, created = ThreadManager.objects.get_or_create(type=1, status=0)
+        if not created:
+            return False
         for episode_instance in EpisodeDetail.objects.filter(meta_stat=False, scan_stat=False):
             tv_instance = episode_instance.season.series
             params = copy.deepcopy(DEFAULT_PARAMS)
@@ -83,6 +125,7 @@ class PopulateMetaData(object):
             print("Instance_saved: {}".format(tv_instance))
             update_thread = Thread(target=self.update_tv_data, args=(episode_instance,))
             update_thread.start()
+        thread_instance.delete()
 
     def update_tv_data(self, episode_instance=None):
         fetcher_object = MetaFetcher()
@@ -157,20 +200,25 @@ class PopulateMetaData(object):
                         print("Exception in creating person role: {}".format(e))
 
     def update_person_data(self):
-        fetcher = MetaFetcher()
-        for person_instance in Person.objects.filter(status=0):
-            try:
-                person_data = fetcher.get_person_detail(person_instance.tmdb_id)
-                person_instance.status = 1
-                person_instance.save()
-                # print(person_instance)
-                if person_data:
-                    for key, value in person_data.items():
-                        setattr(person_instance, key, value)
-                    person_instance.status = 2
+        thread_instance, created = ThreadManager.objects.get_or_create(type=4, status=0)
+        if created:
+            fetcher = MetaFetcher()
+            for person_instance in Person.objects.filter(status=0):
+                try:
+                    person_data = fetcher.get_person_detail(person_instance.tmdb_id)
+                    person_instance.status = 1
                     person_instance.save()
-            except Exception as e:
-                print("Unable to fetch person data for {}\nreason:".format(person_instance, e))
+                    # print(person_instance)
+                    if person_data:
+                        for key, value in person_data.items():
+                            setattr(person_instance, key, value)
+                        person_instance.status = 2
+                        person_instance.save()
+                except Exception as e:
+                    print("Unable to fetch person data for {}\nreason:".format(person_instance, e))
+            thread_instance.delete()
+        else:
+            return False
 
 
 def get_mediainfo():
@@ -200,78 +248,51 @@ def get_mediainfo():
             print("RawData objects could not created for: {}\nEXCEPTION==>reason: ".format(raw_object, e))
 
 
-def structure_maker():
-    contents = content_fetcher(directory_path=SCRAPE_DIR)
-    if contents:
-        for video in contents:
-            try:
-                # RawData.objects.filter(mediainfo__isnull=True)
-                raw_object = RawData.objects.get_or_create(**video)[0]
-                media_info_obj = FetchMediaInfo()
-                try:
-                    media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
-                    if media_data:
-                        try:
-                            MediaInfo.objects.create(file=raw_object, **media_data)
-                        except Exception as e:
-                            print("Create query for media info failed for object: {} and media data: {}\n reason: {}".format(raw_object.values(), media_data, e))
-                    else:
-                        print("Media data couldn't found for: {}".format(raw_object.values()))
-                except Exception as e:
-                    print("Could not fetch media information for : {}".format(raw_object.values()))
-            except Exception as e:
-                print("RawData objects could not created for: {}\nEXCEPTION==>reason: ".format(video, e))
-    else:
-        print("Structure Maker: Path Does not exist")
-
-
-def insert_raw_data(request):
-    success_url = reverse_lazy('index')
-    fetcher_thread = Thread(target=structure_maker)
-    fetcher_thread.start()
-    return HttpResponseRedirect(success_url)
-
-
 def filter_raw_data():
-    fetcher = DataFilter()
-    for entry in MediaInfo.objects.filter(meta_movie__isnull=True, meta_episode__isnull=True):
-        filter1 = fetcher.filter_film(entry.file.name)
-        if filter1:
-            if all(filter1):
+    thread_instance, created = ThreadManager.objects.get_or_create(type=1, status=0)
+    if created:
+        fetcher = DataFilter()
+        for entry in MediaInfo.objects.filter(meta_movie__isnull=True, meta_episode__isnull=True):
+            filter1 = fetcher.filter_film(entry.file.name)
+            if filter1:
+                if all(filter1):
+                    try:
+                        structure = fetcher.organize_tv_data(model_instance=entry.file)
+                        if structure:
+                            title = structure.get('title', None)
+                            if title:
+                                # XXX: need to check test case if two TV season with same name exist???
+                                tv_instance = TVSeries.objects.get_or_create(title=title)[0]
+                                season_number = structure.get('season_number', None)
+                                if season_number:
+                                    season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
+                                    print("---------", season_number)
+                                    episode_number = structure.get('episode_number', None)
+                                    if episode_number:
+                                        episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance,
+                                                                                               episode_number=episode_number)[
+                                            0]
+                                        entry.meta_episode = episode_instance
+                                        entry.save()
+                    except Exception as e:
+                        print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
+                        # raise Exception(e)
+            else:
+                title = fetcher.get_name(entry.file.name)
+                # FIXME: handle name match with multiple occurrence of special character
+                if '_' in title:
+                    x = title.split('_')
+                    title = x[1] if len(x) > 1 else title
                 try:
-                    structure = fetcher.organize_tv_data(model_instance=entry.file)
-                    if structure:
-                        title = structure.get('title', None)
-                        if title:
-                            # XXX: need to check test case if two TV season with same name exist???
-                            tv_instance = TVSeries.objects.get_or_create(title=title)[0]
-                            season_number = structure.get('season_number', None)
-                            if season_number:
-                                season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
-                                print("---------", season_number)
-                                episode_number = structure.get('episode_number', None)
-                                if episode_number:
-                                    episode_instance = EpisodeDetail.objects.get_or_create(season=season_instance,
-                                                                                           episode_number=episode_number)[
-                                        0]
-                                    entry.meta_episode = episode_instance
-                                    entry.save()
+                    if title:
+                        movie_instance = Movie.objects.get_or_create(title=title)[0]
+                        entry.meta_movie = movie_instance
+                        entry.save()
                 except Exception as e:
-                    print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
-                    # raise Exception(e)
-        else:
-            title = fetcher.get_name(entry.file.name)
-            # FIXME: handle name match with multiple occurrence of special character
-            if '_' in title:
-                x = title.split('_')
-                title = x[1] if len(x) > 1 else title
-            try:
-                if title:
-                    movie_instance = Movie.objects.get_or_create(title=title)[0]
-                    entry.meta_movie = movie_instance
-                    entry.save()
-            except Exception as e:
-                print("Exception during creating Movie object: {}".format(e))
+                    print("Exception during creating Movie object: {}".format(e))
+        thread_instance.delete()
+    else:
+        return False
 
 
 def genre_maker(genres):
@@ -286,18 +307,11 @@ def genre_maker(genres):
                 print(e)
 
 
-def file_filter(request):
-    filter_thread = Thread(target=filter_raw_data)
-    filter_thread.start()
-    genres = get_genre("tv")
-    genres.update(get_genre("movie"))
-    genre_thread = Thread(target=genre_maker, args=(genres,))
-    genre_thread.start()
-    return HttpResponseRedirect(reverse_lazy('index'))
-
-
 def fetch_movie_metadata():
     print("fetching movie data...")
+    thread_instance, created = ThreadManager.objects.get_or_create(type=2, status=0)
+    if not created:
+        return False
     fetcher = MetaFetcher()
     for movie_instance in Movie.objects.filter(status=False, scan_stat=False):
         try:
@@ -363,29 +377,28 @@ def fetch_movie_metadata():
                             print("Movie... saving meta data exception : {}".format(e))
                         image_set_thread = Thread(target=set_image, args=(movie_instance, movie))
                         image_set_thread.start()
-
-                        # # TODO: INCLUDE ME IN CLASS!!! GET CAST/CREW DATA!
-                        # cast_movie_url = "{}movie/{}/credits".format(TMDB_BASE_URL, movies_data[0]['id'])
-                        # cast_list = get_json_response(cast_movie_url, DEFAULT_PARAMS)['cast']
-                        # for cast in cast_list:
-                        #     person_data = fetch_cast_data(cast)
-                        #     if person_data:
-                        #         if not Person.objects.filter(**person_data):
-                        #             try:
-                        #                 person_instance = Person.objects.get_or_create(**person_data)[0]
-                        #                 try:
-                        #                     PersonRole.objects.create(role="Cast", person=person_instance,
-                        #                                               movie=movie_instance)
-                        #                 except Exception as e:
-                        #                     print(
-                        #                         "Exception occurred during creating person role-- {}\n for {}".format(e,
-                        #                                                                                               person_instance))
-                        #             except Exception as e:
-                        #                 print("Exception occurred during creating person-- {}".format(e))
                         movie_instance.status = True
                         movie_instance.save()
         except Exception as e:
             print("Exception in movie creation for object :  {}\n Exception: {}".format(movie_instance, e))
+    thread_instance.delete()
+
+
+def insert_raw_data(request):
+    success_url = reverse_lazy('index')
+    fetcher_thread = Thread(target=structure_maker)
+    fetcher_thread.start()
+    return HttpResponseRedirect(success_url)
+
+
+def file_filter(request):
+    filter_thread = Thread(target=filter_raw_data)
+    filter_thread.start()
+    genres = get_genre("tv")
+    genres.update(get_genre("movie"))
+    genre_thread = Thread(target=genre_maker, args=(genres,))
+    genre_thread.start()
+    return HttpResponseRedirect(reverse_lazy('index'))
 
 
 def update_meta_data(request):

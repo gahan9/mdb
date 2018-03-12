@@ -1,10 +1,10 @@
 # coding=utf-8
 import re
 import time
-
 import requests
 import os
 
+from mysite.directory_settings import SCRAPE_DIR
 from mysite.regex import MOVIE_TV_FILTER
 from mysite.settings import TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 from mysite.tmdb_settings import *
@@ -12,7 +12,26 @@ from mysite.tmdb_settings import *
 
 class DataFilter(object):
     def __init__(self, *args, **kwargs):
-        pass
+        self.directory_path = SCRAPE_DIR
+
+    def content_fetcher(self, directory_path=None):
+        if directory_path:
+            self.directory_path = directory_path
+
+        data_set = []
+        if os.path.exists(directory_path):
+            for root, directory, files in os.walk(directory_path, topdown=True):
+                if TEMP_FOLDER_NAME in root:
+                    continue
+                else:
+                    for name in files:
+                        if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
+                            d = {"name": name, "path": root, "extension": name.split('.')[-1]}
+                            data_set.append(d)
+            return data_set
+        else:
+            print("content_fetcher: path does not exist : {}".format(directory_path))
+            return False
 
     def filter_film(self, title):
         if title:

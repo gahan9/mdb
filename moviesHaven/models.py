@@ -380,3 +380,24 @@ class SubMenuContent(MainMenuConstructor):
 
     class Meta:
         verbose_name = _("Sub Menu Content")
+
+
+class ThreadManager(models.Model):
+    THREAD_TYPE = (
+        (0, "Raw Data"),
+        (1, "Filtering Raw Data"),
+        (2, "Fetch Movie Meta Data"),
+        (3, "Fetch TV Meta Data"),
+        (4, "Fetch Person Detail")
+    )
+    THREAD_STATUS = (
+        (0, "running"),
+        (1, "stopped")
+    )
+    type = models.IntegerField(choices=THREAD_TYPE, verbose_name="Thread Type")
+    status = models.IntegerField(choices=THREAD_STATUS, verbose_name="Thread Status")
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.get_type_display()
