@@ -34,7 +34,9 @@ def structure_maker():
                             try:
                                 MediaInfo.objects.create(file=raw_object, **media_data)
                             except Exception as e:
-                                print("Create query for media info failed for object: {} and media data: {}\n reason: {}".format(raw_object.values(), media_data, e))
+                                print(
+                                    "Create query for media info failed for object: {} and media data: {}\n reason: {}".format(
+                                        raw_object.values(), media_data, e))
                         else:
                             print("Media data couldn't found for: {}".format(raw_object.values()))
                     except Exception as e:
@@ -58,16 +60,19 @@ class HomePageView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)
         thread_instance = ThreadManager.objects.last()
+        person_query = Person.objects.filter(personrole__role="cast").distinct()
+        movie_query = Movie.objects.all().distinct()
+        episode_query = EpisodeDetail.objects.all().distinct()
         context['thread'] = thread_instance if thread_instance else None
-        context['actors_scanned'] = Person.objects.filter(personrole__role='cast', status__gte=1).distinct().count()
-        context['actors_with_metadata'] = Person.objects.filter(personrole__role='cast', status__gte=2).distinct().count()
-        context['total_actors'] = Person.objects.filter(personrole__role="cast").distinct().count()
-        context['total_movies'] = Movie.objects.all().distinct().count()
-        context['movies_scanned'] = Movie.objects.filter(scan_stat=True).distinct().count()
-        context['movies_with_metadata'] = Movie.objects.filter(status=True).distinct().count()
-        context['total_episodes'] = EpisodeDetail.objects.all().distinct().count()
-        context['episodes_scanned'] = EpisodeDetail.objects.filter(scan_stat=True).distinct().count()
-        context['episodes_with_metadata'] = EpisodeDetail.objects.filter(meta_stat=True).distinct().count()
+        context['actors_scanned'] = person_query.filter(status__gte=1).count()
+        context['actors_with_metadata'] = person_query.filter(status__gte=2).count()
+        context['total_actors'] = person_query.count()
+        context['total_movies'] = movie_query.count()
+        context['movies_scanned'] = movie_query.filter(scan_stat=True).count()
+        context['movies_with_metadata'] = movie_query.filter(status=True).count()
+        context['total_episodes'] = episode_query.count()
+        context['episodes_scanned'] = episode_query.filter(scan_stat=True).count()
+        context['episodes_with_metadata'] = episode_query.filter(meta_stat=True).count()
         context['total_raw_data'] = RawData.objects.all().distinct().count()
         context['total_raw_data_with_media_info'] = MediaInfo.objects.all().distinct().count()
         return context
@@ -267,7 +272,9 @@ def filter_raw_data():
                                 tv_instance = TVSeries.objects.get_or_create(title=title)[0]
                                 season_number = structure.get('season_number', None)
                                 if season_number:
-                                    season_instance = SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[0]
+                                    season_instance = \
+                                    SeasonDetail.objects.get_or_create(series=tv_instance, season_number=season_number)[
+                                        0]
                                     print("---------", season_number)
                                     episode_number = structure.get('episode_number', None)
                                     if episode_number:
@@ -277,7 +284,8 @@ def filter_raw_data():
                                         entry.meta_episode = episode_instance
                                         entry.save()
                     except Exception as e:
-                        print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e, entry))
+                        print("filter_raw_data: Exception during creating TVSeries object: {}\nfor object- {}".format(e,
+                                                                                                                      entry))
                         # raise Exception(e)
             else:
                 title = fetcher.get_name(entry.file.name)
@@ -359,7 +367,8 @@ def fetch_movie_metadata():
                                                                   movie=movie_instance)
                                     except Exception as e:
                                         print(
-                                            "Exception in creating person role: {}\n cast: {} \n cast_role:>> {} <<".format(e, cast, cast_role))
+                                            "Exception in creating person role: {}\n cast: {} \n cast_role:>> {} <<".format(
+                                                e, cast, cast_role))
                             if crews:
                                 for crew in crews:
                                     crew_role = crew.pop('role')
@@ -370,7 +379,9 @@ def fetch_movie_metadata():
                                                                   role=crew_role, character=crew_work,
                                                                   movie=movie_instance)
                                     except Exception as e:
-                                        print("Exception in creating person role: {}\n crew: {} \n crew_role:>> {} <<".format(e, crew, crew_role))
+                                        print(
+                                            "Exception in creating person role: {}\n crew: {} \n crew_role:>> {} <<".format(
+                                                e, crew, crew_role))
                         if genre_id:
                             [movie_instance.genre_name.add(Genres.objects.get(genre_id=i)) for i in genre_id]
                         try:
