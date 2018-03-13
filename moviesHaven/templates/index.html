@@ -150,11 +150,15 @@
                 </td>
             </tr>
             <tr>
-                <td>Person</td>
-                <td></td>
+                <td>Actors</td>
+                <td>
+                    <a href="{% url 'admin:moviesHaven_person_changelist' %}?status__gte=1">
+                        {{ actors_with_metadata }}
+                    </a>
+                </td>
                 <td>
                     <a href="{% url 'admin:moviesHaven_person_changelist' %}?status__gte=2">
-                        Cast and Crew Detail
+                        {{ actors_scanned }}
                     </a>
                 </td>
                 <td>

@@ -59,7 +59,9 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         context = super(HomePageView, self).get_context_data(**kwargs)
         thread_instance = ThreadManager.objects.last()
         context['thread'] = thread_instance if thread_instance else None
-        context['total_actors'] = PersonRole.objects.filter(role="cast").distinct().count()
+        context['actors_scanned'] = Person.objects.filter(personrole__role='cast', status__gte=1).distinct().count()
+        context['actors_with_metadata'] = Person.objects.filter(personrole__role='cast', status__gte=2).distinct().count()
+        context['total_actors'] = Person.objects.filter(personrole__role="cast").distinct().count()
         context['total_movies'] = Movie.objects.all().distinct().count()
         context['movies_scanned'] = Movie.objects.filter(scan_stat=True).distinct().count()
         context['movies_with_metadata'] = Movie.objects.filter(status=True).distinct().count()
