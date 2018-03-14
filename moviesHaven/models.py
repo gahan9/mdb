@@ -325,7 +325,7 @@ class MediaInfo(models.Model):
     @property
     def get_duration(self):
         try:
-            minutes, seconds = self.runtime // 60, self.runtime % 60
+            minutes, seconds = int(self.runtime) // 60, int(self.runtime) % 60
             hour, minutes = minutes // 60, minutes % 60
             return "{}:{}:{}".format(hour, minutes, seconds)
         except Exception as e:
