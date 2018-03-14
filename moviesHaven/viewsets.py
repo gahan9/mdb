@@ -68,17 +68,19 @@ class MovieViewSet(viewsets.ModelViewSet):
     ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
     model = Movie
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            response_data = CustomUtils().get_unique_result(serializer.data, flag="tmdb_id")
-            return self.get_paginated_response(response_data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         print(serializer.data)
+    #         print(len(serializer.data))
+    #         # response_data = CustomUtils().get_unique_result(serializer.data, flag="tmdb_id")
+    #         return self.get_paginated_response(serializer.data)
+    #
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer.data)
 
     def get_queryset(self):
         queryset = self.queryset
@@ -136,7 +138,10 @@ class MovieViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
-        # TODO: remove duplicates values of tmdb_id from queryset using extra() or distinct ON
+
+        unique_tmdb_ids = queryset.values_list('tmdb_id', flat=True).distinct()
+        queryset = [self.model.objects.filter(tmdb_id=i)[0] for i in unique_tmdb_ids]
+        queryset = list(set(list(queryset)))
         return queryset
 
     def get_serializer_class(self):
