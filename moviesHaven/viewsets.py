@@ -15,6 +15,7 @@ from moviesHaven.models import *
 from moviesHaven.serializers import *
 from rest_framework import viewsets
 
+from moviesHaven.utils import CustomUtils
 from mysite.directory_settings import MEDIA_MAP
 from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
 
@@ -66,6 +67,18 @@ class MovieViewSet(viewsets.ModelViewSet):
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
     model = Movie
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response_data = CustomUtils().get_unique_result(serializer.data, flag="tmdb_id")
+            return self.get_paginated_response(response_data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         queryset = self.queryset
@@ -139,6 +152,18 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
     model = TVSeries
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response_data = CustomUtils().get_unique_result(serializer.data, flag="season_number")
+            return self.get_paginated_response(response_data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         """
@@ -375,6 +400,18 @@ class SeasonDetailViewSet(viewsets.ModelViewSet):
     ordering_fields = ('season_number',)
     model = SeasonDetail
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response_data = CustomUtils().get_unique_result(serializer.data, flag="season_number")
+            return self.get_paginated_response(response_data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class EpisodeDetailViewSet(viewsets.ModelViewSet):
     serializer_class = EpisodeDetailSerializer
@@ -382,6 +419,18 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
     filter_backends = (OrderingFilter,)
     ordering_fields = ('episode_number', 'air_date')
     model = EpisodeDetail
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response_data = CustomUtils().get_unique_result(serializer.data, flag="tmdb_id")
+            return self.get_paginated_response(response_data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_queryset(self):
         queryset = self.model.objects.filter(meta_stat=True).order_by('-air_date')

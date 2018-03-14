@@ -12,6 +12,25 @@ from mysite.tmdb_settings import *
 
 
 class CustomUtils(object):
+    @staticmethod
+    def get_unique_result(raw_response=None, flag="tmdb_id"):
+        if flag == "season_number":
+            list_of_dict = raw_response.get("seasons", None)
+            _key = "seasons" if list_of_dict else ''
+        else:
+            list_of_dict = raw_response.get("results", None)
+            _key = "results" if list_of_dict else ''
+        if list_of_dict:
+            _keys, _unique_item_list = [], []
+            for _item in list_of_dict:
+                _flag = _item.get(flag)
+                if _flag not in _keys:
+                    _keys.append(_flag)
+                    _unique_item_list.append(_item)
+            if _key:
+                raw_response[_key] = _unique_item_list
+        return raw_response
+
     def get_directory_hash(self, directory, verbose=0):
         # xbmc.log('Hashing file :', 2)
         dir_hash = hashlib.md5()
