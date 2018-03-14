@@ -139,9 +139,10 @@ class MovieViewSet(viewsets.ModelViewSet):
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
 
-        unique_tmdb_ids = queryset.values_list('tmdb_id', flat=True).distinct()
-        queryset = [self.model.objects.filter(tmdb_id=i)[0] for i in unique_tmdb_ids]
-        queryset = list(set(list(queryset)))
+        # FIX: optimize below three lines
+        # unique_tmdb_ids = queryset.values_list('tmdb_id', flat=True).distinct()
+        # queryset = [self.model.objects.filter(tmdb_id=i)[0] for i in unique_tmdb_ids]
+        # queryset = list(set(list(queryset)))
         return queryset
 
     def get_serializer_class(self):
