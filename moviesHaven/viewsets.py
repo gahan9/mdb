@@ -159,11 +159,8 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            if serializer.data.get("seasons", None):
-                response_data = CustomUtils().get_unique_result(serializer.data, flag="season_number")
-            else:
-                response_data = serializer.data
-            return self.get_paginated_response(response_data)
+            response_data = CustomUtils().get_unique_result(serializer.data, flag="season_number")
+            return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -409,10 +406,7 @@ class SeasonDetailViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            if serializer.data.get("seasons", None):
-                response_data = CustomUtils().get_unique_result(serializer.data, flag="season_number")
-            else:
-                response_data = serializer.data
+            response_data = CustomUtils().get_unique_result(serializer.data, flag="season_number")
             return self.get_paginated_response(response_data)
 
         serializer = self.get_serializer(queryset, many=True)
