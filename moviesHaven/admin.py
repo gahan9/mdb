@@ -125,7 +125,7 @@ class EpisodeDetailAdmin(admin.ModelAdmin):
         return "{}- {}".format(obj.season.series.id, name)
 
     def season_number(self, obj):
-        return object.season.season_number
+        return obj.season.season_number
 
 
 class GenreAdmin(admin.ModelAdmin):
