@@ -48,17 +48,6 @@ class MediaInfoAdmin(admin.ModelAdmin):
                      'meta_movie__name', 'meta_episode__name', 'meta_movie__tmdb_id',
                      'meta_movie__title', 'meta_episode__title', 'meta_episode__tmdb_id']
 
-    def get_fieldsets(self, request, obj=None):
-        # Add 'item_type' on add forms and remove it on changeforms.
-        fieldsets = super(MediaInfoAdmin, self).get_fieldsets(request, obj)
-        if not obj:  # this is an add form
-            if 'name' not in fieldsets[0][1]['fields']:
-                fieldsets[0][1]['fields'] += ('name',)
-        else:  # this is a change form
-            print(fieldsets[0][1]['fields'])
-            fieldsets[0][1]['fields'] = tuple(x for x in fieldsets[0][1]['fields'] if x != 'name')
-        return fieldsets
-
     def get_playable_stream(self, obj):
         # file_path = os.path.join(obj.file.path, obj.file.name)
         # return file_path
