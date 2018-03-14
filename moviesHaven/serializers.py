@@ -1,5 +1,7 @@
 from django.core.serializers import serialize
 from rest_framework import serializers
+
+from moviesHaven.utils import CustomUtils
 from .models import *
 
 
@@ -94,7 +96,8 @@ class TVSeriesSerializer(serializers.ModelSerializer):
 
     def get_seasons(self, obj):
         result = SeasonDetail.objects.filter(series__tmdb_id=obj.tmdb_id)
-        return [i.get_detail for i in result]
+        _seasons = [i.get_detail for i in result]
+        return CustomUtils().get_unique_result(_seasons, flag="season_number")
 
     # def get_name(self, obj):
     #     return "{} Season {} episode {}".format(obj.episode_title, obj.season_number, obj.episode_number)
@@ -147,7 +150,8 @@ class SeasonDetailSerializer(serializers.ModelSerializer):
 
     def get_results(self, obj):
         result = EpisodeDetail.objects.filter(season__tmdb_id=obj.tmdb_id)
-        return [i.get_details for i in result]
+        _episodes = [i.get_details for i in result]
+        return CustomUtils().get_unique_result(_episodes)
 
     class Meta:
         model = SeasonDetail
