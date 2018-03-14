@@ -101,7 +101,10 @@ class MovieViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 latest = 3
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
-            queryset = queryset.filter(date_updated__gte=latest_condition)
+            temp_query = queryset.filter(date_updated__gte=latest_condition)
+            if not temp_query:
+                temp_query = queryset.order_by('-release_date')[:50]
+            queryset = temp_query
         if year:
             try:
                 queryset = queryset.filter(release_date__year=year)
