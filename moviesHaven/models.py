@@ -324,9 +324,13 @@ class MediaInfo(models.Model):
 
     @property
     def get_duration(self):
-        minutes, seconds = self.runtime // 60, self.runtime % 60
-        hour, minutes = minutes // 60, minutes % 60
-        return "{}:{}:{}".format(hour, minutes, seconds)
+        try:
+            minutes, seconds = self.runtime // 60, self.runtime % 60
+            hour, minutes = minutes // 60, minutes % 60
+            return "{}:{}:{}".format(hour, minutes, seconds)
+        except Exception as e:
+            print(">>Exception in get_duration for : {}-{}\nreason:{}".format(self.id, self, e))
+            return self.runtime
 
     @property
     def get_quality(self):
@@ -334,6 +338,7 @@ class MediaInfo(models.Model):
         try:
             quality = "HD" if (int(self.frame_width) * int(self.frame_height)) > 896000 else "SD"
             return "{} ({}p)".format(quality, self.frame_height)
+        except Exception as e:
         except Exception as e:
             print("EXCEPTION in get_quality for object: {}-{}\nreason:{}".format(self.id, self, e))
             return "{} x {}".format(self.frame_width, self.frame_height)
