@@ -140,9 +140,14 @@ class MovieViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Invalid Genre"})
 
         # FIX: optimize below three lines
+        queryset_obj, tmdb_ids = [], []
         # unique_tmdb_ids = queryset.values_list('tmdb_id', flat=True).distinct()
-        # queryset = [self.model.objects.filter(tmdb_id=i)[0] for i in unique_tmdb_ids]
+        # queryset = [queryset.filter(tmdb_id=i)[0] for i in unique_tmdb_ids]
         # queryset = list(set(list(queryset)))
+        for i in queryset:
+            if i.tmdb_id not in tmdb_ids:
+                tmdb_ids.append(i.tmdb_id)
+                queryset_obj.append(i)
         return queryset
 
     def get_serializer_class(self):
