@@ -232,7 +232,12 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
-        return queryset
+        queryset_obj, tmdb_ids = [], []
+        for i in queryset:
+            if i.tmdb_id not in tmdb_ids:
+                tmdb_ids.append(i.tmdb_id)
+                queryset_obj.append(i)
+        return queryset_obj
 
     def get_serializer_class(self):
         if self.kwargs:
