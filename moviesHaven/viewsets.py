@@ -4,6 +4,7 @@ import uuid
 
 import requests
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
@@ -60,14 +61,14 @@ class MovieViewSet(viewsets.ModelViewSet):
     list:
     Return List of all movies with meta data
     """
-    queryset = Movie.objects.filter(status=True).order_by("name")
+    queryset = Movie.objects.filter(status=True, release_date__lte=timezone.now()).distinct().order_by("name")
     serializer_class = MovieSerializer
     filter_backends = (OrderingFilter,)
     ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
     model = Movie
 
     def get_queryset(self):
-        queryset = self.model.objects.filter(status=True).order_by("name")
+        queryset = self.queryset
         name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         person_name = self.request.query_params.get('person_name', None)
