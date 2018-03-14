@@ -112,7 +112,7 @@ class SeasonDetailAdmin(admin.ModelAdmin):
 
 class EpisodeDetailAdmin(admin.ModelAdmin):
     inlines = [MediaInfoInline]
-    list_display = ['id', 'tmdb_id', 'season_name',
+    list_display = ['id', 'tmdb_id', 'season_name', 'season_number',
                     'episode_title', 'episode_number', 'air_date', 'vote_average',
                     'get_short_overview', 'still_path', 'meta_stat', 'scan_stat'
                     ]
@@ -121,7 +121,11 @@ class EpisodeDetailAdmin(admin.ModelAdmin):
     readonly_fields = ['title', 'date_created', 'date_updated']
 
     def season_name(self, obj):
-        return obj.season.series.name if obj.season.series.name else obj.season.series.title
+        name = obj.season.series.name if obj.season.series.name else obj.season.series.title
+        return "{}- {}".format(obj.season.series.id, name)
+
+    def season_number(self, obj):
+        return object.season.season_number
 
 
 class GenreAdmin(admin.ModelAdmin):
