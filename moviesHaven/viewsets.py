@@ -173,7 +173,11 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 latest = 3
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
-            queryset = queryset.filter(date_updated__gte=latest_condition)
+            # queryset = queryset.filter(date_updated__gte=latest_condition)
+            temp_query = queryset.filter(date_updated__gte=latest_condition)
+            if not temp_query:
+                temp_query = queryset.order_by('-date_updated')[:50]
+            queryset = temp_query
         if year:
             try:
                 queryset = queryset.filter(first_air_date__year=year).order_by("name")
