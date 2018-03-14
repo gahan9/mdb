@@ -146,7 +146,7 @@ class SeasonDetailSerializer(serializers.ModelSerializer):
     # seasons = EpisodeDetailSerializer(source="seasons")
 
     def get_results(self, obj):
-        result = EpisodeDetail.objects.filter(season=obj)
+        result = EpisodeDetail.objects.filter(season__tmdb_id=obj.tmdb_id)
         return [i.get_details for i in result]
 
     class Meta:
