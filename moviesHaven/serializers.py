@@ -151,7 +151,7 @@ class SeasonDetailSerializer(serializers.ModelSerializer):
     def get_results(self, obj):
         result = EpisodeDetail.objects.filter(season__tmdb_id=obj.tmdb_id)
         _episodes = [i.get_details for i in result]
-        return CustomUtils().get_unique_result(_episodes)
+        return _episodes
 
     class Meta:
         model = SeasonDetail
