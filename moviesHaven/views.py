@@ -64,8 +64,8 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         movie_query = Movie.objects.all().distinct()
         episode_query = EpisodeDetail.objects.all().distinct()
         context['thread'] = thread_instance if thread_instance else None
-        context['actors_scanned'] = person_query.filter(status__gte=1).count()
-        context['actors_with_metadata'] = person_query.filter(status__gte=2).count()
+        # context['actors_scanned'] = person_query.filter(status__gte=1).count()
+        # context['actors_with_metadata'] = person_query.filter(status__gte=2).count()
         context['total_actors'] = person_query.count()
         context['total_movies'] = movie_query.count()
         context['movies_scanned'] = movie_query.filter(scan_stat=True).count()
