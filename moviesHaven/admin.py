@@ -15,9 +15,9 @@ class RawDataAdmin(admin.ModelAdmin):
 
 
 class MediaInfoInline(admin.TabularInline):
-    fields = ('get_playable_stream',
+    fields = ('id', 'get_playable_stream',
               'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime')
-    readonly_fields = ('get_playable_stream', 'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime')
+    readonly_fields = ('id', 'get_playable_stream', 'frame_width', 'frame_height', 'video_codec', 'audio_codec', 'runtime')
     model = MediaInfo
     extra = 0
 
@@ -28,6 +28,28 @@ class MediaInfoInline(admin.TabularInline):
         # file_path = os.path.join(obj.file.path, obj.file.name)
         # return file_path
         return format_html(obj.get_stream_link())
+
+
+class EpisodeDetailInline(admin.TabularInline):
+    model = EpisodeDetail
+    fields = ['id', 'tmdb_id', 'season_name',
+              'episode_title', 'episode_number', 'air_date',
+              'still_path', 'meta_stat', 'scan_stat'
+              ]
+    readonly_fields = ['id', 'tmdb_id', 'season_name',
+                       'episode_title', 'episode_number', 'air_date',
+                       'still_path', 'meta_stat', 'scan_stat'
+                       ]
+
+    def season_name(self, obj):
+        name = obj.season.series.name if obj.season.series.name else obj.season.series.title
+        return "{}- {}".format(obj.season.series.id, name)
+
+
+class SeasonDetailInline(admin.TabularInline):
+    model = SeasonDetail
+    fields = ['id', 'series', 'tmdb_id', 'air_date', 'season_number']
+    readonly_fields = ['id', 'series', 'tmdb_id', 'air_date', 'season_number']
 
 
 class MediaInfoAdmin(admin.ModelAdmin):
@@ -71,6 +93,7 @@ class MovieAdmin(admin.ModelAdmin):
 
 
 class TVSeriesAdmin(admin.ModelAdmin):
+    inlines = [SeasonDetailInline]
     list_display = ['id', 'title', 'name', 'tmdb_id',
                     'original_name', 'first_air_date', 'vote_average',
                     'origin_country', 'original_language', 'status', 'season_status',
@@ -81,6 +104,7 @@ class TVSeriesAdmin(admin.ModelAdmin):
 
 
 class SeasonDetailAdmin(admin.ModelAdmin):
+    inlines = [EpisodeDetailInline]
     list_display = ['id', 'series', 'tmdb_id', 'air_date', 'season_number']
     search_fields = ['season_number']
     readonly_fields = ['title', 'date_created', 'date_updated']
