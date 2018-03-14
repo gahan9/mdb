@@ -3,11 +3,55 @@ import re
 import time
 import requests
 import os
+import hashlib
 
 from mysite.directory_settings import SCRAPE_DIR
 from mysite.regex import MOVIE_TV_FILTER
 from mysite.settings import TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 from mysite.tmdb_settings import *
+
+
+class CustomUtils(object):
+    def get_directory_hash(self, directory, verbose=0):
+        # xbmc.log('Hashing file :', 2)
+        dir_hash = hashlib.md5()
+        if not os.path.exists(directory):
+            return -1
+
+        try:
+            print("DIRECTORY :" + str(directory))
+            for root, dirs, files in os.walk(directory):
+                for names in files:
+                    if verbose == 1:
+                        print('Hashing new file :' + str(names))
+                    file_path = os.path.join(root, names)
+                    try:
+                        f1 = open(file_path, 'rb')
+                    except Exception as e:
+                        print(">> EXCEPTION in opening file: {}\nreason:{}".format(file_path, e))
+                        # You can't open the file for some reason
+                        try:
+                            f1.close()
+                        except:
+                            pass
+                        continue
+
+                    while 1:
+                        # Read file in as little chunks
+                        buf = f1.read(4096)
+                        if not buf:
+                            break
+                        dir_hash.update(hashlib.md5(buf).hexdigest())
+                    f1.close()
+
+        except:
+            import traceback
+            print(" MD5 FILE ERROR")
+            # Print the stack traceback
+            traceback.print_exc()
+            return -2
+
+        return dir_hash.hexdigest()
 
 
 class DataFilter(object):
