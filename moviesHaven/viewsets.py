@@ -164,7 +164,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         person_name_starts_with = self.request.query_params.get('person_name_starts_with', None)
         # print(movie_name, movie_year, genre)
         if exclude:
-            queryset = queryset.exclude(genre_name__genre_name__in=['animation', 'documentaire', 'kids'])
+            queryset = queryset.exclude(genre_name__genre_name__in=['animation', 'kids'])
         if name:
             queryset = queryset.filter(name__icontains=name).order_by('name')
         if name_starts_with:
