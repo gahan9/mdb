@@ -3,7 +3,7 @@ import os
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from mysite.directory_settings import SCRAPE_DIR, MEDIA_MAP
+from mysite.directory_settings import *
 
 
 class RawData(models.Model):
@@ -337,10 +337,11 @@ class MediaInfo(models.Model):
         # HD : if frame resolution greater then 896000(1280 * 700)
         try:
             quality = "HD" if (int(self.frame_width) * int(self.frame_height)) > 896000 else "DVD"
-            return "{} ({}p)".format(quality, self.frame_height)
+            return "{}".format(quality)
         except Exception as e:
             print("EXCEPTION in get_quality for object: {}-{}\nreason:{}".format(self.id, self, e))
-            return "{} x {}".format(self.frame_width, self.frame_height)
+            # "{} x {}".format(self.frame_width, self.frame_height)
+            return ""
 
     def __str__(self):
         return "{} - {}x{} @ {}".format(self.file, self.frame_width, self.frame_height, self.bit_rate)
