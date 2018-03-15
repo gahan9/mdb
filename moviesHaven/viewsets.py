@@ -102,11 +102,14 @@ class MovieViewSet(viewsets.ModelViewSet):
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
             temp_query = queryset.filter(date_updated__gte=latest_condition)
             if not temp_query:
-                temp_query = queryset.order_by('-release_date')[:350]
+                temp_query = queryset.filter(release_date__lte=datetime.date(2018, 1, 1)).order_by('-release_date')[:350]
             queryset = temp_query
         if year:
             try:
-                queryset = queryset.filter(release_date__year=year)
+                if year == '2018' or year == 2018:
+                    queryset = queryset.filter(release_date__gte=datetime.date(2016, 1, 1)).order_by('-release_date')
+                else:
+                    queryset = queryset.filter(release_date__year=year)
             except ValueError:
                 return Response({"detail": "Invalid Year"})
         if classics:
