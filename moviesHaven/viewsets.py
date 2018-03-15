@@ -1,17 +1,13 @@
 import datetime
-import os
 import uuid
 
 import requests
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework.filters import OrderingFilter
-from rest_framework.generics import ListAPIView
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from moviesHaven.models import *
 from moviesHaven.serializers import *
 from rest_framework import viewsets
 
@@ -68,20 +64,6 @@ class MovieViewSet(viewsets.ModelViewSet):
     ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
     model = Movie
 
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         print(serializer.data)
-    #         print(len(serializer.data))
-    #         # response_data = CustomUtils().get_unique_result(serializer.data, flag="tmdb_id")
-    #         return self.get_paginated_response(serializer.data)
-    #
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)
-
     def get_queryset(self):
         queryset = self.queryset
         name = self.request.query_params.get('name', None)
@@ -97,12 +79,11 @@ class MovieViewSet(viewsets.ModelViewSet):
         latest = self.request.query_params.get('latest', None)
         # print(movie_name, movie_year, genre)
         if exclude:
-            for category in ['animation', 'documentaire', 'kids']:
-                queryset = queryset.exclude(genre_name__genre_name__iexact=category)
+            queryset = queryset.exclude(genre_name__genre_name__in=['animation', 'documentaire', 'kids'])
         if name:
             queryset = queryset.filter(name__icontains=name)
         if name_starts_with:
-            if str(name_starts_with) == "0":
+            if str(name_starts_with) == "numbers":
                 queryset = queryset.filter(name__iregex=r'^[0-9](.*)').order_by('name')
             else:
                 queryset = queryset.filter(name__istartswith=name_starts_with)
@@ -132,8 +113,8 @@ class MovieViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Invalid search parameter: {}".format(classics)})
         if genre:
             try:
-                if genre.lower() == "animation":
-                    queryset = queryset.filter(Q(genre_name__genre_name__iexact='Kids') | Q(genre_name__genre_name__iexact=genre)).order_by("name")
+                if genre.lower() == "animation" or genre.lower() == 'kids':
+                    queryset = queryset.filter(genre_name__genre_name__in=['kids', 'animation']).order_by("name")
                 else:
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
@@ -145,6 +126,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         # queryset = list(set(list(queryset)))
         queryset_obj, tmdb_ids = [], []
         for i in queryset:
+            # remove duplicate results by tmdb_id
             if i.tmdb_id not in tmdb_ids:
                 tmdb_ids.append(i.tmdb_id)
                 queryset_obj.append(i)
@@ -164,24 +146,13 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
     ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
     model = TVSeries
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            response_data = CustomUtils().get_unique_result(serializer.data, flag="season_number")
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
     def get_queryset(self):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
         queryset = self.model.objects.filter(status=True).order_by("name")
         name = self.request.query_params.get('name', None)
+        exclude = self.request.query_params.get('exclude', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
         year = self.request.query_params.get('year', None)
         latest = self.request.query_params.get('latest', None)
@@ -192,10 +163,12 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         person_role = person_role if person_role else "cast"
         person_name_starts_with = self.request.query_params.get('person_name_starts_with', None)
         # print(movie_name, movie_year, genre)
+        if exclude:
+            queryset = queryset.exclude(genre_name__genre_name__in=['animation', 'documentaire', 'kids'])
         if name:
             queryset = queryset.filter(name__icontains=name).order_by('name')
         if name_starts_with:
-            if str(name_starts_with) == "0":
+            if str(name_starts_with) == "numbers":
                 queryset = queryset.filter(name__iregex=r'^[0-9](.*)').order_by('name')
             else:
                 queryset = queryset.filter(name__istartswith=name_starts_with).order_by('name')
@@ -226,14 +199,15 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "Invalid search parameter: {}".format(classics)})
         if genre:
             try:
-                if genre.lower() == "animation":
-                    queryset = queryset.filter(Q(genre_name__genre_name__iexact='Kids') | Q(genre_name__genre_name__iexact=genre)).order_by("name")
+                if genre.lower() == "animation" or genre.lower() == 'kids':
+                    queryset = queryset.filter(genre_name__genre_name__in=['kids', 'animation']).order_by("name")
                 else:
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
         queryset_obj, tmdb_ids = [], []
         for i in queryset:
+            # remove duplicate results by tmdb_id
             if i.tmdb_id not in tmdb_ids:
                 tmdb_ids.append(i.tmdb_id)
                 queryset_obj.append(i)
@@ -248,7 +222,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
 
 class MovieByGenreViewSet(viewsets.ModelViewSet):
     # TODO: combine movie -tv genre
-    queryset = Genres.objects.filter(movie__genre_name__isnull=False).exclude(Q(genre_name='Kids') | Q(genre_name='Animation') | Q(genre_id=10770) | Q(genre_name='Documentaire') | Q(genre_name='Comédie')).distinct()
+    queryset = Genres.objects.filter(movie__genre_name__isnull=False).exclude(genre_name__in=['kids', 'animation', 'documentaire', 'Comédie']).distinct()
     serializer_class = MovieByGenreSerializer
     model = Genres
     filter_backends = (OrderingFilter,)
@@ -258,7 +232,7 @@ class MovieByGenreViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
-        queryset = self.model.objects.filter(movie__genre_name__isnull=False).exclude(Q(genre_name='Kids') | Q(genre_name='Animation') | Q(genre_id=10770) | Q(genre_name='Documentaire') | Q(genre_name='Comédie')).distinct()
+        queryset = self.model.objects.filter(movie__genre_name__isnull=False).exclude(Q(genre_name__in=['kids', 'animation', 'documentaire', 'Comédie']) | Q(genre_id=10770)).distinct()
         genre = self.request.query_params.get('genre', None)
         genre_year = self.request.query_params.get('year', None)
         # print("genre_name: {}".format(genre))
