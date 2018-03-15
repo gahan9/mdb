@@ -37,7 +37,7 @@ class DetailView(APIView):
         elif content_type == "tv":
             self.model = TVSeries
             filter_for = 'first_air_date'
-        queryset = self.model.objects.filter(status=True)
+        queryset = self.model.objects.filter(status=True, release_date__lte=timezone.now())
         print(content_type, filter_for)
         if category == "year":
             try:
