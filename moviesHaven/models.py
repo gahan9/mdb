@@ -11,6 +11,14 @@ class RawData(models.Model):
     path = models.CharField(max_length=1500, blank=True, null=True)
     extension = models.CharField(blank=True, null=True, max_length=10)
 
+    @property
+    def get_full_path(self):
+        return os.path.join(self.path, self.name)
+
+    @property
+    def get_file_name(self):
+        return self.name
+
     def __str__(self):
         return "{}".format(self.name)[:10]
 
@@ -81,7 +89,8 @@ class Entertainment(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name if self.name else self.title
+        _name = self.name if self.name else self.title
+        return "{}- {}".format(self.id, _name)
 
     class Meta:
         abstract = True
@@ -128,7 +137,7 @@ class Movie(Entertainment):
         return detail_set
 
     def __str__(self):
-        return "{}. {} - {}".format(self.id, self.title[:10], self.vote_average)
+        return "{}. {}".format(self.id, self.title[:20])
 
     class Meta:
         verbose_name = _("Movie")
@@ -152,11 +161,16 @@ class TVSeries(Entertainment):
                                     help_text=_("Mark if scanned with tmdb API"))
 
     @property
+    def get_name(self):
+        return self.name if self.name else self.title
+
+    @property
     def get_short_overview(self):
         return self.overview[:15] if self.overview else self.overview
 
     def __str__(self):
-        return self.name if self.name else self.title
+        _name = self.name if self.name else self.title
+        return "{}- {}".format(self.id, _name)
 
     class Meta:
         verbose_name = _("TV Title")
@@ -180,7 +194,7 @@ class SeasonDetail(Entertainment):
                 "season_number": self.season_number}
 
     def __str__(self):
-        return "{} Season {}".format(self.name, self.season_number)
+        return "{} Season {}".format(self.series.get_name, self.season_number)
 
     class Meta:
         verbose_name = _("TV Season")
