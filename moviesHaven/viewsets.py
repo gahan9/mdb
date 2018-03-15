@@ -102,7 +102,7 @@ class MovieViewSet(viewsets.ModelViewSet):
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
             temp_query = queryset.filter(date_updated__gte=latest_condition)
             if not temp_query:
-                temp_query = queryset.order_by('-release_date')[:50]
+                temp_query = queryset.order_by('-release_date')[:350]
             queryset = temp_query
         if year:
             try:
