@@ -191,11 +191,14 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
             # queryset = queryset.filter(date_updated__gte=latest_condition)
             temp_query = queryset.filter(date_updated__gte=latest_condition)
             if not temp_query:
-                temp_query = queryset.order_by('-date_updated')[:50]
+                temp_query = queryset.filter(first_air_date__range=(datetime.date(2010, 1, 1), datetime.date(2018, 1, 1))).order_by('-date_updated')
             queryset = temp_query
         if year:
             try:
-                queryset = queryset.filter(first_air_date__year=year).order_by("name")
+                if year == '2018' or year == 2018:
+                    queryset = queryset.filter(first_air_date__gte=datetime.date(2016, 1, 1)).order_by('-first_air_date')
+                else:
+                    queryset = queryset.filter(first_air_date__year=year).order_by("-first_air_date")
             except ValueError:
                 return Response({"detail": "Invalid Year"})
         if classics:
