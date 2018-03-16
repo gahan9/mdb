@@ -1,15 +1,20 @@
 from .inline_admin import *
+from easy_select2 import select2_modelform
 from django.utils.translation import ugettext_lazy as _
 
+MediaInfoForm = select2_modelform(MediaInfo, attrs={'width': '250px'})
 
-class RawDataAdmin(admin.ModelAdmin):
+
+class RawDataAdmin(NestedModelAdmin):
     list_display = ['id', 'name', 'path', 'extension']
+    inlines = [MediaInfoInline]
     readonly_fields = ['id', 'name', 'path', 'extension']
     list_filter = ['extension']
     search_fields = ['name', 'path']
 
 
 class MediaInfoAdmin(admin.ModelAdmin):
+    form = MediaInfoForm
     fieldsets = (
         (None, {'fields': ('file', 'meta_movie', 'meta_episode')}),
         (_('Media info'), {'fields': ('frame_width', 'frame_height', 'video_codec', 'audio_codec',
@@ -36,7 +41,7 @@ class MediaInfoAdmin(admin.ModelAdmin):
         return obj.file[:10] if obj.file else obj.file
 
 
-class MovieAdmin(admin.ModelAdmin):
+class MovieAdmin(NestedModelAdmin):
     inlines = [MediaInfoInline]
     list_display = ['id', 'title', 'name', 'tmdb_id', 'vote_average', 'vote_count', 'trailer_id',
                     'movie_genre', 'release_date', 'get_short_overview', 'status', 'scan_stat',
@@ -49,7 +54,7 @@ class MovieAdmin(admin.ModelAdmin):
         return "\n".join([p.genre_name for p in obj.genre_name.all()])
 
 
-class TVSeriesAdmin(admin.ModelAdmin):
+class TVSeriesAdmin(NestedModelAdmin):
     inlines = [SeasonDetailInline]
     list_display = ['id', 'title', 'name', 'tmdb_id',
                     'original_name', 'first_air_date', 'vote_average',

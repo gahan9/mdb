@@ -1,6 +1,7 @@
 import os
 
 from django.db import models
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from mysite.directory_settings import *
@@ -11,6 +12,14 @@ class RawData(models.Model):
     path = models.CharField(max_length=1500, blank=True, null=True)
     extension = models.CharField(blank=True, null=True, max_length=10)
 
+    def get_reference_id(self):
+        _id = self.id
+        _app_name = os.path.basename(os.path.dirname(__file__))
+        _model_name = self.__class__.__name__.lower()
+        _url = reverse_lazy('admin:{}_{}_changelist'.format(_app_name, _model_name))
+        _href = "<a href='{0}{1}/change/'>{1}</a>".format(_url, _id)
+        return _href
+
     @property
     def get_full_path(self):
         return os.path.join(self.path, self.name)
@@ -20,7 +29,7 @@ class RawData(models.Model):
         return self.name
 
     def __str__(self):
-        return "{}".format(self.name)[:10]
+        return "{}- {}".format(self.id, self.name)[:50]
 
     class Meta:
         verbose_name = _("Raw Video Data in local")
@@ -52,6 +61,14 @@ class Person(models.Model):
     popularity = models.FloatField(blank=True, null=True)
     status = models.IntegerField(choices=STATUS_CHOICE, default=0)
 
+    def get_reference_id(self):
+        _id = self.id
+        _app_name = os.path.basename(os.path.dirname(__file__))
+        _model_name = self.__class__.__name__.lower()
+        _url = reverse_lazy('admin:{}_{}_changelist'.format(_app_name, _model_name))
+        _href = "<a href='{0}{1}/change/'>{1}</a>".format(_url, _id)
+        return _href
+
     def __str__(self):
         return "{}".format(self.name)
 
@@ -73,6 +90,14 @@ class Genres(models.Model):
                                     help_text=_("Enter image URL of resolution width 780"),
                                     blank=True, null=True)
 
+    def get_reference_id(self):
+        _id = self.id
+        _app_name = os.path.basename(os.path.dirname(__file__))
+        _model_name = self.__class__.__name__.lower()
+        _url = reverse_lazy('admin:{}_{}_changelist'.format(_app_name, _model_name))
+        _href = "<a href='{0}{1}/change/'>{1}</a>".format(_url, _id)
+        return _href
+
     def __str__(self):
         return "{}".format(self.genre_name)
 
@@ -87,6 +112,14 @@ class Entertainment(models.Model):
     trailer_id = models.CharField(max_length=200, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
+
+    def get_reference_id(self):
+        _id = self.id
+        _app_name = os.path.basename(os.path.dirname(__file__))
+        _model_name = self.__class__.__name__.lower()
+        _url = reverse_lazy('admin:{}_{}_changelist'.format(_app_name, _model_name))
+        _href = "<a href='{0}{1}/change/'>{1}</a>".format(_url, _id)
+        return _href
 
     def __str__(self):
         _name = self.name if self.name else self.title
@@ -137,7 +170,7 @@ class Movie(Entertainment):
         return detail_set
 
     def __str__(self):
-        return "{}. {}".format(self.id, self.title[:20])
+        return "{}. {}".format(self.id, self.title[:40])
 
     class Meta:
         verbose_name = _("Movie")
@@ -217,6 +250,10 @@ class EpisodeDetail(Entertainment):
                                     help_text=_("Mark if scanned with tmdb API"))
 
     @property
+    def get_name(self):
+        return self.episode_title if self.episode_title else "Episode {}".format(self.episode_number)
+
+    @property
     def get_short_overview(self):
         return self.overview[:15] if self.overview else self.overview
 
@@ -253,15 +290,19 @@ class EpisodeDetail(Entertainment):
                 for i in result]
 
     @property
+    def get_backdrop_path(self):
+        return self.season.backdrop_path if self.season.backdrop_path else self.season.series.backdrop_path
+
+    @property
     def get_details(self):
         detail_set = {
             "id"            : self.id,
-            "name"          : self.episode_title if self.episode_title else "Episode {}".format(self.episode_number),
+            "name"          : self.get_name,
             "air_date"      : self.air_date,
             "episode_number": self.episode_number,
             "vote_average"  : self.vote_average,
             "vote_count"    : self.vote_count,
-            "backdrop_path" : self.season.backdrop_path if self.season.backdrop_path else self.season.series.backdrop_path,
+            "backdrop_path" : self.get_backdrop_path,
             "poster_path"   : self.still_path if self.still_path else self.season.series.poster_path,
             "description"   : self.overview,
             "director"      : self.get_director,
@@ -287,16 +328,24 @@ class PersonRole(models.Model):
     cast_id = models.IntegerField(null=True, blank=True)
     tmdb_id = models.IntegerField(null=True, blank=True)
 
+    def get_reference_id(self):
+        _id = self.id
+        _app_name = os.path.basename(os.path.dirname(__file__))
+        _model_name = self.__class__.__name__.lower()
+        _url = reverse_lazy('admin:{}_{}_changelist'.format(_app_name, _model_name))
+        _href = "<a href='{0}{1}/change/'>{1}</a>".format(_url, _id)
+        return _href
+
     def __str__(self):
         return "{} as ".format(self.person, self.character)
 
 
 class MediaInfo(models.Model):
     file = models.ForeignKey(RawData, on_delete=models.CASCADE)
-    meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.SET_NULL,
+    meta_movie = models.ForeignKey(Movie, null=True, blank=True, on_delete=models.CASCADE,
                                    help_text=_("Related Movie of stream (if exist)"),
                                    related_name='movie_media_info')
-    meta_episode = models.ForeignKey(EpisodeDetail, null=True, blank=True, on_delete=models.SET_NULL,
+    meta_episode = models.ForeignKey(EpisodeDetail, null=True, blank=True, on_delete=models.CASCADE,
                                      help_text=_("Related TV Episode of stream (if exist)"),
                                      related_name='episode_media_info')
     frame_width = models.CharField(max_length=20, null=True, blank=True)
@@ -306,6 +355,14 @@ class MediaInfo(models.Model):
     bit_rate = models.CharField(max_length=20, null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True,
                                   verbose_name=_("Run time in seconds"))
+
+    def get_reference_id(self):
+        _id = self.id
+        _app_name = os.path.basename(os.path.dirname(__file__))
+        _model_name = self.__class__.__name__.lower()
+        _url = reverse_lazy('admin:{}_{}_changelist'.format(_app_name, _model_name))
+        _href = "<a href='{0}{1}/change/'>{1}</a>".format(_url, _id)
+        return _href
 
     def get_stream_link(self, link_name=None):
         if not link_name:

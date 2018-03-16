@@ -34,16 +34,18 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-                     'django.contrib.admin',
-                     'django.contrib.auth',
-                     'django.contrib.contenttypes',
-                     'django.contrib.sessions',
-                     'django.contrib.messages',
-                     'django.contrib.staticfiles',
-                     'moviesHaven',
-                     'rest_framework',
-                     'django_filters',
-                 ] + DEMO_APPS
+     'django.contrib.admin',
+     'django.contrib.auth',
+     'django.contrib.contenttypes',
+     'django.contrib.sessions',
+     'django.contrib.messages',
+     'django.contrib.staticfiles',
+     'moviesHaven',
+     'rest_framework',
+     'django_filters',
+     'nested_inline',
+     'easy_select2',
+] + DEMO_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -7,3 +7,4 @@ Pillow==5.0.0
 requests==2.18.4
 drf_openapi
 django-nested-inline
+django-easy-select2
