@@ -94,16 +94,6 @@ class MovieViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(personrole__role__iexact=person_role, person__name__icontains=person_name)
         if person_name_starts_with:
             queryset = queryset.filter(personrole__role__iexact=person_role, person__name__istartswith=person_name_starts_with)
-        if latest:
-            try:
-                latest = int(latest)
-            except Exception as e:
-                latest = 3
-            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
-            temp_query = queryset.filter(date_updated__gte=latest_condition)
-            if not temp_query:
-                temp_query = queryset.filter(release_date__lte=datetime.date(2018, 1, 1)).order_by('-release_date')[:880]
-            queryset = temp_query
         if year:
             try:
                 if year == '2018' or year == 2018:
@@ -125,7 +115,16 @@ class MovieViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
-
+        if latest:
+            try:
+                latest = int(latest)
+            except Exception as e:
+                latest = 3
+            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
+            temp_query = queryset.filter(date_updated__gte=latest_condition)
+            if not temp_query:
+                temp_query = queryset.filter(release_date__lte=datetime.date(2018, 1, 1)).order_by('-release_date')[:880]
+            queryset = temp_query
         # FIX: optimize below three lines
         # unique_tmdb_ids = queryset.values_list('tmdb_id', flat=True).distinct()
         # queryset = [queryset.filter(tmdb_id=i)[0] for i in unique_tmdb_ids]
