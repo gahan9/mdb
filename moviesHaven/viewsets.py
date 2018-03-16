@@ -181,17 +181,6 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(personrole__role__iexact=person_role, person__name__icontains=person_name)
         if person_name_starts_with:
             queryset = queryset.filter(personrole__role__iexact=person_role, person__name__istartswith=person_name_starts_with)
-        if latest:
-            try:
-                latest = int(latest)
-            except Exception as e:
-                latest = 3
-            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
-            # queryset = queryset.filter(date_updated__gte=latest_condition)
-            temp_query = queryset.filter(date_updated__gte=latest_condition)
-            if not temp_query:
-                temp_query = queryset.filter(first_air_date__range=(datetime.date(2010, 1, 1), datetime.date(2018, 1, 1))).order_by('-date_updated')
-            queryset = temp_query
         if year:
             try:
                 if year == '2018' or year == 2018:
@@ -213,6 +202,18 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
+        if latest:
+            try:
+                latest = int(latest)
+            except Exception as e:
+                latest = 3
+            latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
+            # queryset = queryset.filter(date_updated__gte=latest_condition)
+            temp_query = queryset.filter(date_updated__gte=latest_condition)
+            if not temp_query:
+                temp_query = queryset.filter(first_air_date__range=(datetime.date(2010, 1, 1), datetime.date(2018, 1, 1))).order_by('-date_updated')
+            queryset = temp_query
+
         queryset_obj, tmdb_ids = [], []
         for i in queryset:
             # remove duplicate results by tmdb_id
