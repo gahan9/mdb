@@ -5,6 +5,7 @@ Markdown==2.6.11
 mysqlclient==1.3.12
 Pillow==5.0.0
 requests==2.18.4
-drf_openapi
-django-nested-inline
-django-easy-select2
+drf_openapi==1.3.0
+django-nested-inline==0.3.7
+django-easy-select2==1.3.4
+checksumdir==1.1.4

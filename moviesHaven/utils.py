@@ -24,62 +24,26 @@ class CustomUtils(object):
             return _unique_item_list
         return list_of_dict
 
-    def get_directory_hash(self, directory, verbose=0):
-        # xbmc.log('Hashing file :', 2)
-        dir_hash = hashlib.md5()
-        if not os.path.exists(directory):
-            return -1
-
-        try:
-            print("DIRECTORY :" + str(directory))
-            for root, dirs, files in os.walk(directory):
-                for names in files:
-                    if verbose == 1:
-                        print('Hashing new file :' + str(names))
-                    file_path = os.path.join(root, names)
-                    try:
-                        f1 = open(file_path, 'rb')
-                    except Exception as e:
-                        print(">> EXCEPTION in opening file: {}\nreason:{}".format(file_path, e))
-                        # You can't open the file for some reason
-                        try:
-                            f1.close()
-                        except:
-                            pass
-                        continue
-
-                    while 1:
-                        # Read file in as little chunks
-                        buf = f1.read(4096)
-                        if not buf:
-                            break
-                        dir_hash.update(hashlib.md5(buf).hexdigest())
-                    f1.close()
-
-        except:
-            import traceback
-            print(" MD5 FILE ERROR")
-            # Print the stack traceback
-            traceback.print_exc()
-            return -2
-
-        return dir_hash.hexdigest()
-
 
 class DataFilter(object):
-    def __init__(self, *args, **kwargs):
-        self.directory_path = SCRAPE_DIR
+    excluded_dir = [TEMP_FOLDER_NAME]
+    excluded_files = []
+    excluded_extensions = []
+    _lookup_dir = SCRAPE_DIR
 
-    def content_fetcher(self, directory_path=None):
-        if directory_path:
-            self.directory_path = directory_path
+    def get_path_state(self, directory_name=None):
+        directory_name = self._lookup_dir if not directory_name else directory_name
+        return os.path.getmtime(directory_name)
 
+    def content_fetcher(self, directory_path=None, db_paths=None):
+        directory_path = self._lookup_dir if not self._lookup_dir else directory_path
+        db_paths = [] if not db_paths else db_paths
         data_set = []
         if os.path.exists(directory_path):
             for root, directory, files in os.walk(directory_path, topdown=True):
-                if TEMP_FOLDER_NAME in root:
-                    continue
-                else:
+                if root not in db_paths:
+                    if TEMP_FOLDER_NAME in root:
+                        continue
                     for name in files:
                         if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
                             d = {"name": name, "path": root, "extension": name.split('.')[-1]}
@@ -453,18 +417,82 @@ def fetch_cast_data(cast_json):
         return person_data
 
 
-def content_fetcher(directory_path):
-    data_set = []
-    if os.path.exists(directory_path):
-        for root, directory, files in os.walk(directory_path, topdown=True):
-            if TEMP_FOLDER_NAME in root:
-                continue
+class DirState(object):
+    """ Get directory state for any change/update """
+    HASH_FUNCS = {
+        'md5'   : hashlib.md5,
+        'sha1'  : hashlib.sha1,
+        'sha256': hashlib.sha256,
+        'sha512': hashlib.sha512
+    }
+    excluded_dir = ['.cache']
+    excluded_files = []
+    excluded_extensions = []
+    _lookup_dir = SCRAPE_DIR
+
+    def content_fetcher(self, directory_path=None):
+        data_set = []
+        if os.path.exists(directory_path):
+            for root, directory, files in os.walk(directory_path, topdown=True):
+                if TEMP_FOLDER_NAME in root:
+                    continue
+                else:
+                    for name in files:
+                        if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
+                            d = {"name": name, "path": root, "extension": name.split('.')[-1]}
+                            data_set.append(d)
+            return data_set
+        else:
+            print("content_fetcher: path does not exist : {}".format(directory_path))
+            return False
+
+    def get_dir_hash(self, dir_name, hash_func='md5', excluded_files=None, ignore_hidden=False, excluded_dir=None,
+                     follow_links=False, excluded_extensions=None):
+        hash_func = self.HASH_FUNCS.get(hash_func, None)
+        if not hash_func:
+            raise NotImplementedError('{} not implemented.'.format(hash_func))
+
+        excluded_dir = self.excluded_dir if not excluded_dir else excluded_dir
+        excluded_files = self.excluded_files if not excluded_files else excluded_files
+        excluded_extensions = self.excluded_extensions if not excluded_extensions else excluded_extensions
+
+        if not os.path.isdir(dir_name):
+            raise TypeError('{} is not a directory.'.format(dir_name))
+        hash_values = []
+        for root, dirs, files in os.walk(dir_name, topdown=True, followlinks=follow_links):
+            if ignore_hidden:
+                if not re.search(r'/\.', root) and root not in excluded_dir:
+                    hash_values.extend(
+                        [self._file_hash(os.path.join(root, f), hash_func) for f in files
+                         if os.path.exists(os.path.join(root, f)) and not f.startswith('.') and not re.search(r'/\.', f)
+                         and f not in excluded_files and f.split('.')[-1:][0] not in excluded_extensions
+                         ]
+                    )
             else:
-                for name in files:
-                    if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
-                        d = {"name": name, "path": root, "extension": name.split('.')[-1]}
-                        data_set.append(d)
-        return data_set
-    else:
-        print("content_fetcher: path does not exist : {}".format(directory_path))
-        return False
+                hash_values.extend(
+                    [self._file_hash(os.path.join(root, f), hash_func) for f in files if
+                     f not in excluded_files and f.split('.')[-1:][0] not in excluded_extensions and os.path.exists(
+                         os.path.join(root, f))]
+                )
+        return self._reduce_hash(hash_values, hash_func)
+
+    @staticmethod
+    def _file_hash(file_path, hash_func):
+        hasher = hash_func()
+        block_size = 64 * 1024
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as fp:
+                while True:
+                    data = fp.read(block_size)
+                    if not data:
+                        break
+                    hasher.update(data)
+            return hasher.hexdigest()
+
+    @staticmethod
+    def _reduce_hash(hash_list, hash_func):
+        hasher = hash_func()
+        for hash_value in sorted(hash_list):
+            hasher.update(hash_value.encode('utf-8'))
+        return hasher.hexdigest()
+

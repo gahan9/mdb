@@ -38,7 +38,7 @@ class MovieSerializer(serializers.ModelSerializer):
         result = MediaInfo.objects.filter(meta_movie__tmdb_id=obj.tmdb_id)
         return [{"media_id"  : i.id,
                  "quality"   : i.get_quality,
-                 "name"      : "{}".format(obj.name),
+                 "name"      : obj.name,
                  "resolution": i.get_resolution,
                  "duration"  : i.get_duration,
                  "runtime"   : i.runtime}

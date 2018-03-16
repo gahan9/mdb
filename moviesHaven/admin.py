@@ -2,7 +2,7 @@ from .inline_admin import *
 from easy_select2 import select2_modelform
 from django.utils.translation import ugettext_lazy as _
 
-MediaInfoForm = select2_modelform(MediaInfo, attrs={'width': '250px'})
+MediaInfoForm = select2_modelform(MediaInfo, attrs={'width': '450px'})
 
 
 class RawDataAdmin(NestedModelAdmin):

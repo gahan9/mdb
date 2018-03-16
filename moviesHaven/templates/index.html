@@ -14,6 +14,7 @@
             <thead>
             <tr>
                 <th scope="col">Insert into Database!</th>
+                <th scope="col">Update Content</th>
                 <th scope="col">Filter Files!</th>
                 <th scope="col">Fetch API Data!</th>
                 <th scope="col">Update Person Detail</th>
@@ -32,6 +33,20 @@
                     <form action="{% url 'insert_raw_data' %}">
                         <button class="btn btn-primary" type="submit" {% if thread.status == 0 %} disabled {% endif %}>
                             {% trans "Fetch local content" %}
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    {% if thread.type == 5 %}
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped bg-success progress-bar-animated"
+                                 role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                                 style="width: 100%">{{ thread.get_status_display }}</div>
+                        </div>
+                    {% endif %}
+                    <form action="{% url 'index' task='update_content' %}">
+                        <button class="btn btn-primary" type="submit" {% if thread.status == 0 %} disabled {% endif %}>
+                            {% trans "Update content" %}
                         </button>
                     </form>
                 </td>

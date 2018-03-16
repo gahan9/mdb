@@ -165,6 +165,17 @@ class Movie(Entertainment):
                                     help_text=_("Mark if scanned with tmdb API"))
 
     @property
+    def get_streams(self):
+        result = MediaInfo.objects.filter(meta_movie=self)
+        return [{"media_id"  : i.id,
+                 "quality"   : i.get_quality,
+                 "name"      : self.name,
+                 "resolution": i.get_resolution,
+                 "duration"  : i.get_duration,
+                 "runtime"   : i.runtime}
+                for i in result]
+
+    @property
     def get_short_overview(self):
         return self.overview[:15] if self.overview else self.overview
 
@@ -418,12 +429,12 @@ class MediaInfo(models.Model):
     def get_quality(self):
         # HD : if frame resolution greater then 896000(1280 * 700)
         try:
-            quality = "HD" if (int(self.frame_width) * int(self.frame_height)) > 896000 else "DVD"
+            quality = "HD" if (int(self.frame_width) * int(self.frame_height)) > 844800 else "DVD"
             return "{}".format(quality)
         except Exception as e:
             print("EXCEPTION in get_quality for object: {}-{}\nreason:{}".format(self.id, self, e))
             # "{} x {}".format(self.frame_width, self.frame_height)
-            return ""
+            return "DVD"
 
     def __str__(self):
         return "{} - {}x{} @ {}".format(self.file, self.frame_width, self.frame_height, self.bit_rate)
@@ -479,7 +490,8 @@ class ThreadManager(models.Model):
         (1, "Filtering Raw Data"),
         (2, "Fetch Movie Meta Data"),
         (3, "Fetch TV Meta Data"),
-        (4, "Fetch Person Detail")
+        (4, "Fetch Person Detail"),
+        (5, "Structure Update")
     )
     THREAD_STATUS = (
         (0, "running"),
