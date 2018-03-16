@@ -7,6 +7,17 @@ from django.utils.translation import ugettext_lazy as _
 from mysite.directory_settings import *
 
 
+class PathHash(models.Model):
+    path = models.CharField(max_length=1500)
+    path_last_modified = models.FloatField()
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Path Hash"
+        verbose_name_plural = verbose_name
+
+
 class RawData(models.Model):
     name = models.CharField(max_length=1500, blank=True, null=True)
     path = models.CharField(max_length=1500, blank=True, null=True)
@@ -283,7 +294,7 @@ class EpisodeDetail(Entertainment):
         result = MediaInfo.objects.filter(meta_episode=self)
         return [{"media_id"  : i.id,
                  "quality"   : i.get_quality,
-                 "name"      : "{} ({})".format(self.get_episode_name, i.get_quality),
+                 "name"      : self.get_episode_name,
                  "resolution": i.get_resolution,
                  "duration"  : i.get_duration,
                  "runtime"   : i.runtime}
