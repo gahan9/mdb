@@ -24,7 +24,7 @@ class RawData(models.Model):
     path = models.CharField(max_length=1500, blank=True, null=True)
     extension = models.CharField(blank=True, null=True, max_length=10)
 
-    def get_detail(self):
+    def get_details(self):
         return model_to_dict(self)
 
     def get_reference_id(self):
