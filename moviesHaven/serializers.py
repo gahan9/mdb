@@ -111,7 +111,7 @@ class TVSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TVSeries
-        fields = ['id', 'tmdb_id', 'url', 'name', 'title',
+        fields = ['id', 'tmdb_id', 'url', 'name', 'title', 'release_date',
                   'genre_names', 'first_air_date', 'description', 'seasons',
                   'backdrop_path', 'poster_path',
                   ]
