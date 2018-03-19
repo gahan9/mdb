@@ -321,6 +321,7 @@ class EpisodeDetail(Entertainment):
             "id"            : self.id,
             "name"          : self.get_name,
             "air_date"      : self.air_date,
+            "release_date"  : self.air_date,
             "episode_number": self.episode_number,
             "vote_average"  : self.vote_average,
             "vote_count"    : self.vote_count,

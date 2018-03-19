@@ -87,6 +87,10 @@ class TVSeriesSerializer(serializers.ModelSerializer):
     genre_names = serializers.SerializerMethodField(required=False, read_only=True)
     description = serializers.SerializerMethodField(required=False, read_only=True)
     seasons = serializers.SerializerMethodField(read_only=True, required=False)
+    release_date = serializers.SerializerMethodField(read_only=True, required=False)
+
+    def get_release_date(self, obj):
+        return obj.first_air_date
 
     def get_genre_names(self, obj):
         if obj.genre_name:
