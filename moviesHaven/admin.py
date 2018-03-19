@@ -5,6 +5,11 @@ from django.utils.translation import ugettext_lazy as _
 MediaInfoForm = select2_modelform(MediaInfo, attrs={'width': '450px'})
 
 
+class PathHashAdmin(admin.ModelAdmin):
+    list_display = ['id', 'path', 'path_last_modified', 'date_updated', 'date_created']
+    search_fields = ['path']
+
+
 class RawDataAdmin(NestedModelAdmin):
     list_display = ['id', 'name', 'path', 'extension']
     inlines = [MediaInfoInline]
@@ -132,6 +137,7 @@ admin.site.register(PersonRole, PersonRoleAdmin)
 admin.site.register(Genres, GenreAdmin)
 admin.site.register(StreamAuthLog, StreamAuthLogAdmin)
 admin.site.register(MediaInfo, MediaInfoAdmin)
+admin.site.register(PathHash, PathHashAdmin)
 admin.site.register(Others)
 # admin.site.register(MainMenuContent, MainMenuContentAdmin)
 # admin.site.register(SubMenuContent, SubMenuContentAdmin)
