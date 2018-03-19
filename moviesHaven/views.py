@@ -148,7 +148,7 @@ class DirSniffer(DataFilter):
         if contents:
             for video in contents:
                 try:
-                    raw_object = RawData.objects.get_or_create(**video)[0]
+                    raw_object, created = RawData.objects.get_or_create(**video)
                     media_info_obj = FetchMediaInfo()
                     try:
                         print_log("fetching media info")
@@ -165,7 +165,7 @@ class DirSniffer(DataFilter):
                     except Exception as e:
                         print_log("Could not fetch media information for : {}".format(raw_object.values()))
                 except Exception as e:
-                    print_log("RawData objects could not created for: {}\nEXCEPTION==>reason: ".format(video, e))
+                    print_log("RawData objects could not created for: {}\nEXCEPTION==>reason:{} ".format(video, e))
         else:
             print_log("Structure Maker: Path Does not exist")
 
