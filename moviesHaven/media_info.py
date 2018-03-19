@@ -1,5 +1,7 @@
 # coding=utf-8
+import locale
 import os
+import subprocess
 import sys
 import re
 
@@ -38,7 +40,14 @@ class FetchMediaInfo(object):
                         media_data = os.popen(cmd).read()
                     except Exception as e:
                         print("MediaInfo: unable to fetch media information for {} \nreason: {}".format(media_path, e))
-                        return False
+                        try:
+                            media_data = subprocess.Popen(cmd.encode(locale.getpreferredencoding()),
+                                                          shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                            stdin, stdout = media_data.communicate()
+                            media_data = stdin.decode('utf-8', 'ignore')
+                        except Exception as e:
+                            print("L()Lzzzzzzz")
+                            return False
                     # print(media_data)
                     media_info["frame_width"] = re.findall(r'width=(\d+)', media_data)[0] if re.findall(r'width=(\d+)', media_data) else None
                     media_info["frame_height"] = re.findall(r'height=(\d+)', media_data)[0] if re.findall(r'height=(\d+)', media_data) else None
