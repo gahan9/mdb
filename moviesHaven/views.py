@@ -19,9 +19,10 @@ from .models import *
 def print_log(line, *args, debug=True):
     print(line)
     if debug:
-        print("additional info: ")
-        for i in args:
-            print(i)
+        if args:
+            print("additional info: ")
+            for i in args:
+                print(i)
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
