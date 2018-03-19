@@ -160,15 +160,20 @@ class DirSniffer(DataFilter):
                     try:
                         print_log("fetching media info")
                         media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
+                        print_log("found media_data for entry {}".format(video),
+                                  raw_object.get_details(), media_data.get_details(), debug=True)
                         if media_data:
                             try:
-                                MediaInfo.objects.get_or_create(file=raw_object, **media_data)
+                                media_info_instance = MediaInfo.objects.get_or_create(file=raw_object, **media_data)
+                                print_log("media_info_instance instance for {} : {}".format(video, media_info_instance.get_details()),
+                                          video, raw_object.get_details(), media_data, debug=True)
                             except Exception as e:
                                 print_log(
                                     "Create query for media info failed for object: {} and media data: {}\n reason: {}".format(
                                         raw_object.values(), media_data, e))
                         else:
-                            print_log("Media data couldn't found for: {}".format(raw_object.values()))
+                            print_log("Media data couldn't found for: {}".format(raw_object.values()),
+                                      video, raw_object.get_details(), media_data, debug=True)
                     except Exception as e:
                         print_log("Could not fetch media information for : {}".format(raw_object.values()))
                 except Exception as e:

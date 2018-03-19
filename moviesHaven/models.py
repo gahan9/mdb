@@ -1,5 +1,6 @@
 import os
 
+from django.forms.models import model_to_dict
 from django.db import models
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -22,6 +23,9 @@ class RawData(models.Model):
     name = models.CharField(max_length=1500, blank=True, null=True)
     path = models.CharField(max_length=1500, blank=True, null=True)
     extension = models.CharField(blank=True, null=True, max_length=10)
+
+    def get_detail(self):
+        return model_to_dict(self)
 
     def get_reference_id(self):
         _id = self.id
@@ -382,6 +386,13 @@ class MediaInfo(models.Model):
     bit_rate = models.CharField(max_length=20, null=True, blank=True)
     runtime = models.IntegerField(null=True, blank=True,
                                   verbose_name=_("Run time in seconds"))
+
+    def get_details(self):
+        model_dict = model_to_dict(self)
+        model_dict['file'] = model_to_dict(self.file) if model_dict.get('file', None) else self.file
+        model_dict['meta_movie'] = model_to_dict(self.meta_movie) if model_dict.get('meta_movie', None) else self.meta_movie
+        model_dict['meta_episode'] = model_to_dict(self.meta_episode) if model_dict.get('meta_episode', None) else self.meta_episode
+        return model_dict
 
     def get_reference_id(self):
         _id = self.id

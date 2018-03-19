@@ -46,7 +46,7 @@ class DataFilter(object):
                         continue
                     for name in files:
                         if name.split('.')[-1] in SUPPORTED_EXTENSIONS:
-                            d = {"name": name.encode('utf-8').decode('utf-8', 'ignore'),
+                            d = {"name": name.encode('utf-8', 'surrogateescape').decode('utf-8', 'surrogateescape'),
                                  "path": root, "extension": name.split('.')[-1]}
                             data_set.append(d)
             return data_set
