@@ -36,13 +36,16 @@ class MovieSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_streams(obj):
         result = MediaInfo.objects.filter(meta_movie__tmdb_id=obj.tmdb_id)
-        return [{"media_id"  : i.id,
-                 "quality"   : i.get_quality,
-                 "name"      : obj.name,
-                 "resolution": i.get_resolution,
-                 "duration"  : i.get_duration,
-                 "runtime"   : i.runtime}
-                for i in result]
+        stream_info = [{"media_id"  : i.id,
+                        "quality"   : i.get_quality,
+                        "name"      : obj.name,
+                        "resolution": i.get_resolution,
+                        "duration"  : i.get_duration,
+                        "runtime"   : i.runtime}
+                       for i in result]
+        if not stream_info:
+            obj.delete()
+        return stream_info
 
     def get_director(self, obj):
         result = Person.objects.filter(personrole__role__iexact='director', movie=obj)

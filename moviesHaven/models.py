@@ -167,13 +167,17 @@ class Movie(Entertainment):
     @property
     def get_streams(self):
         result = MediaInfo.objects.filter(meta_movie=self)
-        return [{"media_id"  : i.id,
-                 "quality"   : i.get_quality,
-                 "name"      : self.name,
-                 "resolution": i.get_resolution,
-                 "duration"  : i.get_duration,
-                 "runtime"   : i.runtime}
-                for i in result]
+        stream_info = [{"media_id"  : i.id,
+                        "quality"   : i.get_quality,
+                        "name"      : self.name,
+                        "resolution": i.get_resolution,
+                        "duration"  : i.get_duration,
+                        "runtime"   : i.runtime}
+                       for i in result]
+        if not stream_info:
+            self.delete()
+        else:
+            return stream_info
 
     @property
     def get_short_overview(self):
