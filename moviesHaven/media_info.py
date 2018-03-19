@@ -43,9 +43,9 @@ class FetchMediaInfo(object):
                         try:
                             media_data = subprocess.Popen(cmd.encode(locale.getpreferredencoding()),
                                                           shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                            stdin, stdout = media_data.communicate()
+                            stdout, stderr = media_data.communicate()
+                            media_data = stdout.decode('utf-8', 'ignore')
                             print(media_data)
-                            media_data = stdin.decode('utf-8', 'ignore')
                         except Exception as e:
                             print("L()Lzzzzzzz 2")
                             return False
@@ -64,6 +64,7 @@ class FetchMediaInfo(object):
                     except Exception as e:
                         print("MediaInfo: fetching bit_rate unsuccessful\nreason: {}".format(e))
                         # raise Exception(e)
+                    print(">>> ", media_info)
                     return media_info
                 except Exception as e:
                     print("MediaInfo: fetching unsuccessful\nreason: {}".format(e))
