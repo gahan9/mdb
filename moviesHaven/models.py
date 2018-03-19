@@ -298,7 +298,7 @@ class EpisodeDetail(Entertainment):
 
     @property
     def get_episode_name(self):
-        return self.episode_title if self.episode_title else "Episode {}".format(self.episode_number),
+        return self.episode_title if self.episode_title else "Episode {}".format(self.episode_number)
 
     @property
     def get_streams(self):
