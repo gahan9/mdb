@@ -1,3 +1,7 @@
+"""
+Evan Joaness - E viva espana (français)_476b7.mp4
+"""
+
 from threading import Thread
 import copy
 
@@ -137,8 +141,9 @@ class DirSniffer(DataFilter):
                             self.update_content(directory_path=root)
                         path_instance.path_last_modified = _last_modified
                         path_instance.save()
-                    except:
+                    except Exception as e:
                         path_instance = PathHash.objects.create(path=root, path_last_modified=_last_modified)
+                        print_log("created path: {}".format(root))
             thread_instance.delete()
             print_log("deleted thread instance")
         else:
@@ -156,7 +161,7 @@ class DirSniffer(DataFilter):
                         media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
                         if media_data:
                             try:
-                                MediaInfo.objects.create(file=raw_object, **media_data)
+                                MediaInfo.objects.get_or_create(file=raw_object, **media_data)
                             except Exception as e:
                                 print_log(
                                     "Create query for media info failed for object: {} and media data: {}\n reason: {}".format(
@@ -175,7 +180,7 @@ class DirSniffer(DataFilter):
         print_log("thread created: {}; created: {}".format(thread_instance, created))
         if created:
             contents = self.content_fetcher(directory_path=self._lookup_dir, db_paths=self._sniffed_paths)
-            self.content_creator(contents)
+            # self.content_creator(contents)
             content_creator = Thread(target=self.content_creator, args=(contents,))
             content_creator.start()
             thread_instance.delete()
@@ -367,11 +372,10 @@ def genre_maker(genres):
         genre_dict = {"genre_id"  : genre.get('id'),
                       "genre_name": genre.get('name'),
                       }
-        if not Genres.objects.filter(**genre_dict):
-            try:
-                Genres.objects.create(**genre_dict)
-            except Exception as e:
-                print_log(e)
+        try:
+            Genres.objects.get_or_create(**genre_dict)
+        except Exception as e:
+            print_log(e)
 
 
 def fetch_movie_metadata():
