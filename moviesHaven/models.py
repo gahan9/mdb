@@ -430,7 +430,7 @@ class MediaInfo(models.Model):
     def get_quality(self):
         # HD : if frame resolution greater then 896000(1280 * 700)
         try:
-            quality = "HD" if (int(self.frame_width) * int(self.frame_height)) > 844800 else "DVD"
+            quality = "HD" if int(self.frame_width) > 500 else "DVD"
             return "{}".format(quality)
         except Exception as e:
             print("EXCEPTION in get_quality for object: {}-{}\nreason:{}".format(self.id, self, e))
