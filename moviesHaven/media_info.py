@@ -44,9 +44,10 @@ class FetchMediaInfo(object):
                             media_data = subprocess.Popen(cmd.encode(locale.getpreferredencoding()),
                                                           shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                             stdin, stdout = media_data.communicate()
+                            print(media_data)
                             media_data = stdin.decode('utf-8', 'ignore')
                         except Exception as e:
-                            print("L()Lzzzzzzz")
+                            print("L()Lzzzzzzz 2")
                             return False
                     # print(media_data)
                     media_info["frame_width"] = re.findall(r'width=(\d+)', media_data)[0] if re.findall(r'width=(\d+)', media_data) else None
