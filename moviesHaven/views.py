@@ -116,7 +116,8 @@ class DirSniffer(DataFilter):
             for item in files_in_dir:
                 _extension = item.split('.')[-1]
                 if _extension in SUPPORTED_EXTENSIONS:
-                    _item_info = {"name": item, "path": directory_path, "extension": _extension}
+                    _item_info = {"name": item.encode('utf-8').decode('utf-8', 'ignore'),
+                                  "path": directory_path, "extension": _extension}
                     files_set.append(_item_info)
             if files_set:
                 print_log("file set exist", files_set)
