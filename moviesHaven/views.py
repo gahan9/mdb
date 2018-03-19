@@ -156,6 +156,7 @@ class DirSniffer(DataFilter):
             for video in contents:
                 try:
                     raw_object, created = RawData.objects.get_or_create(**video)
+                    print_log(raw_object, created)
                     media_info_obj = FetchMediaInfo()
                     try:
                         print_log("fetching media info")
@@ -170,12 +171,12 @@ class DirSniffer(DataFilter):
                             except Exception as e:
                                 print_log(
                                     "Create query for media info failed for object: {} and media data: {}\n reason: {}".format(
-                                        raw_object.values(), media_data, e))
+                                        raw_object.get_details(), media_data, e))
                         else:
-                            print_log("Media data couldn't found for: {}".format(raw_object.values()),
-                                      video, raw_object.get_details(), media_data, debug=True)
+                            print_log("Media data couldn't found for: {}".format(raw_object.get_details()),
+                                      video, media_data, debug=True)
                     except Exception as e:
-                        print_log("Could not fetch media information for : {}".format(raw_object.values()))
+                        print_log("Could not fetch media information for : {}".format(raw_object.get_details()))
                 except Exception as e:
                     print_log("RawData objects could not created for: {}\nEXCEPTION==>reason:{} ".format(video, e))
         else:
