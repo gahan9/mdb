@@ -386,6 +386,8 @@ class MediaInfo(models.Model):
     meta_episode = models.ForeignKey(EpisodeDetail, null=True, blank=True, on_delete=models.CASCADE,
                                      help_text=_("Related TV Episode of stream (if exist)"),
                                      related_name='episode_media_info')
+    meta_other = models.ForeignKey(Others, null=True, blank=True, on_delete=models.CASCADE,
+                                   help_text=_("all other contents"))
     frame_width = models.CharField(max_length=20, null=True, blank=True)
     frame_height = models.CharField(max_length=20, null=True, blank=True)
     video_codec = models.CharField(max_length=20, null=True, blank=True)
