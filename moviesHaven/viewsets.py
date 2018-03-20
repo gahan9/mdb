@@ -63,8 +63,6 @@ class MovieViewSet(viewsets.ModelViewSet):
     """
     queryset = Movie.objects.filter(status=True, release_date__lte=timezone.now()).distinct().order_by("name")
     serializer_class = MovieSerializer
-    filter_backends = (OrderingFilter,)
-    ordering_fields = ('name', 'release_date', 'vote_average', 'vote_count')
     model = Movie
 
     def get_queryset(self):
@@ -153,8 +151,6 @@ class MovieViewSet(viewsets.ModelViewSet):
 class TVSeriesViewSet(viewsets.ModelViewSet):
     queryset = TVSeries.objects.filter(status=True).order_by("name")
     serializer_class = TVSeriesSerializer
-    filter_backends = (OrderingFilter,)
-    ordering_fields = ('name', 'first_air_date', 'vote_average', 'vote_count')
     model = TVSeries
 
     def get_queryset(self):
@@ -210,6 +206,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
         if ordering:
+            print("........here")
             queryset = queryset.order_by(ordering)
         if latest:
             try:
