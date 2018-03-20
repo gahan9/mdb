@@ -11,6 +11,19 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ['id', 'genre_id', 'genre_name', 'backdrop_path', 'poster_path']
 
 
+class RawDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RawData
+        fields = ['id', 'name', 'path', 'get_full_path']
+
+
+class MediaInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaInfo
+        fields = ['id', 'file', 'get_stream_url',
+                  'meta_movie', 'meta_episode', 'meta_other', 'frame_width', 'runtime']
+
+
 class PersonSerializer(serializers.ModelSerializer):
     poster_path = serializers.SerializerMethodField(required=False, read_only=True)
 

@@ -359,7 +359,7 @@ def filter_raw_data():
     thread_instance, created = ThreadManager.objects.get_or_create(type=1, status=0)
     if created:
         fetcher = DataFilter()
-        for entry in MediaInfo.objects.filter(meta_movie__isnull=True, meta_episode__isnull=True):
+        for entry in MediaInfo.objects.filter(meta_movie__isnull=True, meta_episode__isnull=True, meta_other__isnull=True):
             filter1 = fetcher.filter_film(entry.file.name)
             if filter1:
                 if all(filter1):

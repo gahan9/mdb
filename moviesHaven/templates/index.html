@@ -44,7 +44,7 @@
                                  style="width: 100%">{{ thread.get_status_display }}</div>
                         </div>
                     {% endif %}
-                    <form action="{% url 'index' task='update_content' %}">
+                    <form action="{% url 'task' task='update_content' %}">
                         <button class="btn btn-primary" type="submit" {% if thread.status == 0 %} disabled {% endif %}>
                             {% trans "Update content" %}
                         </button>
@@ -86,7 +86,7 @@
                                  style="width: 100%">{{ thread.get_status_display }}</div>
                         </div>
                     {% endif %}
-                    <form action="{% url 'index' task='update_person_data' %}">
+                    <form action="{% url 'task' task='update_person_data' %}">
                         <button class="btn btn-primary" type="submit"  {% if thread.status == 0 %} disabled {% endif %}>
                             {% trans "Fetch MetaData" %}
                         </button>

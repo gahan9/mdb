@@ -9,6 +9,8 @@ from . import viewsets
 from rest_framework import routers
 
 router = routers.DefaultRouter()
+router.register(r'raw', viewsets.RawDataViewSet)
+router.register(r'mediainfo', viewsets.MediaInfoViewSet)
 router.register(r'movie', viewsets.MovieViewSet)
 router.register(r'tv', viewsets.TVSeriesViewSet)
 router.register(r'season', viewsets.SeasonDetailViewSet)
@@ -24,7 +26,7 @@ urlpatterns = [
     path('login/', django_login, {'template_name': 'login.html', 'authentication_form': LoginForm}, name='login'),
     path('logout/', django_logout, {'next_page': '/'}, name='logout'),
     path('', views.HomePageView.as_view(), name='index'),
-    path('<slug:task>', views.HomePageView.as_view(), name='index'),
+    path('task/<slug:task>/', views.HomePageView.as_view(), name='task'),
     path('api/', include(router.urls)),
     # path('api/v1/', RedirectView.as_view(url='/api/')),
     path('insert_raw_data/', views.insert_raw_data, name='insert_raw_data'),
@@ -33,6 +35,7 @@ urlpatterns = [
     path('display_data/', views.MediaInfoView.as_view(), name='display_data'),
     path('api/generate_stream/', viewsets.StreamGenerator.as_view(), name='generate_stream'),
     path('api/filter_set/', viewsets.DetailView.as_view(), name='filter_set'),
+    path('api/get_count/', viewsets.GetCount.as_view(), name='get_count'),
     path('api_example/', views.APIDOCView.as_view(), name='api_example'),
     path('api_example/<slug:q>', views.APIDOCView.as_view(), name='api_example'),
     # path('genre/movie/<int:pk>', views.MovieByGenre.as_view(), name=''),

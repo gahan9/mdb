@@ -321,6 +321,16 @@ class MovieByPersonViewSet(viewsets.ModelViewSet):
             return self.serializer_class
 
 
+class RawDataViewSet(viewsets.ModelViewSet):
+    queryset = RawData.objects.all()
+    serializer_class = RawDataSerializer
+
+
+class MediaInfoViewSet(viewsets.ModelViewSet):
+    queryset = MediaInfo.objects.all()
+    serializer_class = MediaInfoSerializer
+
+
 class StreamGenerator(APIView):
     model = MediaInfo
 
@@ -439,3 +449,12 @@ class EpisodeDetailViewSet(viewsets.ModelViewSet):
             # queryset = queryset.filter(date_updated__gte=latest_condition)
             queryset = queryset.filter(air_date__gte=latest_condition).order_by('-air_date')
         return queryset
+
+
+class GetCount(APIView):
+    def get(self, request):
+        response_data = {}
+        models = self.request.query_params.get('model', None)
+        response_data['request'] = request.data
+        return Response(response_data)
+
