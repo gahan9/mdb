@@ -1,4 +1,5 @@
 import os
+import urllib
 
 from django.forms.models import model_to_dict
 from django.db import models
@@ -402,6 +403,8 @@ class MediaInfo(models.Model):
             return self.meta_movie.title
         elif self.meta_episode:
             return self.meta_episode.season.series.title
+        elif self.meta_other:
+            return self.meta_other.title
         else:
             return '—'
 
@@ -438,6 +441,7 @@ class MediaInfo(models.Model):
             file_path = file_path.replace(MEDIA_MAP, '')
         else:
             file_path = file_path.replace(SCRAPE_DIR, '')
+        file_path = urllib.parse.quote(file_path)
         stream_url = "http://{0}/media/{1}".format(domain, file_path)
         return stream_url
 
