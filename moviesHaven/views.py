@@ -196,7 +196,7 @@ class DirSniffer(DataFilter):
                                   raw_object.get_details(), media_data, debug=True)
                         if media_data:
                             try:
-                                media_info_instance = MediaInfo.objects.get_or_create(file=raw_object, **media_data)
+                                media_info_instance, created = MediaInfo.objects.get_or_create(file=raw_object, **media_data)
                                 print_log("media_info_instance instance for {} : {}".format(video, media_info_instance.get_details()),
                                           video, raw_object.get_details(), media_data, debug=True)
                             except Exception as e:
