@@ -91,7 +91,7 @@ class MediaInfoView(AddFormMixin, SingleTableView):
     template_name = "tabular_view.html"
     table_class = MediaInfoTable
     # table_pagination = {'per_page': 100}
-    paginate_by = 5
+    paginate_by = 150
     search_fields = ['file__name', 'meta_movie__name', 'meta_episode__name']
     queryset = model.objects.exclude(Q(meta_movie__status=True) | Q(meta_episode__scan_stat=True))
 
