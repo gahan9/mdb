@@ -80,6 +80,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         genre = self.request.query_params.get('genre', None)
         exclude = self.request.query_params.get('exclude', None)
         latest = self.request.query_params.get('latest', None)
+        ordering = self.request.query_params.get('ordering', None)
         # print(movie_name, movie_year, genre)
         if exclude:
             queryset = queryset.exclude(genre_name__genre_name__in=['animation', 'documentaire', 'kids'])
@@ -115,6 +116,8 @@ class MovieViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
+        if ordering:
+            queryset = queryset.order_by(ordering)
         if latest:
             try:
                 latest = int(latest)
@@ -122,8 +125,11 @@ class MovieViewSet(viewsets.ModelViewSet):
                 latest = 3
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
             temp_query = queryset.filter(date_updated__gte=latest_condition)
-            if not temp_query:
-                temp_query = queryset.filter(release_date__lte=datetime.date(2018, 1, 1)).order_by('-release_date')[:880]
+            if temp_query.count() < 50:
+                temp_query = queryset.filter(release_date__lte=datetime.date(2018, 1, 1)).order_by('-release_date')
+                if ordering:
+                    temp_query.order_by(ordering)
+                temp_query = temp_query[:880]
             queryset = temp_query
         # FIX: optimize below three lines
         # unique_tmdb_ids = queryset.values_list('tmdb_id', flat=True).distinct()
@@ -167,6 +173,7 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         person_role = self.request.query_params.get('person_role', None)
         person_role = person_role if person_role else "cast"
         person_name_starts_with = self.request.query_params.get('person_name_starts_with', None)
+        ordering = self.request.query_params.get('ordering', None)
         # print(movie_name, movie_year, genre)
         if exclude:
             queryset = queryset.exclude(genre_name__genre_name__in=['animation', 'kids'])
@@ -202,18 +209,21 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(genre_name__genre_name__iexact=genre).order_by("name")
             except ValueError:
                 return Response({"detail": "Invalid Genre"})
+        if ordering:
+            queryset = queryset.order_by(ordering)
         if latest:
             try:
                 latest = int(latest)
             except Exception as e:
-                latest = 3
+                latest = 7
             latest_condition = datetime.date.today() - datetime.timedelta(days=latest)
             # queryset = queryset.filter(date_updated__gte=latest_condition)
             temp_query = queryset.filter(date_updated__gte=latest_condition)
-            if not temp_query:
+            if temp_query.count() < 50:
                 temp_query = queryset.filter(first_air_date__range=(datetime.date(2010, 1, 1), datetime.date(2018, 1, 1))).order_by('-date_updated')
+                if ordering:
+                    temp_query.order_by(ordering)
             queryset = temp_query
-
         queryset_obj, tmdb_ids = [], []
         for i in queryset:
             # remove duplicate results by tmdb_id

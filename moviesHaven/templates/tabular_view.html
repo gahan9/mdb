@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% block extracss %}
+    <style>
+        td {
+            white-space: normal !important;
+            word-wrap: break-word;
+        }
+
+        table {
+            table-layout: fixed;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+    {% if form %}
+        <div class="container">
+            <form action="" method="get" class="form form-inline">
+                {% bootstrap_form form layout='inline' %}
+                {% bootstrap_button 'Search' %}
+            </form>
+        </div>
+    {% endif %}
+    <div class="container-fluid" style="margin-top: 1%">
+        {% render_table table %}
+    </div>
+
+    {% if is_paginated %}
+
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">&laquo;</a></li>
+            {% endif %}
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="active page-item">
+                        <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                    </li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            {% else %}
+                <li class="disabled page-item"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+            <li class="page-item"><span class="page-link"> Total Records: {{ total_records }}</span></li>
+        </ul>
+    {% endif %}
+{% endblock %}

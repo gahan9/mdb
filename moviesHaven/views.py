@@ -9,8 +9,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
+from django_tables2 import SingleTableMixin, SingleTableView
 
 from moviesHaven.media_info import FetchMediaInfo
+from moviesHaven.tables import MediaInfoTable
 from .utils import *
 from mysite.settings import TMDB_SEARCH_URL, DEFAULT_PARAMS, SCRAPE_DIR
 from .models import *
@@ -81,6 +83,35 @@ class APIDOCView(LoginRequiredMixin, TemplateView):
         query = self.kwargs.get('q', None)
         context['regex'] = True if query else None
         return context
+
+
+class MediaInfoView(AddFormMixin, SingleTableView):
+    """ Home page view """
+    model = MediaInfo
+    template_name = "tabular_view.html"
+    table_class = MediaInfoTable
+    # table_pagination = {'per_page': 100}
+    paginate_by = 5
+    search_fields = ['file__name', 'meta_movie__name', 'meta_episode__name']
+    queryset = model.objects.exclude(Q(meta_movie__status=True) | Q(meta_episode__scan_stat=True))
+
+    def get_context_data(self, **kwargs):
+        context = super(MediaInfoView, self).get_context_data(**kwargs)
+        context['total_records'] = self.queryset.count()
+        return context
+
+    def get_form_fields(self):
+        """
+        Enables filter for fields mentioned in list search_fields
+        :return: list of fields for search
+        """
+        return self.search_fields
+
+    def get_queryset(self):
+        print(self.queryset.count())
+        if self.queryset is None:
+            self.queryset = self.model.objects.filter(meta_movie__isnull=True , meta_episode__isnull=True)
+        return super(MediaInfoView, self).get_queryset()
 
 
 class DirSniffer(DataFilter):
@@ -161,6 +192,7 @@ class DirSniffer(DataFilter):
                     try:
                         print_log("fetching media info")
                         media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
+                        # THE BLACK HOLE HERE.....
                         print_log("found media_data for entry {}".format(video),
                                   raw_object.get_details(), media_data.get_details(), debug=True)
                         if media_data:

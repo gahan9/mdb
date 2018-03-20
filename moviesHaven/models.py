@@ -280,8 +280,11 @@ class EpisodeDetail(Entertainment):
                                     help_text=_("Mark if scanned with tmdb API"))
 
     @property
-    def get_name(self):
-        return self.episode_title if self.episode_title else "Episode {}".format(self.episode_number)
+    def get_full_name(self):
+        _episode = "Episode {}".format(self.episode_number)
+        _season = "Season {}".format(self.season.season_number)
+        _season_title = self.season.series.title
+        return "{} {} {}".format(_season_title, _season, _episode)
 
     @property
     def get_short_overview(self):
@@ -306,6 +309,10 @@ class EpisodeDetail(Entertainment):
 
     @property
     def get_episode_name(self):
+        return self.episode_title if self.episode_title else "Episode {}".format(self.episode_number)
+
+    @property
+    def get_name(self):
         return self.episode_title if self.episode_title else "Episode {}".format(self.episode_number)
 
     @property
@@ -387,6 +394,15 @@ class MediaInfo(models.Model):
     runtime = models.IntegerField(null=True, blank=True,
                                   verbose_name=_("Run time in seconds"))
 
+    @property
+    def get_info_object(self):
+        if self.meta_movie:
+            return self.meta_movie.title
+        elif self.meta_episode:
+            return self.meta_episode.season.series.title
+        else:
+            return '—'
+
     def get_details(self):
         model_dict = model_to_dict(self)
         model_dict['file'] = model_to_dict(self.file) if model_dict.get('file', None) else self.file
@@ -394,17 +410,21 @@ class MediaInfo(models.Model):
         model_dict['meta_episode'] = model_to_dict(self.meta_episode) if model_dict.get('meta_episode', None) else self.meta_episode
         return model_dict
 
-    def get_reference_id(self):
+    @property
+    def get_href(self):
         _id = self.id
         _app_name = os.path.basename(os.path.dirname(__file__))
         _model_name = self.__class__.__name__.lower()
         _url = reverse_lazy('admin:{}_{}_changelist'.format(_app_name, _model_name))
-        _href = "<a href='{0}{1}/change/'>{1}</a>".format(_url, _id)
+        _href = "{0}{1}/change/".format(_url, _id)
         return _href
 
-    def get_stream_link(self, link_name=None):
-        if not link_name:
-            link_name = self.file.name
+    def get_reference_id(self):
+        _href = self.get_href
+        return "<a href='{}'>{}</a>".format(_href, self.id)
+
+    @property
+    def get_stream_url(self):
         file_path = os.path.join(self.file.path, self.file.name)
         # host = '/'.join(request.build_absolute_uri().split('/')[:3])
         try:
@@ -417,6 +437,12 @@ class MediaInfo(models.Model):
         else:
             file_path = file_path.replace(SCRAPE_DIR, '')
         stream_url = "http://{0}/media/{1}".format(domain, file_path)
+        return stream_url
+
+    def get_stream_link(self, link_name=None):
+        if not link_name:
+            link_name = self.file.name
+        stream_url = self.get_stream_url
         # NOTE: stream URL configured to work only with apache hosted server
         return "<a href='{0}'>{1}</a>".format(stream_url, link_name)
 

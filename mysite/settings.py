@@ -45,6 +45,8 @@ INSTALLED_APPS = [
      'django_filters',
      'nested_inline',
      'easy_select2',
+     'django_tables2',
+     'bootstrap3',
 ] + DEMO_APPS
 
 MIDDLEWARE = [
