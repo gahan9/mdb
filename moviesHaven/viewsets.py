@@ -5,6 +5,7 @@ import requests
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -329,6 +330,7 @@ class RawDataViewSet(viewsets.ModelViewSet):
 class MediaInfoViewSet(viewsets.ModelViewSet):
     queryset = MediaInfo.objects.all()
     serializer_class = MediaInfoSerializer
+    permission_classes = [IsAdminUser]
 
 
 class StreamGenerator(APIView):
