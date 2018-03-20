@@ -191,10 +191,9 @@ class DirSniffer(DataFilter):
                     media_info_obj = FetchMediaInfo()
                     try:
                         print_log("fetching media info")
-                        media_data = media_info_obj.get_all_info(os.path.join(video["path"], video["name"]))
-                        # THE BLACK HOLE HERE.....
+                        media_data = media_info_obj.get_all_info(raw_object.get_full_path)
                         print_log("found media_data for entry {}".format(video),
-                                  raw_object.get_details(), media_data.get_details(), debug=True)
+                                  raw_object.get_details(), media_data, debug=True)
                         if media_data:
                             try:
                                 media_info_instance = MediaInfo.objects.get_or_create(file=raw_object, **media_data)
