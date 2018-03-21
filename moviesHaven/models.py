@@ -335,6 +335,7 @@ class EpisodeDetail(Entertainment):
     def get_details(self):
         detail_set = {
             "id"            : self.id,
+            "tmdb_id"       : self.tmdb_id,
             "name"          : self.get_name,
             "air_date"      : self.air_date,
             "release_date"  : self.air_date,
