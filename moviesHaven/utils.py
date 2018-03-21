@@ -15,6 +15,29 @@ from mysite.settings import TEMP_FOLDER_NAME, SUPPORTED_EXTENSIONS
 from mysite.tmdb_settings import *
 
 
+def print_log(line, *args, debug=True):
+    print(line)
+    if debug:
+        if args:
+            print("additional info: ")
+            for i in args:
+                print(i)
+
+
+def get_host_name():
+    try:
+        if os.sys.platform == "win32":
+            import socket
+            _host_name = socket.gethostbyname(socket.gethostname())
+            return _host_name
+        else:
+            _host_name = os.popen('hostname -I').read().strip()
+            return _host_name
+    except Exception as e:
+        print("Couldn't get host name due to : {}".format(e))
+        return False
+
+
 class CustomUtils(object):
     @staticmethod
     def get_unique_result(list_of_dict=None, flag="tmdb_id"):

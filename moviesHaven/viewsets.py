@@ -6,15 +6,31 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAdminUser
+from rest_framework.renderers import AdminRenderer, BrowsableAPIRenderer, JSONRenderer, TemplateHTMLRenderer, \
+    DocumentationRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from moviesHaven.serializers import *
 from rest_framework import viewsets
 
-from moviesHaven.utils import CustomUtils
+from moviesHaven.utils import *
 from mysite.directory_settings import MEDIA_MAP
 from mysite.settings import STREAM_VALIDATOR_API, TEMP_FOLDER_NAME, SCRAPE_DIR
+
+
+class RawDataViewSet(viewsets.ModelViewSet):
+    queryset = RawData.objects.all()
+    serializer_class = RawDataSerializer
+    permission_classes = [IsAdminUser]
+    renderer_classes = (AdminRenderer, BrowsableAPIRenderer, JSONRenderer, DocumentationRenderer)
+
+
+class MediaInfoViewSet(viewsets.ModelViewSet):
+    queryset = MediaInfo.objects.all()
+    serializer_class = MediaInfoSerializer
+    permission_classes = [IsAdminUser]
+    renderer_classes = (AdminRenderer, BrowsableAPIRenderer, JSONRenderer, DocumentationRenderer)
 
 
 class DetailView(APIView):
@@ -67,6 +83,14 @@ class MovieViewSet(viewsets.ModelViewSet):
     model = Movie
 
     def get_queryset(self):
+        if self.kwargs:
+            _pk = self.kwargs.get('pk', None)
+            if _pk:
+                try:
+                    return Movie.objects.filter(pk=_pk)
+                except Exception as e:
+                    print_log()
+
         queryset = self.queryset
         name = self.request.query_params.get('name', None)
         name_starts_with = self.request.query_params.get('name_starts_with', None)
@@ -142,12 +166,6 @@ class MovieViewSet(viewsets.ModelViewSet):
                 queryset_obj.append(i)
         return queryset_obj
 
-    def get_serializer_class(self):
-        if self.kwargs:
-            return self.serializer_class
-        else:
-            return self.serializer_class
-
 
 class TVSeriesViewSet(viewsets.ModelViewSet):
     queryset = TVSeries.objects.filter(status=True).order_by("name")
@@ -158,6 +176,8 @@ class TVSeriesViewSet(viewsets.ModelViewSet):
         """
         filtering against a `name` query parameter in the URL. for tv name
         """
+        if self.kwargs:
+            print(self.kwargs)
         queryset = self.model.objects.filter(status=True).order_by("name")
         name = self.request.query_params.get('name', None)
         exclude = self.request.query_params.get('exclude', None)
@@ -320,17 +340,6 @@ class MovieByPersonViewSet(viewsets.ModelViewSet):
             return PersonSerializer
         else:
             return self.serializer_class
-
-
-class RawDataViewSet(viewsets.ModelViewSet):
-    queryset = RawData.objects.all()
-    serializer_class = RawDataSerializer
-
-
-class MediaInfoViewSet(viewsets.ModelViewSet):
-    queryset = MediaInfo.objects.all()
-    serializer_class = MediaInfoSerializer
-    permission_classes = [IsAdminUser]
 
 
 class StreamGenerator(APIView):

@@ -73,7 +73,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.i18n'
+                'django.template.context_processors.i18n',
+                'moviesHaven.context_processors.site_detail'
             ],
         },
     },
@@ -154,7 +155,17 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS'      : 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE'                     : 100,
     'DEFAULT_FILTER_BACKENDS'       : ('django_filters.rest_framework.DjangoFilterBackend',),
-    'DEFAULT_VERSIONING_CLASS'      : 'rest_framework.versioning.URLPathVersioning'
+    'DEFAULT_VERSIONING_CLASS'      : 'rest_framework.versioning.URLPathVersioning',
+    'DEFAULT_RENDERER_CLASSES'      : [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.AdminRenderer',
+    ],
 }
 
 SUPPORTED_EXTENSIONS = ['mp4', 'mkv', '3gp', 'avi', 'mov', 'vob', 'm3u8']
+
+
+SITE_NAME = 'Planet Vision'
+SITE_LOGO = 'http://planetvision.net/s/front/elements/PlanetVision_Logotype_Blanc_PNG.png'
+DEFAULT_PORT = 8000

@@ -9,26 +9,25 @@ from . import viewsets
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r'raw', viewsets.RawDataViewSet)
-router.register(r'mediainfo', viewsets.MediaInfoViewSet)
-router.register(r'movie', viewsets.MovieViewSet)
-router.register(r'tv', viewsets.TVSeriesViewSet)
+router.register(r'rawdata', viewsets.RawDataViewSet, 'rawdata')
+router.register(r'mediainfo', viewsets.MediaInfoViewSet, 'mediainfo')
+router.register(r'movie', viewsets.MovieViewSet, 'movie')
+router.register(r'tv', viewsets.TVSeriesViewSet, 'tvseries')
 router.register(r'season', viewsets.SeasonDetailViewSet)
 router.register(r'episode', viewsets.EpisodeDetailViewSet)
-router.register(r'person', viewsets.PersonViewSet)
-router.register(r'genre_movie', viewsets.MovieByGenreViewSet)
-router.register(r'person_movie', viewsets.MovieByPersonViewSet)
-router.register(r'genre_tv', viewsets.TVSeriesByGenreViewSet)
+router.register(r'person', viewsets.PersonViewSet, 'person')
+router.register(r'genre_movie', viewsets.MovieByGenreViewSet, 'genre_movie')
+router.register(r'person_movie', viewsets.MovieByPersonViewSet, 'person_movie')
+router.register(r'genre_tv', viewsets.TVSeriesByGenreViewSet, 'genre_tv')
 # router.register(r'person_tv', viewsets.TVSeriesByPersonViewSet)
-router.register(r'menu', viewsets.SubMenuStructureViewSet)
+router.register(r'menu', viewsets.SubMenuStructureViewSet, 'submenu')
 
 urlpatterns = [
     path('login/', django_login, {'template_name': 'login.html', 'authentication_form': LoginForm}, name='login'),
     path('logout/', django_logout, {'next_page': '/'}, name='logout'),
     path('', views.HomePageView.as_view(), name='index'),
     path('task/<slug:task>/', views.HomePageView.as_view(), name='task'),
-    path('api/', include(router.urls)),
-    # path('api/v1/', RedirectView.as_view(url='/api/')),
+    path('api/', include(router.urls), name='api_root'),
     path('insert_raw_data/', views.insert_raw_data, name='insert_raw_data'),
     path('file_filter/', views.file_filter, name='file_filter'),
     path('update_meta_data/', views.update_meta_data, name='update_meta_data'),

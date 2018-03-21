@@ -1,3 +1,4 @@
+from mysite.settings import SITE_NAME
 from .inline_admin import *
 from easy_select2 import select2_modelform
 from django.utils.translation import ugettext_lazy as _
@@ -142,6 +143,6 @@ admin.site.register(Others)
 # admin.site.register(MainMenuContent, MainMenuContentAdmin)
 # admin.site.register(SubMenuContent, SubMenuContentAdmin)
 
-admin.site.site_header = 'Planet Vision'
-admin.site.site_title = 'Planet Vision'
-admin.site.index_title = 'Planet Vision'
+admin.site.site_header = SITE_NAME
+admin.site.site_title = SITE_NAME
+admin.site.index_title = SITE_NAME

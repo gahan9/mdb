@@ -1,4 +1,3 @@
-from django.core.serializers import serialize
 from rest_framework import serializers
 
 from moviesHaven.utils import CustomUtils
@@ -11,16 +10,16 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ['id', 'genre_id', 'genre_name', 'backdrop_path', 'poster_path']
 
 
-class RawDataSerializer(serializers.ModelSerializer):
+class RawDataSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = RawData
-        fields = ['id', 'name', 'path', 'get_full_path']
+        fields = ['id', 'url', 'name', 'path', 'get_full_path']
 
 
-class MediaInfoSerializer(serializers.ModelSerializer):
+class MediaInfoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MediaInfo
-        fields = ['id', 'file', 'get_stream_url',
+        fields = ['id', 'url', 'file', 'get_stream_url',
                   'meta_movie', 'meta_episode', 'meta_other', 'frame_width', 'runtime']
 
 
@@ -44,21 +43,10 @@ class MovieSerializer(serializers.ModelSerializer):
     director = serializers.SerializerMethodField(read_only=True, required=False)
     actor = serializers.SerializerMethodField(read_only=True, required=False)
     writer = serializers.SerializerMethodField(read_only=True, required=False)
-    streams = serializers.SerializerMethodField(read_only=True, required=False)
+    streams = serializers.SerializerMethodField(read_only=True)
 
-    @staticmethod
-    def get_streams(obj):
-        result = MediaInfo.objects.filter(meta_movie__tmdb_id=obj.tmdb_id)
-        stream_info = [{"media_id"  : i.id,
-                        "quality"   : i.get_quality,
-                        "name"      : obj.name,
-                        "resolution": i.get_resolution,
-                        "duration"  : i.get_duration,
-                        "runtime"   : i.runtime}
-                       for i in result]
-        if not stream_info:
-            obj.delete()
-        return stream_info
+    def get_streams(self, obj):
+        return obj.get_streams
 
     def get_director(self, obj):
         result = Person.objects.filter(personrole__role__iexact='director', movie=obj)

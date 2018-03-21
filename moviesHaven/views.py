@@ -18,15 +18,6 @@ from mysite.settings import TMDB_SEARCH_URL, DEFAULT_PARAMS, SCRAPE_DIR
 from .models import *
 
 
-def print_log(line, *args, debug=True):
-    print(line)
-    if debug:
-        if args:
-            print("additional info: ")
-            for i in args:
-                print(i)
-
-
 class HomePageView(LoginRequiredMixin, TemplateView):
     """ Home page view """
     template_name = "index.html"
