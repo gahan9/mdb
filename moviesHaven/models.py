@@ -5,6 +5,7 @@ from django.forms.models import model_to_dict
 from django.db import models
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
+from field_history.tracker import FieldHistoryTracker
 
 from mysite.directory_settings import *
 
@@ -105,6 +106,7 @@ class Genres(models.Model):
     backdrop_path = models.URLField(max_length=1000, verbose_name=_("Fan Art"),
                                     help_text=_("Enter image URL of resolution width 780"),
                                     blank=True, null=True)
+    field_history = FieldHistoryTracker(['genre_id', 'genre_name', 'poster_path'])
 
     def get_reference_id(self):
         _id = self.id

@@ -34,20 +34,23 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-     'django.contrib.admin',
-     'django.contrib.auth',
-     'django.contrib.contenttypes',
-     'django.contrib.sessions',
-     'django.contrib.messages',
-     'django.contrib.staticfiles',
-     'moviesHaven',
-     'rest_framework',
-     'django_filters',
-     'nested_inline',
-     'easy_select2',
-     'django_tables2',
-     'bootstrap3',
-] + DEMO_APPS
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'moviesHaven',
+    'rest_framework',
+    'django_filters',
+    'nested_inline',
+    'easy_select2',
+    'django_tables2',
+    'bootstrap3',
+    'field_history',
+    'webshell',
+]
+INSTALLED_APPS += DEMO_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware'
 ]
 
 ROOT_URLCONF = 'mysite.urls'

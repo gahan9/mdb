@@ -26,6 +26,7 @@ urlpatterns = [
     path('moviesHaven/', include('moviesHaven.urls',)),
     path('api-docs/', include_docs_urls(title='Api doc')),
     path('', include('moviesHaven.urls',)),
+    path('admin/webshell/', include('webshell.urls')),
 ]
 
 if settings.DEBUG:
